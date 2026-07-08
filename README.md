@@ -1,3 +1,3 @@
 # SOR Reboot
 
-Repo for the Some Other Race Reboot project. This is a test.
+Repo for the Some Other Race Reboot project.
