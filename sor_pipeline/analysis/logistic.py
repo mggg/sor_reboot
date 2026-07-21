@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-from sor_pipeline.config import VARS_LOG, VARS_NO_LOG
+from sor_pipeline.utils.config import VARS_LOG, VARS_NO_LOG
 
 # The three binary dominant-race indicators (one-hots from features.add_dominant_race_choice).
 RACE_TARGETS = ["Most_SOR", "Most_White_SOR", "Most_White"]

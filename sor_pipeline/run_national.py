@@ -6,6 +6,9 @@ from sor_pipeline.runners.national.run_pearson_correlations import (
     run_pearson_correlations,
 )
 from sor_pipeline.runners.national.run_spatial_analysis import run_spatial_analysis
+from sor_pipeline.runners.national.run_univariate_logistic_regressions import (
+    run_univariate_logistic_regressions,
+)
 
 
 def main() -> None:
@@ -39,6 +42,10 @@ def main() -> None:
         if not checkpoint.confirm_rerun(path, f"spatial analysis for {region}"):
             regions_to_run.remove(region)
     run_spatial_analysis(df, include_regions=regions_to_run)
+
+    # --- Step 5: univariate logistic regressions on the dominant-race indicators ---
+    if checkpoint.confirm_rerun(config.NATIONAL_LOGISTIC_DIR, "univariate logistic regressions"):
+        run_univariate_logistic_regressions(df)
 
 
 if __name__ == "__main__":

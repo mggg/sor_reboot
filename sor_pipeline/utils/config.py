@@ -8,9 +8,12 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv(
-    "/Users/esher/mggg/projects/sor/sor/.env"
-)  # replace with your own path to the .env file!
+success = load_dotenv("/Users/esher/mggg/projects/sor/sor/.env")
+
+if not success:
+    print(
+        "No .env file found. Make sure to set the CENSUS_API_KEY environment variable."
+    )
 
 # --- Paths -------------------------------------------------------------------
 # Resolve relative to this package so scripts work regardless of CWD.

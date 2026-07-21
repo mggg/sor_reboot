@@ -255,6 +255,7 @@ def plot_dual_graph(
     unit_plural="counties",
     state_outlines=None,
     stats_note: str | None = None,
+    min_cluster_pop: int | None = None,
 ):
     """Draw the cluster dual graph: nodes at cluster centroids, colored by dominant race.
 
@@ -264,7 +265,11 @@ def plot_dual_graph(
     labels the underlying unit in the title ("counties" nationally, "tracts" per state).
     `stats_note` is an optional pre-built headline statistic (e.g. Moran's I) shown as
     its own subtitle line — the caller decides the content, this function just renders it.
+    `min_cluster_pop` is the clustering threshold cited in the footnote; it must match
+    what the caller actually clustered with (defaults to the national constant).
     """
+    if min_cluster_pop is None:
+        min_cluster_pop = config.MIN_CLUSTER_HISPANIC
     nodes = list(graph.nodes())
     # Split edges by whether their endpoint clusters agree on dominant race choice:
     # matched edges are background connective tissue; mismatched edges ARE the
@@ -373,7 +378,7 @@ def plot_dual_graph(
                     + (f"{stats_note}<br>" if stats_note else "")
                     # Use HTML span to visually de-emphasize the methodology footnote
                     + f"<span style='color: #666666; font-size: 11px;'>"
-                    f"*Counties with fewer than {config.MIN_CLUSTER_HISPANIC} Hispanic "
+                    f"*{unit_plural.capitalize()} with fewer than {min_cluster_pop} Hispanic "
                     f"residents are merged with neighbors. Total clusters: {len(nodes)}. "
                     f"Median population per cluster: {np.median(pops):,.0f}."
                     f" {warning}"
