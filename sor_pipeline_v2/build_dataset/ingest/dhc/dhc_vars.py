@@ -19,9 +19,13 @@ from __future__ import annotations
 
 # (feature name, numerator code, denominator code, meaning)
 DHC_FEATURES: tuple[tuple[str, str, str, str], ...] = (
-    ("URBANSHARE", "P2_002N", "P2_001N",
-     "Share of the county's total population living in an urban area "
-     "(2020 Census urban/rural classification)"),
+    (
+        "URBANSHARE",
+        "P2_002N",
+        "P2_001N",
+        "Share of the county's total population living in an urban area "
+        "(2020 Census urban/rural classification)",
+    ),
 )
 
 # P2_003N is requested only to re-verify the collinearity note in the module

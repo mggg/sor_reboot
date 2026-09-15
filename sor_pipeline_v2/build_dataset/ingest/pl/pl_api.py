@@ -1,12 +1,10 @@
+import pandas as pd
+
 from build_dataset.ingest.census_client import (
-    CENSUS_API_KEY,
     DECENNIAL_PL_URL,
-    MAX_VARS_PER_REQUEST,
     get_census_data,
 )
-from build_dataset.ingest.pl.pl_vars import VARS_PL_TOTAL, VARS_PL_HISPANIC
-import requests
-import pandas as pd
+from build_dataset.ingest.pl.pl_vars import VARS_PL_HISPANIC, VARS_PL_TOTAL
 
 
 def fetch_decennial_pl(for_geo: str, in_geo: str) -> tuple[pd.DataFrame, pd.DataFrame]:

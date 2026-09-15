@@ -51,7 +51,9 @@ def plot_group_comparison(summary: pd.DataFrame, out_dir, n_seeds: int) -> None:
     # A groups-subset run may carry no `full` baseline; the caption and the
     # pinned top rank then simply go without it.
     full_rows = summary.loc[summary["group"] == FULL, "n_features"]
-    full_note = f"full = all {int(full_rows.iloc[0])} features\n" if len(full_rows) else ""
+    full_note = (
+        f"full = all {int(full_rows.iloc[0])} features\n" if len(full_rows) else ""
+    )
     for target in summary["target"].unique():
         sub = summary[summary["target"] == target]
         n_groups = sub["group"].nunique()
@@ -79,10 +81,18 @@ def plot_group_comparison(summary: pd.DataFrame, out_dir, n_seeds: int) -> None:
                 vals = [rows.loc[g, "mean_r2"] for g in order if g in rows.index]
                 sds = [rows.loc[g, "sd_r2"] for g in order if g in rows.index]
                 ax.errorbar(
-                    vals, ys, xerr=sds,
-                    fmt="o", ms=5.5, ls="none",
-                    color=MODEL_COLORS[model], ecolor="0.6",
-                    elinewidth=1, capsize=2, label=model, zorder=3,
+                    vals,
+                    ys,
+                    xerr=sds,
+                    fmt="o",
+                    ms=5.5,
+                    ls="none",
+                    color=MODEL_COLORS[model],
+                    ecolor="0.6",
+                    elinewidth=1,
+                    capsize=2,
+                    label=model,
+                    zorder=3,
                 )
             if order and order[0] == FULL:
                 ax.axhline(0.5, color="0.8", lw=1)  # separate `full` from the groups
@@ -97,12 +107,18 @@ def plot_group_comparison(summary: pd.DataFrame, out_dir, n_seeds: int) -> None:
         # dot row, since rows span the full height of both panels.
         handles, labels = axes[1].get_legend_handles_labels()
         fig.legend(
-            handles, labels, loc="upper center", ncol=3, frameon=False,
-            fontsize=8, bbox_to_anchor=(0.5, 1.005),
+            handles,
+            labels,
+            loc="upper center",
+            ncol=3,
+            frameon=False,
+            fontsize=8,
+            bbox_to_anchor=(0.5, 1.005),
         )
         fig.suptitle(f"R² by feature group — {target}", fontsize=11, y=1.03)
         fig.text(
-            0.5, -0.01,
+            0.5,
+            -0.01,
             f"each dot = mean test R² across the {n_seeds} splits, bar = ±1 sd\n"
             f"{full_note}"
             "the two panels score different questions (places vs people), so their "
@@ -110,12 +126,16 @@ def plot_group_comparison(summary: pd.DataFrame, out_dir, n_seeds: int) -> None:
             "$R^2 = 1 - SS_{res}/SS_{tot}$, computed on held-out counties, so it can be negative:\n"
             "below 0 means the model predicts the test counties worse than guessing their mean "
             "(1.0 = perfect prediction)",
-            ha="center", va="top", fontsize=8, color="0.35",
+            ha="center",
+            va="top",
+            fontsize=8,
+            color="0.35",
         )
         fig.tight_layout()
         fig.savefig(
             out_dir / f"group_comparison_{target.replace(' ', '_')}.png",
-            dpi=150, bbox_inches="tight",
+            dpi=150,
+            bbox_inches="tight",
         )
         plt.close(fig)
 

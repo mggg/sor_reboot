@@ -14,13 +14,14 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 from lightgbm import LGBMRegressor
+from model_utils.split import split_train_test
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import RidgeCV
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
+
 from regression.regression_utils import DEFAULT_PARAMS
-from model_utils.split import split_train_test
 
 # Model key -> the label written in every output table and directory name.
 MODEL_LABELS = {"rf": "random_forest", "lgbm": "lightgbm", "ridge": "ridge"}

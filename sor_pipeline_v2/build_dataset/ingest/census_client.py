@@ -1,8 +1,9 @@
-import pandas as pd
 import os
+
+import pandas as pd
 import requests
-from utils.config import ENV_PATH
 from dotenv import load_dotenv
+from utils.config import ENV_PATH
 
 load_dotenv(ENV_PATH)
 

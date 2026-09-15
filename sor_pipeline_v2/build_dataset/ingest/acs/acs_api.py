@@ -1,6 +1,7 @@
-from build_dataset.ingest.acs import acs_spec
-from build_dataset.ingest.census_client import ACS5_URL, ACS5_PRIOR_URL, get_census_data
 import pandas as pd
+
+from build_dataset.ingest.acs import acs_spec
+from build_dataset.ingest.census_client import ACS5_PRIOR_URL, ACS5_URL, get_census_data
 
 
 def fetch_acs_features(for_geo: str, in_geo: str) -> pd.DataFrame:

@@ -10,7 +10,6 @@ normalizes FIPS/GEOID; the derived fields belong to the clean stage (see
 from __future__ import annotations
 
 import pandas as pd
-
 from utils.config import RAW_DIR
 
 

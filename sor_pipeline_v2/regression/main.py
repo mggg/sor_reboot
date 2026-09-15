@@ -38,12 +38,12 @@ import time
 from datetime import date
 
 import pandas as pd
-
 from build_dataset import manifest
 from model_utils.matrix import feature_frame
+from utils import config
+
 from regression import figures
 from regression.fit import DEFAULT_PARAMS, MODEL_LABELS, fit_one
-from utils import config
 from regression.regression_utils import FULL, TARGETS, WEIGHT_COL
 
 
@@ -52,7 +52,7 @@ def _run_dir(
     params: dict,
     top_percent: float | None = None,
     groups: list[str] | None = None,
-) -> "config.Path":
+) -> config.Path:
     """`<date>_seeds-<lo>-<hi>_max-depth-<d>[_<param>-<v> for non-defaults]`.
 
     The seed range and depth are always in the name; other hyperparameters

@@ -8,8 +8,9 @@ into the working directory the way the notebooks do.
 from __future__ import annotations
 
 from pathlib import Path
-import pandas as pd
+
 import geopandas as gpd
+import pandas as pd
 
 
 def save_df_to_parquet(df: pd.DataFrame | gpd.GeoDataFrame, path: Path):

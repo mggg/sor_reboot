@@ -27,7 +27,6 @@ import json
 from pathlib import Path
 
 import pandas as pd
-
 from build_dataset import manifest
 from build_dataset.clean import acs as clean_acs
 from build_dataset.ingest.acs import acs_spec
@@ -49,20 +48,60 @@ VALUE_PRECISION = 5
 # counties at once. Territories are included because the dataset spine carries
 # them even though the ACS county universe does not.
 STATE_ABBREV: dict[str, str] = {
-    "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR",
-    "California": "CA", "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE",
-    "District of Columbia": "DC", "Florida": "FL", "Georgia": "GA", "Hawaii": "HI",
-    "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA", "Kansas": "KS",
-    "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
-    "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS",
-    "Missouri": "MO", "Montana": "MT", "Nebraska": "NE", "Nevada": "NV",
-    "New Hampshire": "NH", "New Jersey": "NJ", "New Mexico": "NM", "New York": "NY",
-    "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH", "Oklahoma": "OK",
-    "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI",
-    "South Carolina": "SC", "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX",
-    "Utah": "UT", "Vermont": "VT", "Virginia": "VA", "Washington": "WA",
-    "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY",
-    "Puerto Rico": "PR", "American Samoa": "AS", "Guam": "GU",
+    "Alabama": "AL",
+    "Alaska": "AK",
+    "Arizona": "AZ",
+    "Arkansas": "AR",
+    "California": "CA",
+    "Colorado": "CO",
+    "Connecticut": "CT",
+    "Delaware": "DE",
+    "District of Columbia": "DC",
+    "Florida": "FL",
+    "Georgia": "GA",
+    "Hawaii": "HI",
+    "Idaho": "ID",
+    "Illinois": "IL",
+    "Indiana": "IN",
+    "Iowa": "IA",
+    "Kansas": "KS",
+    "Kentucky": "KY",
+    "Louisiana": "LA",
+    "Maine": "ME",
+    "Maryland": "MD",
+    "Massachusetts": "MA",
+    "Michigan": "MI",
+    "Minnesota": "MN",
+    "Mississippi": "MS",
+    "Missouri": "MO",
+    "Montana": "MT",
+    "Nebraska": "NE",
+    "Nevada": "NV",
+    "New Hampshire": "NH",
+    "New Jersey": "NJ",
+    "New Mexico": "NM",
+    "New York": "NY",
+    "North Carolina": "NC",
+    "North Dakota": "ND",
+    "Ohio": "OH",
+    "Oklahoma": "OK",
+    "Oregon": "OR",
+    "Pennsylvania": "PA",
+    "Rhode Island": "RI",
+    "South Carolina": "SC",
+    "South Dakota": "SD",
+    "Tennessee": "TN",
+    "Texas": "TX",
+    "Utah": "UT",
+    "Vermont": "VT",
+    "Virginia": "VA",
+    "Washington": "WA",
+    "West Virginia": "WV",
+    "Wisconsin": "WI",
+    "Wyoming": "WY",
+    "Puerto Rico": "PR",
+    "American Samoa": "AS",
+    "Guam": "GU",
     "Commonwealth of the Northern Mariana Islands": "MP",
     "United States Virgin Islands": "VI",
 }
@@ -72,27 +111,62 @@ STATE_ABBREV: dict[str, str] = {
 # returns "Autauga County, Alabama" while the TIGER geometry in the joined
 # dataset returns bare "Autauga". The GEOID prefix is always there.
 STATE_FIPS_NAMES: dict[str, tuple[str, str]] = {
-    "01": ("Alabama", "AL"), "02": ("Alaska", "AK"), "04": ("Arizona", "AZ"),
-    "05": ("Arkansas", "AR"), "06": ("California", "CA"), "08": ("Colorado", "CO"),
-    "09": ("Connecticut", "CT"), "10": ("Delaware", "DE"),
-    "11": ("District of Columbia", "DC"), "12": ("Florida", "FL"),
-    "13": ("Georgia", "GA"), "15": ("Hawaii", "HI"), "16": ("Idaho", "ID"),
-    "17": ("Illinois", "IL"), "18": ("Indiana", "IN"), "19": ("Iowa", "IA"),
-    "20": ("Kansas", "KS"), "21": ("Kentucky", "KY"), "22": ("Louisiana", "LA"),
-    "23": ("Maine", "ME"), "24": ("Maryland", "MD"), "25": ("Massachusetts", "MA"),
-    "26": ("Michigan", "MI"), "27": ("Minnesota", "MN"), "28": ("Mississippi", "MS"),
-    "29": ("Missouri", "MO"), "30": ("Montana", "MT"), "31": ("Nebraska", "NE"),
-    "32": ("Nevada", "NV"), "33": ("New Hampshire", "NH"), "34": ("New Jersey", "NJ"),
-    "35": ("New Mexico", "NM"), "36": ("New York", "NY"),
-    "37": ("North Carolina", "NC"), "38": ("North Dakota", "ND"), "39": ("Ohio", "OH"),
-    "40": ("Oklahoma", "OK"), "41": ("Oregon", "OR"), "42": ("Pennsylvania", "PA"),
-    "44": ("Rhode Island", "RI"), "45": ("South Carolina", "SC"),
-    "46": ("South Dakota", "SD"), "47": ("Tennessee", "TN"), "48": ("Texas", "TX"),
-    "49": ("Utah", "UT"), "50": ("Vermont", "VT"), "51": ("Virginia", "VA"),
-    "53": ("Washington", "WA"), "54": ("West Virginia", "WV"),
-    "55": ("Wisconsin", "WI"), "56": ("Wyoming", "WY"), "60": ("American Samoa", "AS"),
-    "66": ("Guam", "GU"), "69": ("Northern Mariana Islands", "MP"),
-    "72": ("Puerto Rico", "PR"), "78": ("U.S. Virgin Islands", "VI"),
+    "01": ("Alabama", "AL"),
+    "02": ("Alaska", "AK"),
+    "04": ("Arizona", "AZ"),
+    "05": ("Arkansas", "AR"),
+    "06": ("California", "CA"),
+    "08": ("Colorado", "CO"),
+    "09": ("Connecticut", "CT"),
+    "10": ("Delaware", "DE"),
+    "11": ("District of Columbia", "DC"),
+    "12": ("Florida", "FL"),
+    "13": ("Georgia", "GA"),
+    "15": ("Hawaii", "HI"),
+    "16": ("Idaho", "ID"),
+    "17": ("Illinois", "IL"),
+    "18": ("Indiana", "IN"),
+    "19": ("Iowa", "IA"),
+    "20": ("Kansas", "KS"),
+    "21": ("Kentucky", "KY"),
+    "22": ("Louisiana", "LA"),
+    "23": ("Maine", "ME"),
+    "24": ("Maryland", "MD"),
+    "25": ("Massachusetts", "MA"),
+    "26": ("Michigan", "MI"),
+    "27": ("Minnesota", "MN"),
+    "28": ("Mississippi", "MS"),
+    "29": ("Missouri", "MO"),
+    "30": ("Montana", "MT"),
+    "31": ("Nebraska", "NE"),
+    "32": ("Nevada", "NV"),
+    "33": ("New Hampshire", "NH"),
+    "34": ("New Jersey", "NJ"),
+    "35": ("New Mexico", "NM"),
+    "36": ("New York", "NY"),
+    "37": ("North Carolina", "NC"),
+    "38": ("North Dakota", "ND"),
+    "39": ("Ohio", "OH"),
+    "40": ("Oklahoma", "OK"),
+    "41": ("Oregon", "OR"),
+    "42": ("Pennsylvania", "PA"),
+    "44": ("Rhode Island", "RI"),
+    "45": ("South Carolina", "SC"),
+    "46": ("South Dakota", "SD"),
+    "47": ("Tennessee", "TN"),
+    "48": ("Texas", "TX"),
+    "49": ("Utah", "UT"),
+    "50": ("Vermont", "VT"),
+    "51": ("Virginia", "VA"),
+    "53": ("Washington", "WA"),
+    "54": ("West Virginia", "WV"),
+    "55": ("Wisconsin", "WI"),
+    "56": ("Wyoming", "WY"),
+    "60": ("American Samoa", "AS"),
+    "66": ("Guam", "GU"),
+    "69": ("Northern Mariana Islands", "MP"),
+    "72": ("Puerto Rico", "PR"),
+    "78": ("U.S. Virgin Islands", "VI"),
 }
 
 
@@ -245,12 +319,15 @@ def build_payload(
     geoids = features["GEOID"].astype(str).tolist()
     if names is None:
         names = features["NAME"] if "NAME" in features else pd.Series(geoids)
+
     # County name, then state from the GEOID prefix. NAME is inconsistent across
     # sources -- "Autauga County, Alabama" from the DHC fetch, bare "Autauga"
     # from the TIGER geometry in the joined dataset -- but the first two digits
     # of GEOID are always the state.
     def split_name(value: object, geoid: str) -> tuple[str, str, str]:
-        county = str(value).rsplit(",", 1)[0].strip() if isinstance(value, str) else geoid
+        county = (
+            str(value).rsplit(",", 1)[0].strip() if isinstance(value, str) else geoid
+        )
         full, abbrev = STATE_FIPS_NAMES.get(str(geoid)[:2], ("Unknown", "??"))
         if full == "Unknown" and isinstance(value, str) and "," in value:
             # Fall back to the spelled-out state in NAME for any FIPS not listed.
@@ -298,7 +375,8 @@ def build_payload(
         "section_order": [
             f"{letter}. {title}"
             for letter, (_slug, title, _names) in manifest.MODEL_GROUPS.items()
-        ] + [_POP, _BUILDING, _OUTCOME],
+        ]
+        + [_POP, _BUILDING, _OUTCOME],
         "features": {},
     }
     for column in columns:
@@ -889,9 +967,7 @@ def write_explorer(
     (declined / empty / unpublished / could_be_zero_pct); features absent from
     it show an em dash with a no-survey-margin tooltip.
     """
-    payload = build_payload(
-        features, quality=quality, raw=raw, dhc_counts=dhc_counts
-    )
+    payload = build_payload(features, quality=quality, raw=raw, dhc_counts=dhc_counts)
     html = (
         _TEMPLATE.replace("__PAYLOAD__", json.dumps(payload, separators=(",", ":")))
         .replace("__TITLE__", path.parent.name or "ACS extract")
@@ -935,95 +1011,200 @@ _POP = "Population context"
 
 EXTRA_PROVENANCE: dict[str, tuple[str, str, str, str]] = {
     # --- geography, with no ACS equivalent
-    "DENSITY": (_GEO, "TOTALPOP / ALAND", "County",
-                "People per square metre of land area. A county-wide average, so a "
-                "large county can look sparse while nearly everyone lives in one "
-                "town -- URBANSHARE measures that instead."),
-    "INTPTLAT": (_GEO, "TIGER internal point", "County",
-                "Latitude of the county's internal point. Ranked top-three in 100% "
-                "of splits in every specification of the current model."),
-    "INTPTLON": (_GEO, "TIGER internal point", "County",
-                "Longitude of the county's internal point. Runs to +178 because "
-                "Aleutians West, AK sits across the antimeridian."),
+    "DENSITY": (
+        _GEO,
+        "TOTALPOP / ALAND",
+        "County",
+        "People per square metre of land area. A county-wide average, so a "
+        "large county can look sparse while nearly everyone lives in one "
+        "town -- URBANSHARE measures that instead.",
+    ),
+    "INTPTLAT": (
+        _GEO,
+        "TIGER internal point",
+        "County",
+        "Latitude of the county's internal point. Ranked top-three in 100% "
+        "of splits in every specification of the current model.",
+    ),
+    "INTPTLON": (
+        _GEO,
+        "TIGER internal point",
+        "County",
+        "Longitude of the county's internal point. Runs to +178 because "
+        "Aleutians West, AK sits across the antimeridian.",
+    ),
     # --- elections (November 2020), with no ACS equivalent
-    "VOTELEAN": (_POL, "E_20_PRES_REP, E_20_PRES_DEM", "Two-party presidential vote",
-                "(Republican - Democratic) / total two-party vote, 2020 presidential. "
-                "Positive is Republican-leaning. Counties with no two-party vote are "
-                "null, which is how Puerto Rico leaves the model."),
-    "NUMBEROFVOTERS": (_POL, "E_20_PRES_DEM + E_20_PRES_REP", "Two-party presidential vote",
-                "COUNT of two-party votes cast in 2020. Largely a proxy for county "
-                "size; correlated 0.98 with BACHDEG in the current model."),
-    "TURNOUT": (_POL, "NUMBEROFVOTERS / VOTINGAGEPOP", "Voting-age population",
-                "Two-party votes cast per voting-age resident, 2020 presidential. "
-                "The one non-redundant ratio from the election columns: Democratic "
-                "share of the two-party vote would be a perfectly monotone transform "
-                "of VOTELEAN (Spearman -1.0) and so identical to a forest. Voting-age "
-                "population includes non-citizens, so turnout runs low where many "
-                "adults are ineligible. A few counties exceed 1.0 because VOTINGAGEPOP "
-                "is a 2016-2020 ACS average while the votes are an actual November "
-                "2020 count."),
-    "E_20_PRES_DEM": (_POL, "election file", "Two-party presidential vote",
-                "COUNT of Democratic votes, 2020 presidential."),
-    "E_20_PRES_REP": (_POL, "election file", "Two-party presidential vote",
-                "COUNT of Republican votes, 2020 presidential."),
+    "VOTELEAN": (
+        _POL,
+        "E_20_PRES_REP, E_20_PRES_DEM",
+        "Two-party presidential vote",
+        "(Republican - Democratic) / total two-party vote, 2020 presidential. "
+        "Positive is Republican-leaning. Counties with no two-party vote are "
+        "null, which is how Puerto Rico leaves the model.",
+    ),
+    "NUMBEROFVOTERS": (
+        _POL,
+        "E_20_PRES_DEM + E_20_PRES_REP",
+        "Two-party presidential vote",
+        "COUNT of two-party votes cast in 2020. Largely a proxy for county "
+        "size; correlated 0.98 with BACHDEG in the current model.",
+    ),
+    "TURNOUT": (
+        _POL,
+        "NUMBEROFVOTERS / VOTINGAGEPOP",
+        "Voting-age population",
+        "Two-party votes cast per voting-age resident, 2020 presidential. "
+        "The one non-redundant ratio from the election columns: Democratic "
+        "share of the two-party vote would be a perfectly monotone transform "
+        "of VOTELEAN (Spearman -1.0) and so identical to a forest. Voting-age "
+        "population includes non-citizens, so turnout runs low where many "
+        "adults are ineligible. A few counties exceed 1.0 because VOTINGAGEPOP "
+        "is a 2016-2020 ACS average while the votes are an actual November "
+        "2020 count.",
+    ),
+    "E_20_PRES_DEM": (
+        _POL,
+        "election file",
+        "Two-party presidential vote",
+        "COUNT of Democratic votes, 2020 presidential.",
+    ),
+    "E_20_PRES_REP": (
+        _POL,
+        "election file",
+        "Two-party presidential vote",
+        "COUNT of Republican votes, 2020 presidential.",
+    ),
     # --- outcomes: the within-Hispanic (of-Hisp) share family
-    "Hisp SOR Alone Pct of Hisp": (_OUTCOME, "HSOR / HISPANIC",
-                "Hispanic population (decennial)",
-                "THE OUTCOME. Share of the county's Hispanic residents who selected "
-                "Some Other Race alone on the 2020 Census."),
-    "Hisp White Alone Pct of Hisp": (_OUTCOME, "HWHITE / HISPANIC",
-                "Hispanic population (decennial)",
-                "THE OUTCOME. Share of the county's Hispanic residents who selected "
-                "White alone."),
-    "Hisp White SOR Pct of Hisp": (_OUTCOME, "HWHITESOR / HISPANIC",
-                "Hispanic population (decennial)",
-                "THE OUTCOME. Share of the county's Hispanic residents who selected "
-                "White and Some Other Race."),
-    "Hisp White Pct of Hisp": (_OUTCOME, "HWHITEACOMBO / HISPANIC",
-                "Hispanic population (decennial)",
-                "Share of the county's Hispanic residents who selected White alone or "
-                "in any combination (the alone-or-in-combination total)."),
+    "Hisp SOR Alone Pct of Hisp": (
+        _OUTCOME,
+        "HSOR / HISPANIC",
+        "Hispanic population (decennial)",
+        "THE OUTCOME. Share of the county's Hispanic residents who selected "
+        "Some Other Race alone on the 2020 Census.",
+    ),
+    "Hisp White Alone Pct of Hisp": (
+        _OUTCOME,
+        "HWHITE / HISPANIC",
+        "Hispanic population (decennial)",
+        "THE OUTCOME. Share of the county's Hispanic residents who selected "
+        "White alone.",
+    ),
+    "Hisp White SOR Pct of Hisp": (
+        _OUTCOME,
+        "HWHITESOR / HISPANIC",
+        "Hispanic population (decennial)",
+        "THE OUTCOME. Share of the county's Hispanic residents who selected "
+        "White and Some Other Race.",
+    ),
+    "Hisp White Pct of Hisp": (
+        _OUTCOME,
+        "HWHITEACOMBO / HISPANIC",
+        "Hispanic population (decennial)",
+        "Share of the county's Hispanic residents who selected White alone or "
+        "in any combination (the alone-or-in-combination total).",
+    ),
     # --- population context: the of-Pop share family (descriptive, not modeled)
-    "Hisp Pct of Pop": (_POP, "HISPANIC / TOTALPOP", "Total population (decennial)",
-                "Hispanic share of the county's total population, decennial. Context, "
-                "not modeled and not an outcome: the outcomes are shares OF the "
-                "Hispanic population, this is the share that IS Hispanic. The ACS "
-                "equivalent, HISPSHARE, is the modeled predictor."),
-    "Hisp SOR Alone Pct of Pop": (_POP, "HSOR / TOTALPOP", "Total population (decennial)",
-                "Share of the county's TOTAL population that is Hispanic and selected "
-                "Some Other Race alone. Descriptive; the modeled outcome is the "
-                "of-Hisp version."),
-    "Hisp White Alone Pct of Pop": (_POP, "HWHITE / TOTALPOP", "Total population (decennial)",
-                "Share of the county's TOTAL population that is Hispanic and selected "
-                "White alone. Descriptive; the modeled outcome is the of-Hisp version."),
-    "Hisp White SOR Pct of Pop": (_POP, "HWHITESOR / TOTALPOP", "Total population (decennial)",
-                "Share of the county's TOTAL population that is Hispanic and selected "
-                "White and Some Other Race. Descriptive; the modeled outcome is the "
-                "of-Hisp version."),
-    "Hisp White Pct of Pop": (_POP, "HWHITEACOMBO / TOTALPOP", "Total population (decennial)",
-                "Share of the county's TOTAL population that is Hispanic and selected "
-                "White alone or in any combination. Descriptive; the modeled outcome "
-                "is the of-Hisp version."),
-    "largest": (_OUTCOME, "derived", "County",
-                "Classification target: 1 = SOR alone is the largest Hispanic race "
-                "choice, 2 = White + SOR, 3 = White alone."),
-    "Most_SOR": (_OUTCOME, "derived", "County", "1 where SOR alone is the largest choice."),
-    "Most_White": (_OUTCOME, "derived", "County", "1 where White alone is the largest choice."),
-    "Most_White_SOR": (_OUTCOME, "derived", "County", "1 where White + SOR is the largest."),
+    "Hisp Pct of Pop": (
+        _POP,
+        "HISPANIC / TOTALPOP",
+        "Total population (decennial)",
+        "Hispanic share of the county's total population, decennial. Context, "
+        "not modeled and not an outcome: the outcomes are shares OF the "
+        "Hispanic population, this is the share that IS Hispanic. The ACS "
+        "equivalent, HISPSHARE, is the modeled predictor.",
+    ),
+    "Hisp SOR Alone Pct of Pop": (
+        _POP,
+        "HSOR / TOTALPOP",
+        "Total population (decennial)",
+        "Share of the county's TOTAL population that is Hispanic and selected "
+        "Some Other Race alone. Descriptive; the modeled outcome is the "
+        "of-Hisp version.",
+    ),
+    "Hisp White Alone Pct of Pop": (
+        _POP,
+        "HWHITE / TOTALPOP",
+        "Total population (decennial)",
+        "Share of the county's TOTAL population that is Hispanic and selected "
+        "White alone. Descriptive; the modeled outcome is the of-Hisp version.",
+    ),
+    "Hisp White SOR Pct of Pop": (
+        _POP,
+        "HWHITESOR / TOTALPOP",
+        "Total population (decennial)",
+        "Share of the county's TOTAL population that is Hispanic and selected "
+        "White and Some Other Race. Descriptive; the modeled outcome is the "
+        "of-Hisp version.",
+    ),
+    "Hisp White Pct of Pop": (
+        _POP,
+        "HWHITEACOMBO / TOTALPOP",
+        "Total population (decennial)",
+        "Share of the county's TOTAL population that is Hispanic and selected "
+        "White alone or in any combination. Descriptive; the modeled outcome "
+        "is the of-Hisp version.",
+    ),
+    "largest": (
+        _OUTCOME,
+        "derived",
+        "County",
+        "Classification target: 1 = SOR alone is the largest Hispanic race "
+        "choice, 2 = White + SOR, 3 = White alone.",
+    ),
+    "Most_SOR": (
+        _OUTCOME,
+        "derived",
+        "County",
+        "1 where SOR alone is the largest choice.",
+    ),
+    "Most_White": (
+        _OUTCOME,
+        "derived",
+        "County",
+        "1 where White alone is the largest choice.",
+    ),
+    "Most_White_SOR": (
+        _OUTCOME,
+        "derived",
+        "County",
+        "1 where White + SOR is the largest.",
+    ),
     # --- population context: the size variables the weighted runs and the
     #     coverage diagnostics are read against
-    "TOTALPOP": (_POP, "P1_001N", "Total population",
-                "Decennial total population of the county."),
-    "HISPANIC": (_POP, "P2_002N", "Total population",
-                "Decennial Hispanic count. The denominator of every outcome and the "
-                "weight in every population-weighted fit."),
+    "TOTALPOP": (
+        _POP,
+        "P1_001N",
+        "Total population",
+        "Decennial total population of the county.",
+    ),
+    "HISPANIC": (
+        _POP,
+        "P2_002N",
+        "Total population",
+        "Decennial Hispanic count. The denominator of every outcome and the "
+        "weight in every population-weighted fit.",
+    ),
     # --- building blocks
-    "ACSTOTALPOP": (_BUILDING, "B01001_001E", "Total population", "ACS total population."),
-    "ACSHISPANIC": (_BUILDING, "B03001_003E", "Total population",
-                "ACS Hispanic count. The denominator of the origin shares."),
+    "ACSTOTALPOP": (
+        _BUILDING,
+        "B01001_001E",
+        "Total population",
+        "ACS total population.",
+    ),
+    "ACSHISPANIC": (
+        _BUILDING,
+        "B03001_003E",
+        "Total population",
+        "ACS Hispanic count. The denominator of the origin shares.",
+    ),
     "ALAND": (_BUILDING, "TIGER", "County", "Land area in square metres."),
     "AWATER": (_BUILDING, "TIGER", "County", "Water area in square metres."),
-    "VOTINGAGEPOP": (_BUILDING, "B29001_001E", "Total population", "Voting-age population."),
+    "VOTINGAGEPOP": (
+        _BUILDING,
+        "B29001_001E",
+        "Total population",
+        "Voting-age population.",
+    ),
 }
 
 

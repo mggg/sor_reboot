@@ -15,11 +15,11 @@ from __future__ import annotations
 # group though they measure participation and size; only VOTELEAN is
 # preference proper -- see the manifest's judgment-call notes.
 ELECTION_FEATURES: tuple[tuple[str, str], ...] = (
-    ("VOTELEAN",
-     "(Republican - Democratic) share of the two-party 2020 presidential "
-     "vote; positive = Republican-leaning"),
-    ("NUMBEROFVOTERS",
-     "Total two-party 2020 presidential vote (Dem + Rep)"),
-    ("TURNOUT",
-     "Two-party 2020 presidential votes cast per voting-age resident"),
+    (
+        "VOTELEAN",
+        "(Republican - Democratic) share of the two-party 2020 presidential "
+        "vote; positive = Republican-leaning",
+    ),
+    ("NUMBEROFVOTERS", "Total two-party 2020 presidential vote (Dem + Rep)"),
+    ("TURNOUT", "Two-party 2020 presidential votes cast per voting-age resident"),
 )

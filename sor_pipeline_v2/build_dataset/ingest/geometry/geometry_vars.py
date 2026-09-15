@@ -10,11 +10,11 @@ from __future__ import annotations
 
 # (feature name, meaning)
 GEOMETRY_FEATURES: tuple[tuple[str, str], ...] = (
-    ("INTPTLAT",
-     "Latitude of the county's internal point (TIGER/Line 2020)"),
-    ("INTPTLON",
-     "Longitude of the county's internal point (TIGER/Line 2020)"),
-    ("DENSITY",
-     "Population density: PL total population divided by TIGER land area "
-     "(ALAND); rows with no land area are dropped"),
+    ("INTPTLAT", "Latitude of the county's internal point (TIGER/Line 2020)"),
+    ("INTPTLON", "Longitude of the county's internal point (TIGER/Line 2020)"),
+    (
+        "DENSITY",
+        "Population density: PL total population divided by TIGER land area "
+        "(ALAND); rows with no land area are dropped",
+    ),
 )

@@ -1,19 +1,19 @@
 import pandas as pd
+from utils import config
 
-from build_dataset.ingest.pl import pl_api
+from build_dataset import manifest
+from build_dataset.clean import acs as clean_acs
+from build_dataset.clean import coerce
+from build_dataset.clean import dhc as clean_dhc
+from build_dataset.clean import election as clean_election
+from build_dataset.clean import geometry as clean_geometry
+from build_dataset.clean import pl as clean_pl
+from build_dataset.ingest import store
 from build_dataset.ingest.acs import acs_api
 from build_dataset.ingest.dhc import dhc_api
-from build_dataset.ingest.geometry import geometry_api
 from build_dataset.ingest.election import election_api
-from build_dataset.ingest import store
-from build_dataset.clean import coerce
-from build_dataset.clean import pl as clean_pl
-from build_dataset.clean import acs as clean_acs
-from build_dataset.clean import dhc as clean_dhc
-from build_dataset.clean import geometry as clean_geometry
-from build_dataset.clean import election as clean_election
-from build_dataset import manifest
-from utils import config
+from build_dataset.ingest.geometry import geometry_api
+from build_dataset.ingest.pl import pl_api
 
 # The attribute columns kept from the TIGER shapefile; the polygons themselves
 # stay behind (nothing downstream models geometry, and keeping them would drag
@@ -70,10 +70,10 @@ def ingest_counties() -> pd.DataFrame:
 
 def clean_counties(df: pd.DataFrame) -> pd.DataFrame:
     """Steps 0-5, in dependency order (each step asserts what it needs)."""
-    df = coerce.coerce_numeric(df)          # 0: strings -> numbers
-    df = clean_pl.add_targets(df)           # 1: renames, composites, targets, weight
-    df = clean_acs.add_acs_features(df)     # 2: 87 shares, derived, growth, auxiliaries
-    df = clean_dhc.add_dhc_features(df)     # 3: URBANSHARE
+    df = coerce.coerce_numeric(df)  # 0: strings -> numbers
+    df = clean_pl.add_targets(df)  # 1: renames, composites, targets, weight
+    df = clean_acs.add_acs_features(df)  # 2: 87 shares, derived, growth, auxiliaries
+    df = clean_dhc.add_dhc_features(df)  # 3: URBANSHARE
     df = clean_geometry.add_geometry_features(df)  # 4: DENSITY (needs step 1)
     df = clean_election.add_election_features(df)  # 5: votes (needs step 2)
     return df
@@ -92,7 +92,9 @@ def build(build_type: str):
         out_dir = config.DATA_DIR / "national_counties"
         raw = ingest_counties().sort_values("GEOID")
         store.save_df_to_parquet(raw, out_dir / "raw.parquet")
-        print(f"saved raw       {raw.shape[0]} x {raw.shape[1]} -> {out_dir / 'raw.parquet'}")
+        print(
+            f"saved raw       {raw.shape[0]} x {raw.shape[1]} -> {out_dir / 'raw.parquet'}"
+        )
 
         df = clean_counties(raw)
         wanted = manifest.processed_columns("county")
@@ -105,7 +107,9 @@ def build(build_type: str):
             )
         processed = df[wanted]
         store.save_df_to_parquet(processed, out_dir / "processed.parquet")
-        print(f"saved processed {processed.shape[0]} x {processed.shape[1]} -> {out_dir / 'processed.parquet'}")
+        print(
+            f"saved processed {processed.shape[0]} x {processed.shape[1]} -> {out_dir / 'processed.parquet'}"
+        )
     else:
         raise NotImplementedError(f"Unknown build type: {build_type}")
 

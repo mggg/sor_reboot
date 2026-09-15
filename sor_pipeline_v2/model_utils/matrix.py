@@ -28,7 +28,6 @@ complete cases is `build_model_matrix(df, features=...)` directly.
 from __future__ import annotations
 
 import pandas as pd
-
 from build_dataset import manifest
 
 

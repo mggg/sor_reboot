@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import pandas as pd
+from utils import config
 
 from feature_report.reliability import feature_reliability
 from feature_report.stats import feature_stats
-from utils import config
 
 
 def report_counties() -> None:
@@ -23,9 +23,7 @@ def report_counties() -> None:
 
     reliability = feature_reliability(raw)
     reliability.to_csv(out_dir / "feature_reliability.csv", index=False)
-    print(
-        f"wrote {len(reliability)} features -> {out_dir / 'feature_reliability.csv'}"
-    )
+    print(f"wrote {len(reliability)} features -> {out_dir / 'feature_reliability.csv'}")
     # explorer.html regenerates separately (`python -m feature_report.explorer`):
     # it depends on the reliability table written above, so it stays an
     # explicit step rather than part of every report run.

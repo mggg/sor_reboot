@@ -4,10 +4,8 @@ These were previously hard-coded in several places across the notebooks. Central
 them here is what lets the national and tract drivers share the same logic.
 """
 
-import os
-import random
-from datetime import datetime
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 ENV_PATH = "/Users/esher/mggg/projects/sor/sor/.env"  # replace with your own path to the .env file!

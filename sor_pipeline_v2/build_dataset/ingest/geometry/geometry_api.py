@@ -8,12 +8,12 @@ GeoParquet, then reused on later runs.
 from __future__ import annotations
 
 import geopandas as gpd
+from utils.config import RAW_DIR
 
 from build_dataset.ingest.census_client import (
     COUNTY_GEOMETRY_URL,
     TRACT_GEOMETRY_URL_TEMPLATE,
 )
-from utils.config import RAW_DIR
 
 
 def load_county_geometry() -> gpd.GeoDataFrame:
