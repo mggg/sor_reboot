@@ -1,0 +1,26 @@
+[project]
+name = "sor-reboot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = []
+requires-python = ">=3.13.11"
+dependencies = [
+    "lightgbm>=4.7.0",
+    "pandas>=3.0.5",
+    "scikit-learn>=1.9.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"
+
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.414",
+    "ruff>=0.16.7",
+]
