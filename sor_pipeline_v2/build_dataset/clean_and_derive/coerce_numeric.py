@@ -1,10 +1,8 @@
-"""Step 0: strings -> numbers.
+"""Step 0 of cleaning and transforming: strings -> numbers.
 
 The census client returns every value as a string (fidelity to the API, and
-what keeps GEOIDs zero-padded). Interpretation starts here: everything except
-the identifier columns becomes numeric. `errors="coerce"` turns genuinely
-non-numeric junk into NaN rather than crashing -- acceptable because the only
-legitimately non-numeric columns are the identifiers excluded below.
+what keeps GEOIDs zero-padded). Turn everything except for GEOID and NAME into a numeric column,
+coercing any non-numeric string to NaN.
 """
 
 from __future__ import annotations

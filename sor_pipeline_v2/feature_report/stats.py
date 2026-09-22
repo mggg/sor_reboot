@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import pandas as pd
-from build_dataset import manifest
+
+from build_dataset import feature_manifest
 
 
 def feature_stats(df: pd.DataFrame) -> pd.DataFrame:
@@ -13,7 +14,7 @@ def feature_stats(df: pd.DataFrame) -> pd.DataFrame:
     order), so the table reads like the manifest with numbers attached.
     """
     rows = []
-    for letter, (slug, _title, names) in manifest.MODEL_GROUPS.items():
+    for letter, (slug, _title, names) in feature_manifest.MODEL_GROUPS.items():
         for name in names:
             values = df[name]
             rows.append(

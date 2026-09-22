@@ -27,8 +27,8 @@ import json
 from pathlib import Path
 
 import pandas as pd
-from build_dataset import manifest
-from build_dataset.clean import acs as clean_acs
+from build_dataset import feature_manifest
+from build_dataset.clean_and_derive import clean_and_transform_acs as clean_acs
 from build_dataset.ingest.acs import acs_spec
 from build_dataset.ingest.dhc import dhc_vars
 from utils import config
@@ -221,7 +221,7 @@ def _provenance() -> dict[str, dict[str, str]]:
             "denominator": f"{code} (2011-2015)",
             "meaning": meaning,
         }
-    for letter, (_slug, title, names) in manifest.MODEL_GROUPS.items():
+    for letter, (_slug, title, names) in feature_manifest.MODEL_GROUPS.items():
         for name in names:
             if name in out:
                 out[name]["source_section"] = out[name]["section"]
@@ -305,12 +305,11 @@ def build_payload(
     dhc_counts: pd.DataFrame | None = None,
 ) -> dict:
     """Assemble everything the page needs as one JSON-serializable dict."""
-    modeled = set(manifest.feature_names("county"))
+    modeled = set(feature_manifest.feature_names("county"))
     columns = [
         c
         for c in features.columns
-        if c not in ("GEOID", "NAME")
-        and not c.startswith(acs_spec.DIAGNOSTIC_PREFIX)
+        if c not in ("GEOID", "NAME") and not c.startswith(acs_spec.DIAGNOSTIC_PREFIX)
         # Beyond the ACS features, take only the columns EXTRA_PROVENANCE can
         # describe. The joined dataset also carries ~65 raw P1_/P2_/B.. code
         # columns; listing those unexplained would bury the real variables.
@@ -374,7 +373,7 @@ def build_payload(
         # at the end.
         "section_order": [
             f"{letter}. {title}"
-            for letter, (_slug, title, _names) in manifest.MODEL_GROUPS.items()
+            for letter, (_slug, title, _names) in feature_manifest.MODEL_GROUPS.items()
         ]
         + [_POP, _BUILDING, _OUTCOME],
         "features": {},
@@ -1245,7 +1244,9 @@ def write_explorer_page() -> Path:
         for row in rel.itertuples()
     }
 
-    n_features = sum(len(names) for _s, _t, names in manifest.MODEL_GROUPS.values())
+    n_features = sum(
+        len(names) for _s, _t, names in feature_manifest.MODEL_GROUPS.values()
+    )
     return write_explorer(
         processed,
         data_dir / "report" / "explorer.html",

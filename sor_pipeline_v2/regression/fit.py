@@ -11,23 +11,25 @@ an untuned RF would measure the tuning, not the model family.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 import pandas as pd
 from lightgbm import LGBMRegressor
-from model_utils.split import split_train_test
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import RidgeCV
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from regression.regression_utils import DEFAULT_PARAMS
+from model_utils.split import split_train_test
+from regression.run_config import RegressionParameters
 
 # Model key -> the label written in every output table and directory name.
 MODEL_LABELS = {"rf": "random_forest", "lgbm": "lightgbm", "ridge": "ridge"}
 
 
-def make_regressor(model: str, seed: int, params: dict | None = None):
+def make_regressor(model: str, seed: int, params: RegressionParameters | None = None):
     """Construct one of the three peer estimators -- the single source of truth.
 
     "rf": the pipeline's forest, `n_estimators` trees capped at `max_depth`.
@@ -42,28 +44,23 @@ def make_regressor(model: str, seed: int, params: dict | None = None):
         leave [0, 1], acceptable for an R² baseline, not for producing
         predicted shares.
 
-    `params` overrides any subset of DEFAULT_PARAMS; unknown keys raise.
+    `params=None` means the RegressionParameters defaults.
     """
-    p = dict(DEFAULT_PARAMS)
-    if params:
-        unknown = set(params) - set(DEFAULT_PARAMS)
-        if unknown:
-            raise KeyError(f"unknown hyperparameter(s): {sorted(unknown)}")
-        p.update(params)
+    p = params if params is not None else RegressionParameters()
 
     if model == "rf":
         return RandomForestRegressor(
-            n_estimators=p["n_estimators"],
-            max_depth=p["max_depth"],
+            n_estimators=p.n_estimators,
+            max_depth=p.max_depth,
             random_state=seed,
             n_jobs=-1,
         )
     if model == "lgbm":
         return LGBMRegressor(
-            n_estimators=p["n_estimators"],
-            num_leaves=p["num_leaves"],
-            max_depth=p["max_depth"],
-            learning_rate=p["learning_rate"],
+            n_estimators=p.n_estimators,
+            num_leaves=p.num_leaves,
+            max_depth=p.max_depth,
+            learning_rate=p.learning_rate,
             random_state=seed,
             deterministic=True,
             force_row_wise=True,
@@ -80,15 +77,35 @@ def make_regressor(model: str, seed: int, params: dict | None = None):
     raise ValueError(f"unknown model {model!r}; expected one of {list(MODEL_LABELS)}")
 
 
-def fit_one(
+@dataclass(frozen=True)
+class RegressionFitMetrics:
+    """The scored result of one (matrix, target, model, weighting, seed) fit."""
+
+    model: str
+    weighting: str
+    seed: int
+    r2: float
+    rmse: float
+    n: int
+    n_test: int
+    # Effective sample size of the test fold: n_test when unweighted, else
+    # (Σw)²/Σw². Travels with every weighted score because a weighted R²
+    # quoted without it looks as solid as an unweighted one and is not.
+    ess: float
+    # The CV-chosen ridge penalty (NaN for the tree models), so a ridge row
+    # is reproducible from its CSV.
+    alpha: float
+
+
+def split_fit_and_score_regression(
     X: pd.DataFrame,
     y: pd.Series,
     model: str,
     seed: int,
     weights: pd.Series | None = None,
-    params: dict | None = None,
-) -> dict:
-    """Split, fit, score. Returns the metrics dict for one table row.
+    params: RegressionParameters | None = None,
+) -> RegressionFitMetrics:
+    """Split, fit, score -- the metrics of one fit.
 
     `weights` (aligned to X's index; pass the HISPANIC counts) switches the
     run from a question about PLACES to a question about PEOPLE, and is
@@ -99,11 +116,6 @@ def fit_one(
       2. the scoring (R²/RMSE with the same test weights -- otherwise you
                       train on people and grade on counties)
 
-    `ess` is the effective sample size of the test fold: `n_test` when
-    unweighted, else (Σw)²/Σw² -- how many counties the weighted fold is
-    actually worth. It travels with every weighted score, always, because a
-    weighted R² quoted without it looks as solid as an unweighted one and
-    is not.
     """
     X_train, X_test, y_train, y_test = split_train_test(X, y, seed)
     w_train = None if weights is None else weights.loc[X_train.index].to_numpy()
@@ -128,21 +140,18 @@ def fit_one(
         estimator.fit(X_train, y_train, sample_weight=w_train)
     y_pred = estimator.predict(X_test)
 
-    return {
-        "model": MODEL_LABELS[model],
-        "weighting": "unweighted" if weights is None else "weighted",
-        "seed": seed,
-        "r2": r2_score(y_test, y_pred, sample_weight=w_test),
-        "rmse": float(
-            np.sqrt(mean_squared_error(y_test, y_pred, sample_weight=w_test))
-        ),
-        "n": len(y),
-        "n_test": len(y_test),
-        "ess": ess,
-        # The CV-chosen penalty, so a ridge row is reproducible from its CSV.
-        "alpha": (
+    return RegressionFitMetrics(
+        model=MODEL_LABELS[model],
+        weighting="unweighted" if weights is None else "weighted",
+        seed=seed,
+        r2=r2_score(y_test, y_pred, sample_weight=w_test),
+        rmse=float(np.sqrt(mean_squared_error(y_test, y_pred, sample_weight=w_test))),
+        n=len(y),
+        n_test=len(y_test),
+        ess=ess,
+        alpha=(
             float(estimator.named_steps["regressor"].alpha_)
             if model == "ridge"
-            else np.nan
+            else float("nan")
         ),
-    }
+    )

@@ -1,0 +1,47 @@
+"""Non-Hispanic White population features for ingestion from the Census Bureau's API."""
+
+from build_dataset.ingest.feature_utils import ModelFeature
+
+PL_NONHISPANIC_WHITE_ALONE_OR_COMBINATION: list[ModelFeature] = [
+    ModelFeature(
+        source_table="P2",
+        table_code=None,
+        var_name="NONHISPANICWHITEALONEORCOMBO",
+        description="Not Hispanic or Latino: White alone or in combination with one or more other races",
+        numerator_codes=(
+            "P2_005N",
+            "P2_013N",
+            "P2_014N",
+            "P2_015N",
+            "P2_016N",
+            "P2_017N",
+            "P2_029N",
+            "P2_030N",
+            "P2_031N",
+            "P2_032N",
+            "P2_033N",
+            "P2_034N",
+            "P2_035N",
+            "P2_036N",
+            "P2_037N",
+            "P2_038N",
+            "P2_050N",
+            "P2_051N",
+            "P2_052N",
+            "P2_053N",
+            "P2_054N",
+            "P2_055N",
+            "P2_056N",
+            "P2_057N",
+            "P2_058N",
+            "P2_059N",
+            "P2_066N",
+            "P2_067N",
+            "P2_068N",
+            "P2_069N",
+            "P2_070N",
+            "P2_073N",
+        ),
+        denominator_codes=(),
+    ),
+]

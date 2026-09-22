@@ -1,15 +1,9 @@
-"""How the election source is obtained: the inherited 2020 presidential CSVs.
-
-The one input the pipeline cannot fetch for itself: `county_level_2020.csv`
-(and the per-state tract files) were inherited from the original sor project's
-notebooks and live in data/raw. This module only reads the raw CSV and
-normalizes FIPS/GEOID; the derived fields belong to the clean stage (see
-`election_vars.py`).
-"""
+"""API for fetching election data from the Census Bureau's API."""
 
 from __future__ import annotations
 
 import pandas as pd
+
 from utils.config import RAW_DIR
 
 

@@ -1,0 +1,47 @@
+"""PL features for ingestion from the Census Bureau's API."""
+
+from build_dataset.ingest.feature_utils import ModelFeature
+
+PL_WHITE_ALONE_OR_COMBINATION: list[ModelFeature] = [
+    ModelFeature(
+        source_table="P1",
+        table_code=None,
+        var_name="WHITEALONEORCOMBO",
+        description="White alone or in combination with one or more other races",
+        numerator_codes=(
+            "P1_003N",
+            "P1_011N",
+            "P1_012N",
+            "P1_013N",
+            "P1_014N",
+            "P1_015N",
+            "P1_027N",
+            "P1_028N",
+            "P1_029N",
+            "P1_030N",
+            "P1_031N",
+            "P1_032N",
+            "P1_033N",
+            "P1_034N",
+            "P1_035N",
+            "P1_036N",
+            "P1_048N",
+            "P1_049N",
+            "P1_050N",
+            "P1_051N",
+            "P1_052N",
+            "P1_053N",
+            "P1_054N",
+            "P1_055N",
+            "P1_056N",
+            "P1_057N",
+            "P1_064N",
+            "P1_065N",
+            "P1_066N",
+            "P1_067N",
+            "P1_068N",
+            "P1_071N",
+        ),
+        denominator_codes=(),
+    ),
+]

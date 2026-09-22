@@ -30,5 +30,5 @@ def load_df_from_parquet(path: Path) -> pd.DataFrame | gpd.GeoDataFrame:
         raise NotImplementedError("Only parquet files are supported.")
     try:
         return gpd.read_parquet(path)
-    except Exception:
+    except ValueError:
         return pd.read_parquet(path)

@@ -1,4 +1,4 @@
-"""Step 4: DENSITY from the TIGER attributes.
+"""Step 4 of cleaning and transforming: DENSITY from the TIGER attributes.
 
 INTPTLAT/INTPTLON need no work here -- coercion already made them floats (the
 TIGER `+32.53` strings parse directly).
@@ -14,11 +14,14 @@ import numpy as np
 import pandas as pd
 
 
-def add_geometry_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Derive DENSITY; requires TOTALPOP (step 1) and ALAND (ingest)."""
+def add_geometry_derived_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Derive DENSITY; requires TOTALPOP (step 1) and ALAND (ingest).
+
+    Other geometry features (INTPTLAT, INTPTLON) are already present and don't need derivation.
+    """
     if "TOTALPOP" not in df.columns:
         raise KeyError(
-            "TOTALPOP absent -- add_geometry_features must run after the PL "
+            "TOTALPOP absent -- add_geometry_derived_features must run after the PL "
             "step (clean.pl.add_targets), which creates it."
         )
     df = df.copy()

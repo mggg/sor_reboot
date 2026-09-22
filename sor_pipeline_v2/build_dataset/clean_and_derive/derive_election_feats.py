@@ -3,10 +3,6 @@
 Depends on step 2: TURNOUT's denominator (VOTINGAGEPOP) is an ACS auxiliary
 column born in the ACS step. Puerto Rico's 78 municipios have NaN vote columns
 (no presidential vote) and correctly come out NaN in all three features.
-
-A handful of counties exceed TURNOUT = 1.0: VOTINGAGEPOP is a survey estimate
-of a slightly different quantity (residents, not eligible voters) and the two
-sources need not agree exactly. That is a caveat, not an error.
 """
 
 from __future__ import annotations
@@ -16,7 +12,7 @@ import pandas as pd
 
 
 def add_election_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Derive the three political-preference features."""
+    """Derive the three political-preference features: votelean, number of voters, and turnout."""
     if "VOTINGAGEPOP" not in df.columns:
         raise KeyError(
             "VOTINGAGEPOP absent -- add_election_features must run after the "

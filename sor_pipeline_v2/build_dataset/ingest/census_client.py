@@ -3,13 +3,12 @@ import os
 import pandas as pd
 import requests
 from dotenv import load_dotenv
+
 from utils.config import ENV_PATH
 
 load_dotenv(ENV_PATH)
 
 # The Census API rejects requests asking for more than 50 variables at once.
-# Larger variable lists are split into chunks of this size and re-joined on the
-# geography key columns.
 MAX_VARS_PER_REQUEST = 50
 
 # --- Census API key ----------------------------------------------------------
@@ -19,40 +18,40 @@ if not CENSUS_API_KEY:
         "CENSUS_API_KEY environment variable not set. Please set it in your .env file."
     )
 
-
 # --- Census API --------------------------------------------------------------
 # The key is read from the CENSUS_API_KEY environment variable (see census_io.load_api_key).
-DECENNIAL_PL_URL = "https://api.census.gov/data/2020/dec/pl"
-ACS5_URL = "https://api.census.gov/data/2020/acs/acs5"
-# Demographic and Housing Characteristics file. A third census product alongside
-# PL and ACS: it carries the urban/rural classification (table P2), which the PL
-# redistricting file does not publish and the ACS does not measure at all.
-# Complete count, so no margins of error.
-DECENNIAL_DHC_URL = "https://api.census.gov/data/2020/dec/dhc"
-# Prior ACS 5-year vintage, used only to measure Hispanic population change.
-# 2011-2015 shares NO years with 2016-2020, which is the Census Bureau's own
-# condition for comparing two 5-year estimates: overlapping windows reuse the
-# same responses and understate real change.
-ACS5_PRIOR_URL = "https://api.census.gov/data/2015/acs/acs5"
-COUNTY_GEOMETRY_URL = (
+DECENNIAL_PL_2020_URL = "https://api.census.gov/data/2020/dec/pl"
+
+# Annual Community Survey 5-year (2016-2020) for most features.
+ACS5_2020_URL = "https://api.census.gov/data/2020/acs/acs5"
+
+# Demographic and Housing Characteristics file.
+DECENNIAL_DHC_2020_URL = "https://api.census.gov/data/2020/dec/dhc"
+
+# Prior ACS 5-year (2011-2015) for growth features. The 2011-2015 vintage is the last one that can be compared to 2016-2020 without overlapping years.
+ACS5_2015_URL = "https://api.census.gov/data/2015/acs/acs5"
+
+# TIGER/Line shapefiles for geometry.
+COUNTY_GEOMETRY_2020_URL = (
     "https://www2.census.gov/geo/tiger/TIGER2020/COUNTY/tl_2020_us_county.zip"
 )
+
 # Per-state tract geometry; format with a 2-digit state FIPS, e.g. .format(state_fips="06").
-TRACT_GEOMETRY_URL_TEMPLATE = (
+TRACT_GEOMETRY_2020_URL_TEMPLATE = (
     "https://www2.census.gov/geo/tiger/TIGER2020/TRACT/tl_2020_{state_fips}_tract.zip"
 )
 
 
 def get_census_data(
-    url: str, variables: list[str], for_geo: str, in_geo: str
+    source_url: str, feature_codes: list[str], for_geo: str, in_geo: str
 ) -> pd.DataFrame:
     """Fetch census data for a geography from a Census API endpoint.
 
     Parameters
     ----------
-    url : str
+    source_url : str
         Base endpoint (Decennial PL or ACS 5-year).
-    variables : list of str
+    feature_codes : list of str
         Census variable codes to request.
     for_geo, in_geo : str
         The `for=` / `in=` clauses, e.g. "county:*" / "state:*", or "tract:*" / "state:06".
@@ -62,15 +61,14 @@ def get_census_data(
     pandas.DataFrame
         One row per geographic unit; values returned as strings.
     """
-    if len(variables) > MAX_VARS_PER_REQUEST:
+    if len(feature_codes) > MAX_VARS_PER_REQUEST:
         chunks = [
-            variables[i : i + MAX_VARS_PER_REQUEST]
-            for i in range(0, len(variables), MAX_VARS_PER_REQUEST)
+            feature_codes[i : i + MAX_VARS_PER_REQUEST]
+            for i in range(0, len(feature_codes), MAX_VARS_PER_REQUEST)
         ]
     else:
-        chunks = [variables]
+        chunks = [feature_codes]
     merged: pd.DataFrame | None = None
-    keys: list[str] = []
 
     for n, chunk in enumerate(chunks, start=1):
         params = {
@@ -79,7 +77,7 @@ def get_census_data(
             "in": in_geo,
             "key": CENSUS_API_KEY,
         }
-        response = requests.get(url, params=params)
+        response = requests.get(source_url, params=params)
         if response.status_code != 200:
             raise ValueError(
                 f"Request failed with status code {response.status_code}: {response.text}"

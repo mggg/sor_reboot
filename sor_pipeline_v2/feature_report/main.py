@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import pandas as pd
-from utils import config
 
 from feature_report.reliability import feature_reliability
 from feature_report.stats import feature_stats
+from utils import config
 
 
 def report_counties() -> None:
