@@ -1,19 +1,16 @@
-"""Step 2: the ACS features -- 87 shares, the derived ratio, the growth pair.
+"""Step 2: the ACS features, each computed by its declared variable_computer.
 
-Order of operations matters and is fixed here:
-
-    sentinels -> NaN
-      -> sum the component lines (a missing component poisons the sum)
-      -> divide by the denominator (a zero universe is an undefined share)
+Order of operations matters and is fixed here: sentinels -> NaN first, so the
+computers' sums and shares never mistake a sentinel for a real value (their
+NaN discipline -- skipna=False sums, NaN on zero denominators -- handles the
+rest).
 """
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 
-from build_dataset.ingest.acs.feats import PRIOR_CODES, PRIOR_SUFFIX
-from build_dataset.ingest.feature_utils import ModelFeature
+from build_dataset.ingest.declarations.feature_utils import ModelVariable
 
 # Values the API substitutes for a real number. Each means the estimate or
 # margin could not be produced; all of them must become NaN before arithmetic,
@@ -30,7 +27,20 @@ SENTINELS: dict[int, str] = {
 
 
 def nullify_sentinels(df: pd.DataFrame) -> pd.DataFrame:
-    """Replace every ACS sentinel value with NaN, across all numeric columns."""
+    """Replace every ACS sentinel value with NaN, across all numeric columns.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The merged frame after numeric coercion; sentinel values sit in its
+        numeric columns as the large negative numbers in SENTINELS.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A copy with every sentinel occurrence replaced by NaN; non-numeric
+        columns untouched.
+    """
     df = df.copy()
     numeric = df.select_dtypes("number").columns
     block = df[numeric]
@@ -38,68 +48,84 @@ def nullify_sentinels(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def combine_estimates(df: pd.DataFrame, codes: tuple[str, ...]) -> pd.Series:
-    """Sum estimate columns; one missing component makes the sum missing."""
-    if len(codes) == 1:
-        return df[codes[0]]
-    return df[list(codes)].sum(axis=1, skipna=False)
-
-
 def add_acs_features(
-    df: pd.DataFrame, model_features: list[ModelFeature]
+    df: pd.DataFrame, model_variables: list[ModelVariable]
 ) -> pd.DataFrame:
-    """Derive every ACS feature, diagnostic, and auxiliary column in place."""
+    """Derive every ACS feature (growth features included) from its computer.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The merged frame after numeric coercion, containing every raw ACS
+        column the declared computers read (current estimates and the
+        `_PRIOR`-suffixed prior-vintage columns).
+    model_variables : list of ModelVariable
+        The ACS declarations to compute, in list order.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A copy with sentinels nullified and one new column per declared
+        variable.
+
+    Raises
+    ------
+    KeyError
+        If a raw column a computer reads is absent -- the fetch and the
+        feats declarations have drifted apart.
+    """
     df = df.copy()
-    features_to_check = {
-        code
-        for feature in model_features
-        for code in feature.numerator_codes + feature.denominator_codes
+    required = {
+        column
+        for variable in model_variables
+        for column in variable.variable_computer.input_columns()
     }
-    missing = [c for c in features_to_check if c not in df.columns]
+    missing = sorted(required - set(df.columns))
     if missing:
         raise KeyError(
-            f"{len(missing)} required ACS estimate column(s) absent, first few: "
+            f"{len(missing)} required ACS column(s) absent, first few: "
             f"{missing[:5]}. The fetch and the feats declarations have drifted "
-            "apart -- re-run ingest with the current acs_api.all_codes()."
+            "apart -- re-run ingest with the current acs_api fetch lists."
         )
 
     df = nullify_sentinels(df)
 
-    for feature in model_features:
-        if feature.custom:
-            continue  # built by its dedicated function, not the generic loop
-        num = combine_estimates(df, feature.numerator_codes)
-        if feature.denominator_codes:
-            # A zero universe is undefined.
-            den = combine_estimates(df, feature.denominator_codes).replace(0, np.nan)
-            df[feature.var_name] = num / den
-        else:
-            # Counts and medians pass through untouched; nothing to divide by.
-            df[feature.var_name] = num
-    return df
-
-
-def add_custom_growth_features(df: pd.DataFrame) -> pd.DataFrame:
-    """The two custom ACS features: growth as a log ratio across vintages.
-
-    These do not follow the generic numerator/denominator pattern, so they are
-    computed here in the clean stage."""
-    # The declared prior-vintage fetch must cover exactly these inputs.
-    assert set(PRIOR_CODES) == {"B03001_003E", "B05002_013E"}
-
-    # NaN where a unit did not exist in 2011-2015
-    def growth(code: str) -> pd.Series:
-        return np.log1p(df[code]) - np.log1p(df[code + PRIOR_SUFFIX])
-
-    df["HISPGROWTH"] = growth("B03001_003E")
-    df["FBGROWTH"] = growth("B05002_013E")
-    return df
+    # One concat, not ~90 sequential inserts: every ACS computer reads only
+    # fetched columns, never another ACS variable, so all outputs can be
+    # computed against the same frame and joined at once. Inserting one
+    # column at a time fragments the frame's memory blocks (pandas
+    # PerformanceWarning) and is markedly slower.
+    computed = pd.concat(
+        {
+            variable.var_name: variable.variable_computer(df)
+            for variable in model_variables
+        },
+        axis=1,
+    )
+    return pd.concat([df, computed], axis=1)
 
 
 def main_acs_clean_and_transform(
-    df: pd.DataFrame, model_features: list[ModelFeature]
+    df: pd.DataFrame, model_variables: list[ModelVariable]
 ) -> pd.DataFrame:
-    """The full ACS step: sentinels, sums, shares, growth."""
-    df = add_acs_features(df, model_features)
-    df = add_custom_growth_features(df)
-    return df
+    """The full ACS step: sentinels, then every declared computer.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The merged frame after numeric coercion.
+    model_variables : list of ModelVariable
+        The ACS declarations to compute.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The frame with every declared ACS variable added.
+
+    Raises
+    ------
+    KeyError
+        Propagated from `add_acs_features` when a required raw column is
+        absent.
+    """
+    return add_acs_features(df, model_variables)

@@ -1,156 +1,178 @@
 """Household Structure (age, marriage, sex) features for ingestion from the Census Bureau's API."""
 
-from build_dataset.ingest.feature_utils import ModelFeature
+from build_dataset.ingest.declarations.census_codes import (
+    B01001I,
+    B01002I,
+    B11001,
+    B11001I,
+)
+from build_dataset.ingest.declarations.denominators import (
+    HISPANIC_WORKING_AGE,
+    Denominator,
+)
+from build_dataset.ingest.declarations.feature_utils import (
+    FractionalShare,
+    ModelVariable,
+    SumFeature,
+)
 
-HOUSEHOLD_FEATURES: list[ModelFeature] = [
-    ModelFeature(
-        source_table="B01002I",
-        table_code="B01002I_001E",
+HOUSEHOLD_FEATURES: list[ModelVariable] = [
+    ModelVariable(
+        source="ACS",
         var_name="HISPMEDAGE",
+        display_name="Hispanic median age",
         description="Median age of the Hispanic population",
-        numerator_codes=("B01002I_001E",),
-        denominator_codes=(),
+        variable_computer=SumFeature(codes=[B01002I.MEDIAN_AGE]),
     ),
-    ModelFeature(
-        source_table="B01001I",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="HISPUNDER18",
+        display_name="Hispanic under 18",
         description="Under 18 years",
-        numerator_codes=(
-            "B01001I_003E",
-            "B01001I_004E",
-            "B01001I_005E",
-            "B01001I_006E",
-            "B01001I_018E",
-            "B01001I_019E",
-            "B01001I_020E",
-            "B01001I_021E",
+        variable_computer=FractionalShare(
+            numerator_codes=[
+                B01001I.MALE_UNDER_5_YEARS,
+                B01001I.MALE_5_TO_9_YEARS,
+                B01001I.MALE_10_TO_14_YEARS,
+                B01001I.MALE_15_TO_17_YEARS,
+                B01001I.FEMALE_UNDER_5_YEARS,
+                B01001I.FEMALE_5_TO_9_YEARS,
+                B01001I.FEMALE_10_TO_14_YEARS,
+                B01001I.FEMALE_15_TO_17_YEARS,
+            ],
+            denominator_codes=[Denominator.HISPANIC_POPULATION_B01001I],
         ),
-        denominator_codes=("B01001I_001E",),
     ),
-    ModelFeature(
-        source_table="B01001I",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="HISP18TO34",
+        display_name="Hispanic 18 to 34",
         description="18 to 34 years",
-        numerator_codes=(
-            "B01001I_007E",
-            "B01001I_008E",
-            "B01001I_009E",
-            "B01001I_010E",
-            "B01001I_022E",
-            "B01001I_023E",
-            "B01001I_024E",
-            "B01001I_025E",
+        variable_computer=FractionalShare(
+            numerator_codes=[
+                B01001I.MALE_18_AND_19_YEARS,
+                B01001I.MALE_20_TO_24_YEARS,
+                B01001I.MALE_25_TO_29_YEARS,
+                B01001I.MALE_30_TO_34_YEARS,
+                B01001I.FEMALE_18_AND_19_YEARS,
+                B01001I.FEMALE_20_TO_24_YEARS,
+                B01001I.FEMALE_25_TO_29_YEARS,
+                B01001I.FEMALE_30_TO_34_YEARS,
+            ],
+            denominator_codes=[Denominator.HISPANIC_POPULATION_B01001I],
         ),
-        denominator_codes=("B01001I_001E",),
     ),
-    ModelFeature(
-        source_table="B01001I",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="HISP35TO64",
+        display_name="Hispanic 35 to 64",
         description="35 to 64 years",
-        numerator_codes=(
-            "B01001I_011E",
-            "B01001I_012E",
-            "B01001I_013E",
-            "B01001I_026E",
-            "B01001I_027E",
-            "B01001I_028E",
+        variable_computer=FractionalShare(
+            numerator_codes=[
+                B01001I.MALE_35_TO_44_YEARS,
+                B01001I.MALE_45_TO_54_YEARS,
+                B01001I.MALE_55_TO_64_YEARS,
+                B01001I.FEMALE_35_TO_44_YEARS,
+                B01001I.FEMALE_45_TO_54_YEARS,
+                B01001I.FEMALE_55_TO_64_YEARS,
+            ],
+            denominator_codes=[Denominator.HISPANIC_POPULATION_B01001I],
         ),
-        denominator_codes=("B01001I_001E",),
     ),
-    ModelFeature(
-        source_table="B01001I",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="HISP65PLUS",
+        display_name="Hispanic 65 and over",
         description="65 years and over",
-        numerator_codes=(
-            "B01001I_014E",
-            "B01001I_015E",
-            "B01001I_016E",
-            "B01001I_029E",
-            "B01001I_030E",
-            "B01001I_031E",
+        variable_computer=FractionalShare(
+            numerator_codes=[
+                B01001I.MALE_65_TO_74_YEARS,
+                B01001I.MALE_75_TO_84_YEARS,
+                B01001I.MALE_85_YEARS_AND_OVER,
+                B01001I.FEMALE_65_TO_74_YEARS,
+                B01001I.FEMALE_75_TO_84_YEARS,
+                B01001I.FEMALE_85_YEARS_AND_OVER,
+            ],
+            denominator_codes=[Denominator.HISPANIC_POPULATION_B01001I],
         ),
-        denominator_codes=("B01001I_001E",),
     ),
     # Formerly a clean-stage derived feature: the finished HISPUNDER18 share
     # divided by (HISP18TO34 + HISP35TO64). All three are shares of the same
     # B01001I total, so the totals cancel and the ratio is a plain sum-over-sum
     # of that table's lines -- declared here like any other feature. It is a
     # RATIO (children per working-age adult, can exceed 1), not a 0-to-1 share.
-    ModelFeature(
-        source_table="B01001I",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="HISPYOUTHDEP",
+        display_name="Hispanic youth dependency ratio",
         description="Youth dependency ratio: Hispanic children (under 18) per "
         "Hispanic working-age adult (18 to 64)",
-        numerator_codes=(
-            "B01001I_003E",
-            "B01001I_004E",
-            "B01001I_005E",
-            "B01001I_006E",
-            "B01001I_018E",
-            "B01001I_019E",
-            "B01001I_020E",
-            "B01001I_021E",
-        ),
-        denominator_codes=(
-            "B01001I_007E",
-            "B01001I_008E",
-            "B01001I_009E",
-            "B01001I_010E",
-            "B01001I_011E",
-            "B01001I_012E",
-            "B01001I_013E",
-            "B01001I_022E",
-            "B01001I_023E",
-            "B01001I_024E",
-            "B01001I_025E",
-            "B01001I_026E",
-            "B01001I_027E",
-            "B01001I_028E",
+        variable_computer=FractionalShare(
+            numerator_codes=[
+                B01001I.MALE_UNDER_5_YEARS,
+                B01001I.MALE_5_TO_9_YEARS,
+                B01001I.MALE_10_TO_14_YEARS,
+                B01001I.MALE_15_TO_17_YEARS,
+                B01001I.FEMALE_UNDER_5_YEARS,
+                B01001I.FEMALE_5_TO_9_YEARS,
+                B01001I.FEMALE_10_TO_14_YEARS,
+                B01001I.FEMALE_15_TO_17_YEARS,
+            ],
+            denominator_codes=HISPANIC_WORKING_AGE,
         ),
     ),
-    ModelFeature(
-        source_table="B11001I",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="HISPHHMARRIED",
+        display_name="Hispanic married-couple households",
         description="Married-couple family households",
-        numerator_codes=("B11001I_003E",),
-        denominator_codes=("B11001I_001E",),
+        variable_computer=FractionalShare(
+            numerator_codes=[B11001I.FAMILY_HOUSEHOLDS_MARRIED_COUPLE_FAMILY],
+            denominator_codes=[Denominator.HISPANIC_HOUSEHOLDS_B11001I],
+        ),
     ),
-    ModelFeature(
-        source_table="B11001I",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="HISPHHMALENOSPOUSE",
+        display_name="Hispanic male householder, no spouse",
         description="Male householder, no spouse present",
-        numerator_codes=("B11001I_005E",),
-        denominator_codes=("B11001I_001E",),
+        variable_computer=FractionalShare(
+            numerator_codes=[
+                B11001I.FAMILY_HOUSEHOLDS_OTHER_FAMILY_MALE_HOUSEHOLDER_NO_SPOUSE_PRESENT
+            ],
+            denominator_codes=[Denominator.HISPANIC_HOUSEHOLDS_B11001I],
+        ),
     ),
-    ModelFeature(
-        source_table="B11001I",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="HISPHHFEMALENOSPOUSE",
+        display_name="Hispanic female householder, no spouse",
         description="Female householder, no spouse present",
-        numerator_codes=("B11001I_006E",),
-        denominator_codes=("B11001I_001E",),
+        variable_computer=FractionalShare(
+            numerator_codes=[
+                B11001I.FAMILY_HOUSEHOLDS_OTHER_FAMILY_FEMALE_HOUSEHOLDER_NO_SPOUSE_PRESENT
+            ],
+            denominator_codes=[Denominator.HISPANIC_HOUSEHOLDS_B11001I],
+        ),
     ),
-    ModelFeature(
-        source_table="B11001I",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="HISPHHALONE",
+        display_name="Hispanic householders living alone",
         description="Householder living alone",
-        numerator_codes=("B11001I_008E",),
-        denominator_codes=("B11001I_001E",),
+        variable_computer=FractionalShare(
+            numerator_codes=[B11001I.NONFAMILY_HOUSEHOLDS_HOUSEHOLDER_LIVING_ALONE],
+            denominator_codes=[Denominator.HISPANIC_HOUSEHOLDS_B11001I],
+        ),
     ),
-    ModelFeature(
-        source_table="B11001",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="HHMARRIEDALL",
+        display_name="Married-couple households, county-wide",
         description="Married-couple family households, county-wide",
-        numerator_codes=("B11001_003E",),
-        denominator_codes=("B11001_001E",),
+        variable_computer=FractionalShare(
+            numerator_codes=[B11001.FAMILY_HOUSEHOLDS_MARRIED_COUPLE_FAMILY],
+            denominator_codes=[Denominator.ALL_HOUSEHOLDS],
+        ),
     ),
 ]

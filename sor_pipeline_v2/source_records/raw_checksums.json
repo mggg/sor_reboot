@@ -1,0 +1,135 @@
+{
+  "files": {
+    "acs5_2015_prior_national_counties.csv": {
+      "published_checksum": null,
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "b0f47bc175ff95950c078eab3aeb4ac4952bd5fde6593698617bef9ca6b4441f",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "acs5_2020_national_counties.csv": {
+      "published_checksum": null,
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "139ee1d1b3b14b0d08a4d67ccfa2b869e0f5d1cdb80fa9ea221998d1563b248d",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "county_geometry_2020.parquet": {
+      "published_checksum": null,
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "118fa126ba547b9f2c311b190d06035db94c7ae6621c8e8b8eac1da0b9fb4d00",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "countypres_2000-2024.csv": {
+      "published_checksum": {
+        "algorithm": "md5",
+        "checksum_source_description": "Harvard Dataverse metadata API, doi:10.7910/DVN/VOQCHQ",
+        "checksum_source_type": "published",
+        "checksum_value": "bd6661282936006b4ef4f5ee71418f3e"
+      },
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "9299583148f5f8264baf50b5d929c260699c46d915909b13ea3c3850918946f8",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "dhc_national_counties.csv": {
+      "published_checksum": null,
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "be29284e446061aaa5cb4e4c3c59b9c16fdf78b201850373e82fc622ae09e3fa",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "pl_2020_hispanic_national_counties.csv": {
+      "published_checksum": null,
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "bd4eab2464dc1cb5de80d8b8ed657048c3c9fd493a693b69889eb1d855a8eca2",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "pl_2020_total_national_counties.csv": {
+      "published_checksum": null,
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "072c9c8be50d552f3992c259384f0169ff6120577e7f43c4b19022abfbd4abd4",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "tiger_2020_blocks_04.zip": {
+      "published_checksum": null,
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "206e94e94cf4b5ea30cf286f6569c4de697ba454659cac7252224e5c5d2c4703",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "tiger_2020_blocks_06.zip": {
+      "published_checksum": null,
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "154ffb979e4d1f8cae4ff2676cbba9030ef39a92d4620644bc8aa7f7be2ad85f",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "tiger_2020_blocks_41.zip": {
+      "published_checksum": null,
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "2a057daf7185823ff5d5195c82f91a984a5d68c2fa4e785ff90f2dc111bad283",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "tiger_2020_blocks_44.zip": {
+      "published_checksum": null,
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "79d10c9dfec1e3e0962e13d6295b53856db286a156d9937d3737adb0c542f35b",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "vest_2020_precincts_04.zip": {
+      "published_checksum": {
+        "algorithm": "md5",
+        "checksum_source_description": "Harvard Dataverse metadata API, doi:10.7910/DVN/K7760H v49.0",
+        "checksum_source_type": "published",
+        "checksum_value": "8647a286d04cb5dfbe5dd7c0e3078c29"
+      },
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "35b987a9c87b062c10e37c6665bf541fb00817f0ad4d0ba2869e833510c012e6",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "vest_2020_precincts_06.zip": {
+      "published_checksum": {
+        "algorithm": "md5",
+        "checksum_source_description": "Harvard Dataverse metadata API, doi:10.7910/DVN/K7760H v49.0",
+        "checksum_source_type": "published",
+        "checksum_value": "d59edec0d3103de469b119265cba943f"
+      },
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "68cf698d46c6d94b4624540e309fc630bc8dc46410e9427d4dc957ec6002a11c",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "vest_2020_precincts_41.zip": {
+      "published_checksum": {
+        "algorithm": "md5",
+        "checksum_source_description": "Harvard Dataverse metadata API, doi:10.7910/DVN/K7760H v49.0",
+        "checksum_source_type": "published",
+        "checksum_value": "cb92362f37e7dc765ca8e434009eda69"
+      },
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "f90c0dc759088c29dc6a4e958f441782e65659f8f697219896b3a33192bd73ef",
+        "checksum_source_type": "custom_self"
+      }
+    },
+    "vest_2020_precincts_44.zip": {
+      "published_checksum": {
+        "algorithm": "md5",
+        "checksum_source_description": "Harvard Dataverse metadata API, doi:10.7910/DVN/K7760H v49.0",
+        "checksum_source_type": "published",
+        "checksum_value": "ac907b652c9178518ee574d76efe1b54"
+      },
+      "self_recorded_checksum": {
+        "checksum_sha_256_value": "ddecbf262ea476c60751067915c80c1fad26c71455ae5b926d6177f3144bbbad",
+        "checksum_source_type": "custom_self"
+      }
+    }
+  },
+  "written": "2026-10-20T13:50:37-04:00"
+}

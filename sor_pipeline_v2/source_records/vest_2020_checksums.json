@@ -1,0 +1,463 @@
+{
+  "archives": {
+    "01": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_01.zip",
+      "checksum_value": "fd557c46a74d31554ed271ea8475c4fe",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "al_2020.zip",
+      "recorded": "2026-10-20T13:52:36-04:00"
+    },
+    "02": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_02.zip",
+      "checksum_value": "ec59a3ed499aa2e2a26a2ab38a2af9e9",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ak_2020.zip",
+      "recorded": "2026-10-20T13:53:44-04:00"
+    },
+    "04": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_04.zip",
+      "checksum_value": "8647a286d04cb5dfbe5dd7c0e3078c29",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "az_2020.zip",
+      "recorded": "2026-10-20T13:24:02-04:00"
+    },
+    "05": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_05.zip",
+      "checksum_value": "4372b9c7baaf3d2d37d8b58b5b8738fa",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ar_2020.zip",
+      "recorded": "2026-10-20T13:54:10-04:00"
+    },
+    "06": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_06.zip",
+      "checksum_value": "d59edec0d3103de469b119265cba943f",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ca_2020.zip",
+      "recorded": "2026-10-18T20:32:07-04:00"
+    },
+    "08": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_08.zip",
+      "checksum_value": "adcfd84e5b6efab0bf1c4df911c75b90",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "co_2020.zip",
+      "recorded": "2026-10-20T13:55:18-04:00"
+    },
+    "09": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_09.zip",
+      "checksum_value": "1c7722b7475992d88136f3cb952dbe7c",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ct_2020.zip",
+      "recorded": "2026-10-20T13:56:10-04:00"
+    },
+    "10": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_10.zip",
+      "checksum_value": "a072b5ea5a58f90856bedb48f14e3fdb",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "de_2020.zip",
+      "recorded": "2026-10-20T13:56:25-04:00"
+    },
+    "11": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_11.zip",
+      "checksum_value": "16da8ce7ba9271636bb0e47ad0daf54c",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "dc_2020.zip",
+      "recorded": "2026-10-20T13:56:32-04:00"
+    },
+    "12": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_12.zip",
+      "checksum_value": "1e85b9eecb4a1ff9cb8300504c3a927b",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "fl_2020.zip",
+      "recorded": "2026-10-20T13:56:36-04:00"
+    },
+    "13": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_13.zip",
+      "checksum_value": "2ffb65ffe97d811a80093878be0ecc60",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ga_2020.zip",
+      "recorded": "2026-10-20T13:58:38-04:00"
+    },
+    "15": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_15.zip",
+      "checksum_value": "2208eed953ecdebc79a6db97cbd1529c",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "hi_2020.zip",
+      "recorded": "2026-10-20T13:59:57-04:00"
+    },
+    "16": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_16.zip",
+      "checksum_value": "0ca9f3bb8a0ecd160bfb6ab3bbf8cac7",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "id_2020.zip",
+      "recorded": "2026-10-20T14:00:03-04:00"
+    },
+    "17": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_17.zip",
+      "checksum_value": "403c5b9625a3a0416e7d395a9bda50f8",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "il_2020.zip",
+      "recorded": "2026-10-20T14:00:42-04:00"
+    },
+    "18": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_18.zip",
+      "checksum_value": "07a3092673cf2c44b7934a9b1e437a87",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "in_2020.zip",
+      "recorded": "2026-10-20T14:02:20-04:00"
+    },
+    "19": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_19.zip",
+      "checksum_value": "500252facae6107b93128406ebf5177b",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ia_2020.zip",
+      "recorded": "2026-10-20T14:03:17-04:00"
+    },
+    "20": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_20.zip",
+      "checksum_value": "f85426ba40c4e41e34c14bce3dcd6d8d",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ks_2020.zip",
+      "recorded": "2026-10-20T14:04:00-04:00"
+    },
+    "21": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_21.zip",
+      "checksum_value": "671ce5134964bcf4ec5a0da7fb1a61a9",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ky_2020.zip",
+      "recorded": "2026-10-20T14:04:49-04:00"
+    },
+    "22": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_22.zip",
+      "checksum_value": "3211fb644c0ee86481282ccf042b4cab",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "la_2020.zip",
+      "recorded": "2026-10-20T14:05:41-04:00"
+    },
+    "23": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_23.zip",
+      "checksum_value": "519d2c1807f2ecc58cd6c93a90f4fb03",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "me_2020.zip",
+      "recorded": "2026-10-20T14:06:33-04:00"
+    },
+    "24": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_24.zip",
+      "checksum_value": "87d4f88d6c8241ee5af7a520f4166dbb",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "md_2020.zip",
+      "recorded": "2026-10-20T14:06:54-04:00"
+    },
+    "25": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_25.zip",
+      "checksum_value": "5d4b4edde83c8b5b28d9508841aec149",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ma_2020.zip",
+      "recorded": "2026-10-20T14:07:34-04:00"
+    },
+    "26": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_26.zip",
+      "checksum_value": "f0f7b116d9c5234148ae644653dc1365",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "mi_2020.zip",
+      "recorded": "2026-10-20T14:08:06-04:00"
+    },
+    "27": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_27.zip",
+      "checksum_value": "fee8f5de153c893f0114629687befb76",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "mn_2020.zip",
+      "recorded": "2026-10-20T14:09:09-04:00"
+    },
+    "28": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_28.zip",
+      "checksum_value": "75b4d3c2fe443ee3ec5115fa383e1e7e",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ms_2020.zip",
+      "recorded": "2026-10-20T14:10:03-04:00"
+    },
+    "29": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_29.zip",
+      "checksum_value": "a34aa4e9a57e03fe79bcfb3e5156436f",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "mo_2020.zip",
+      "recorded": "2026-10-20T14:10:49-04:00"
+    },
+    "30": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_30.zip",
+      "checksum_value": "5df8d46f6979ca496fd96d302d68ff03",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "mt_2020.zip",
+      "recorded": "2026-10-20T14:12:04-04:00"
+    },
+    "31": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_31.zip",
+      "checksum_value": "3f82c7851e4ec2e54c76c489c3691dbf",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ne_2020.zip",
+      "recorded": "2026-10-20T14:12:42-04:00"
+    },
+    "32": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_32.zip",
+      "checksum_value": "e9dc65766fac38c46132da4230292f2e",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "nv_2020.zip",
+      "recorded": "2026-10-20T14:13:13-04:00"
+    },
+    "33": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_33.zip",
+      "checksum_value": "dd4f7eecf060b3417b3656225137e830",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "nh_2020.zip",
+      "recorded": "2026-10-20T14:13:38-04:00"
+    },
+    "34": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_34.zip",
+      "checksum_value": "359c6d8093b06bdb6133aeac18cbba13",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "nj_2020.zip",
+      "recorded": "2026-10-20T14:13:48-04:00"
+    },
+    "35": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_35.zip",
+      "checksum_value": "0e1952e85fc86e29ce4aec30222bf1f1",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "nm_2020.zip",
+      "recorded": "2026-10-20T14:14:34-04:00"
+    },
+    "36": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_36.zip",
+      "checksum_value": "ea6ec0f5b3e6a469cb9f91a0a944cd8d",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ny_2020.zip",
+      "recorded": "2026-10-20T14:15:20-04:00"
+    },
+    "37": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_37.zip",
+      "checksum_value": "d5bcc45677059ed93cf52b9e988fb99a",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "nc_2020.zip",
+      "recorded": "2026-10-20T14:16:58-04:00"
+    },
+    "38": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_38.zip",
+      "checksum_value": "bc1534bc63cbc67c4b4cf1874bd5f5a9",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "nd_2020.zip",
+      "recorded": "2026-10-20T14:18:20-04:00"
+    },
+    "39": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_39.zip",
+      "checksum_value": "57ec1f1ed9bcd6db593aaad1635a1514",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "oh_2020.zip",
+      "recorded": "2026-10-20T14:18:44-04:00"
+    },
+    "40": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_40.zip",
+      "checksum_value": "937eaa6ccabeecf1eec2e277489c7f45",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ok_2020.zip",
+      "recorded": "2026-10-20T14:20:05-04:00"
+    },
+    "41": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_41.zip",
+      "checksum_value": "cb92362f37e7dc765ca8e434009eda69",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "or_2020.zip",
+      "recorded": "2026-10-14T13:10:43-04:00"
+    },
+    "42": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_42.zip",
+      "checksum_value": "3b89cd9518a1b44db8b4f6bf5f461efc",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "pa_2020.zip",
+      "recorded": "2026-10-20T14:21:52-04:00"
+    },
+    "44": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_44.zip",
+      "checksum_value": "ac907b652c9178518ee574d76efe1b54",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ri_2020.zip",
+      "recorded": "2026-10-13T15:26:42-04:00"
+    },
+    "45": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_45.zip",
+      "checksum_value": "01e8d67d1d17a75711a5b7fc4cb7422f",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "sc_2020.zip",
+      "recorded": "2026-10-20T14:23:43-04:00"
+    },
+    "46": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_46.zip",
+      "checksum_value": "0c9eb591cce295792310a22482ffdc4a",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "sd_2020.zip",
+      "recorded": "2026-10-20T14:24:31-04:00"
+    },
+    "47": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_47.zip",
+      "checksum_value": "1032fde0d21380935ea38a49f23a1c60",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "tn_2020.zip",
+      "recorded": "2026-10-20T14:24:56-04:00"
+    },
+    "48": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_48.zip",
+      "checksum_value": "18060992ab990c7d147dfb0ad89258d2",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "tx_2020.zip",
+      "recorded": "2026-10-20T14:26:13-04:00"
+    },
+    "49": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_49.zip",
+      "checksum_value": "6d3c2fe1ca63bfb837774d29fc68e021",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "ut_2020.zip",
+      "recorded": "2026-10-20T14:29:48-04:00"
+    },
+    "50": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_50.zip",
+      "checksum_value": "dd030dab84b95d47c4837c7a71c39029",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "vt_2020.zip",
+      "recorded": "2026-10-20T14:30:21-04:00"
+    },
+    "51": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_51.zip",
+      "checksum_value": "2a14b90429d9df22afa1d23688b3d05d",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "va_2020.zip",
+      "recorded": "2026-10-20T14:30:30-04:00"
+    },
+    "53": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_53.zip",
+      "checksum_value": "603b72df402d15fc2f08c482ab35ca2b",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "wa_2020.zip",
+      "recorded": "2026-10-20T14:31:44-04:00"
+    },
+    "54": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_54.zip",
+      "checksum_value": "500620f12313c8187e9a5dd87c1c4cb7",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "wv_2020.zip",
+      "recorded": "2026-10-20T14:32:50-04:00"
+    },
+    "55": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_55.zip",
+      "checksum_value": "15c3806a17455fc280c190fb85b747e7",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "wi_2020.zip",
+      "recorded": "2026-10-20T14:33:26-04:00"
+    },
+    "56": {
+      "algorithm": "md5",
+      "cache_filename": "vest_2020_precincts_56.zip",
+      "checksum_value": "70ee4bb2f6b7509b9b8174dbddd912f2",
+      "dataset_version": "49.0",
+      "doi": "doi:10.7910/DVN/K7760H",
+      "published_filename": "wy_2020.zip",
+      "recorded": "2026-10-20T14:34:31-04:00"
+    }
+  }
+}

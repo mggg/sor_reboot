@@ -1,8 +1,11 @@
 """The ACS feature declarations, grouped by ACS section."""
 
-from build_dataset.ingest.feature_utils import ModelFeature
+from build_dataset.ingest.declarations.feature_utils import ModelVariable
 
 from .citizenship_feats import CITIZENSHIP_FEATURES
+from .citizenship_feats import (
+    VOTINGAGEPOP as VOTINGAGEPOP,
+)
 from .education_feats import EDUCATION_FEATURES
 from .employment_feats import EMPLOYMENT_FEATURES
 from .household_feats import HOUSEHOLD_FEATURES
@@ -18,7 +21,7 @@ from .mobility_feats import (
 from .national_origin_feats import NATIONAL_ORIGIN_FEATURES
 from .racial_ethnic_feats import RACIAL_ETHNIC_FEATURES
 
-ACS_FEATURES: list[ModelFeature] = [
+ACS_FEATURES: list[ModelVariable] = [
     *CITIZENSHIP_FEATURES,
     *EDUCATION_FEATURES,
     *EMPLOYMENT_FEATURES,

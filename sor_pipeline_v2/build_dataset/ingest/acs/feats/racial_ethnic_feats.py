@@ -1,55 +1,76 @@
 """Racial and Ethnic Composition features for ingestion from the Census Bureau's API."""
 
-from build_dataset.ingest.feature_utils import ModelFeature
+from build_dataset.ingest.declarations.census_codes import B03002
+from build_dataset.ingest.declarations.denominators import Denominator
+from build_dataset.ingest.declarations.feature_utils import (
+    FractionalShare,
+    ModelVariable,
+)
 
-RACIAL_ETHNIC_FEATURES: list[ModelFeature] = [
-    ModelFeature(
-        source_table="B03002",
-        table_code=None,
+RACIAL_ETHNIC_FEATURES: list[ModelVariable] = [
+    ModelVariable(
+        source="ACS",
         var_name="NONHISPANICWHITESHARE",
+        display_name="Non-Hispanic White share",
         description="Non-Hispanic White alone",
-        numerator_codes=("B03002_003E",),
-        denominator_codes=("B03002_001E",),
+        variable_computer=FractionalShare(
+            numerator_codes=[B03002.NOT_HISPANIC_OR_LATINO_WHITE_ALONE],
+            denominator_codes=[Denominator.TOTAL_POPULATION_B03002],
+        ),
     ),
-    ModelFeature(
-        source_table="B03002",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="NONHISPANICBLACKSHARE",
+        display_name="Non-Hispanic Black share",
         description="Non-Hispanic Black or African American alone",
-        numerator_codes=("B03002_004E",),
-        denominator_codes=("B03002_001E",),
+        variable_computer=FractionalShare(
+            numerator_codes=[
+                B03002.NOT_HISPANIC_OR_LATINO_BLACK_OR_AFRICAN_AMERICAN_ALONE
+            ],
+            denominator_codes=[Denominator.TOTAL_POPULATION_B03002],
+        ),
     ),
-    ModelFeature(
-        source_table="B03002",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="NONHISPANICAIANSHARE",
+        display_name="Non-Hispanic AIAN share",
         description="Non-Hispanic American Indian and Alaska Native alone",
-        numerator_codes=("B03002_005E",),
-        denominator_codes=("B03002_001E",),
+        variable_computer=FractionalShare(
+            numerator_codes=[
+                B03002.NOT_HISPANIC_OR_LATINO_AMERICAN_INDIAN_AND_ALASKA_NATIVE_ALONE
+            ],
+            denominator_codes=[Denominator.TOTAL_POPULATION_B03002],
+        ),
     ),
-    ModelFeature(
-        source_table="B03002",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="NONHISPANICASIANSHARE",
+        display_name="Non-Hispanic Asian share",
         description="Non-Hispanic Asian alone",
-        numerator_codes=("B03002_006E",),
-        denominator_codes=("B03002_001E",),
+        variable_computer=FractionalShare(
+            numerator_codes=[B03002.NOT_HISPANIC_OR_LATINO_ASIAN_ALONE],
+            denominator_codes=[Denominator.TOTAL_POPULATION_B03002],
+        ),
     ),
-    ModelFeature(
-        source_table="B03002",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="NONHISPANICMULTISHARE",
+        display_name="Non-Hispanic multiracial share",
         description="Non-Hispanic, two or more races -- the county's non-Hispanic propensity for "
         "multiracial reporting",
-        numerator_codes=("B03002_009E",),
-        denominator_codes=("B03002_001E",),
+        variable_computer=FractionalShare(
+            numerator_codes=[B03002.NOT_HISPANIC_OR_LATINO_TWO_OR_MORE_RACES],
+            denominator_codes=[Denominator.TOTAL_POPULATION_B03002],
+        ),
     ),
-    ModelFeature(
-        source_table="B03002",
-        table_code=None,
+    ModelVariable(
+        source="ACS",
         var_name="HISPSHARE",
+        display_name="Hispanic share",
         description="Hispanic or Latino, any race",
-        numerator_codes=("B03002_012E",),
-        denominator_codes=("B03002_001E",),
+        variable_computer=FractionalShare(
+            numerator_codes=[B03002.HISPANIC_OR_LATINO],
+            denominator_codes=[Denominator.TOTAL_POPULATION_B03002],
+        ),
     ),
 ]

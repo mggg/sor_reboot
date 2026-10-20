@@ -1,15 +1,24 @@
 """DHC features for ingestion from the Census Bureau's API."""
 
-from build_dataset.ingest.feature_utils import ModelFeature
+from build_dataset.ingest.declarations.census_codes import DHC_P2
+from build_dataset.ingest.declarations.denominators import Denominator
+from build_dataset.ingest.declarations.feature_utils import (
+    FractionalShare,
+    ModelVariable,
+)
 
-DHC_FEATURES: list[ModelFeature] = [
-    ModelFeature(
-        source_table="DHC_P2",
-        table_code=None,
+DHC_FEATURES: list[ModelVariable] = [
+    ModelVariable(
+        source="DHC",
         var_name="URBANSHARE",
-        description="Share of the county's total population living in an urban "
-        "area (2020 Census urban/rural classification)",
-        numerator_codes=("P2_002N",),
-        denominator_codes=("P2_001N",),
+        display_name="Urban population share",
+        description=(
+            "Share of the county's total population living in an urban "
+            "area (2020 Census urban/rural classification)"
+        ),
+        variable_computer=FractionalShare(
+            numerator_codes=[DHC_P2.URBAN],
+            denominator_codes=[Denominator.TOTAL_POPULATION_DHC],
+        ),
     ),
 ]

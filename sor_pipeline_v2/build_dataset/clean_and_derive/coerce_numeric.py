@@ -13,7 +13,20 @@ STRING_COLS = ("GEOID", "NAME")
 
 
 def coerce_numeric(df: pd.DataFrame) -> pd.DataFrame:
-    """Coerce every non-identifier column to numeric."""
+    """Coerce every non-identifier column to numeric.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The assembled ingest frame, every value a string as the sources
+        delivered it.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A copy with every column except STRING_COLS (GEOID, NAME) numeric;
+        any non-numeric string becomes NaN.
+    """
     df = df.copy()
     value_cols = [c for c in df.columns if c not in STRING_COLS]
     df[value_cols] = df[value_cols].apply(pd.to_numeric, errors="coerce")

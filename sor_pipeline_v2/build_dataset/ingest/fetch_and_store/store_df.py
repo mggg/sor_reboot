@@ -1,0 +1,60 @@
+"""Persist and reload pipeline artifacts across the data/ tree.
+
+Thin helpers over parquet/json so each stage reads from and writes to a known
+location (data/raw -> data/interim -> data/processed) instead of dumping files
+into the working directory the way the notebooks do.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import geopandas as gpd
+import pandas as pd
+
+
+def save_df_to_parquet(df: pd.DataFrame | gpd.GeoDataFrame, path: Path):
+    """Write a (Geo)DataFrame to parquet, creating parent dirs as needed.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame or geopandas.GeoDataFrame
+        The frame to persist.
+    path : Path
+        Destination parquet path; parent directories are created,
+        and an existing file is overwritten.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(path)
+
+
+def load_df_from_parquet(path: Path) -> pd.DataFrame | gpd.GeoDataFrame:
+    """Read a (Geo)DataFrame back from parquet.
+
+    Tries GeoParquet first so geometry typing + CRS survive the round-trip (pandas
+    alone would hand geometry back as raw WKB bytes). Falls back to a plain
+    DataFrame for tables that were written without any geometry column.
+
+    Parameters
+    ----------
+    path : Path
+        The parquet file to read.
+
+    Returns
+    -------
+    pandas.DataFrame or geopandas.GeoDataFrame
+        A GeoDataFrame when the file carries geometry, else a DataFrame.
+
+    Raises
+    ------
+    NotImplementedError
+        If the path's suffix is not ".parquet".
+    FileNotFoundError
+        If the file does not exist.
+    """
+    if path.suffix != ".parquet":
+        raise NotImplementedError("Only parquet files are supported.")
+    try:
+        return gpd.read_parquet(path)
+    except ValueError:
+        return pd.read_parquet(path)

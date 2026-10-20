@@ -1,8 +1,8 @@
-"""Step 1 of cleaning and transforming: PL renames, race composites, the four targets, and the weight.
+"""Step 1 of cleaning and transforming: PL counts, race composites, the targets, and the weight.
 
-Hispanic-of-race counts are derived by subtracting the non-Hispanic portion of
-each race from the all-population total (the PL file publishes no direct
-Hispanic-by-race lines for the combinations the study needs).
+Every arithmetic column of this step is a declared ModelVariable computed by
+its computer; the one hand-written block is the dominant-race classification
+(`add_hisp_dominant_race_choice`), whose argmax logic fits no computer.
 """
 
 from __future__ import annotations
@@ -10,93 +10,131 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from build_dataset.ingest.pl.nonhispanic_white_total_feats import (
+from build_dataset.ingest.pl.feats.hisp_pop_feats import (
+    HISPANIC,
+    NONHISPANICSORALONE,
+    NONHISPANICWHITEALONE,
+    NONHISPANICWHITESOR,
+    PL_HISP_FEATURES,
+)
+from build_dataset.ingest.pl.feats.hisp_race_targets import (
+    HISP_RACE_COUNTS,
+    HISP_RACE_SHARES,
+    HSOR,
+    HWHITE,
+    HWHITESOR,
+)
+from build_dataset.ingest.pl.feats.nonhispanic_white_total_feats import (
+    NONHISPANICWHITEALONEORCOMBO,
     PL_NONHISPANIC_WHITE_ALONE_OR_COMBINATION,
 )
-from build_dataset.ingest.pl.white_total_feats import PL_WHITE_ALONE_OR_COMBINATION
+from build_dataset.ingest.pl.feats.total_pop_feats import (
+    PL_FEATURES,
+    SORALONE,
+    TOTALPOP,
+    WHITEALONE,
+    WHITESOR,
+)
+from build_dataset.ingest.pl.feats.white_total_feats import (
+    PL_WHITE_ALONE_OR_COMBINATION,
+    WHITEALONEORCOMBO,
+)
 
-RENAME_DICT: dict[str, str] = {
-    "P1_001N": "TOTALPOP",
-    "P1_003N": "WHITEALONE",
-    "P1_008N": "SORALONE",
-    "P1_015N": "WHITESOR",
-    "P2_002N": "HISPANIC",
-    "P2_005N": "NONHISPANICWHITEALONE",
-    "P2_010N": "NONHISPANICSORALONE",
-    "P2_017N": "NONHISPANICWHITESOR",
-}
-
-# --- The columns this step creates (the manifest imports these) --------------
-# Named counts: RENAME_DICT's values plus the two summed composites.
 PL_COUNT_COLUMNS: tuple[str, ...] = (
-    *RENAME_DICT.values(),
-    PL_WHITE_ALONE_OR_COMBINATION[0].var_name,
-    PL_NONHISPANIC_WHITE_ALONE_OR_COMBINATION[0].var_name,
+    TOTALPOP,
+    WHITEALONE,
+    SORALONE,
+    WHITESOR,
+    HISPANIC,
+    NONHISPANICWHITEALONE,
+    NONHISPANICSORALONE,
+    NONHISPANICWHITESOR,
+    WHITEALONEORCOMBO,
+    NONHISPANICWHITEALONEORCOMBO,
 )
 
-# Hispanic-of-race counts and their complements (`add_hispanic_race_counts`).
-HISPANIC_RACE_COUNT_COLUMNS: tuple[str, ...] = (
-    "HSOR",
-    "H_N_SOR",
-    "HWHITESOR",
-    "H_N_WHITESOR",
-    "HWHITE",
-    "H_N_WHITE",
-    "HWHITEACOMBO",
-    "H_N_WHITEACOMBO",
+HISPANIC_RACE_COUNT_COLUMNS: tuple[str, ...] = tuple(
+    variable.var_name for variable in HISP_RACE_COUNTS
 )
 
-# What the two arms predict, most-reported race choice first: both share
-# families (denominator in the name), then the dominant-race classification
-# targets.
+DOMINANT_RACE_INDICATOR = "largest"
+MOST_SOR = "Most_SOR"
+MOST_WHITE_SOR = "Most_White_SOR"
+MOST_WHITE = "Most_White"
+CLASSIFICATION_TARGETS: tuple[str, ...] = (
+    DOMINANT_RACE_INDICATOR,
+    MOST_SOR,
+    MOST_WHITE_SOR,
+    MOST_WHITE,
+)
+
+
 TARGETS: tuple[str, ...] = (
-    "Hisp_Pct_of_Total_Pop",
-    "Hisp_SOR_Alone_Pct_of_Total_Pop",
-    "Hisp_White_SOR_Pct_of_Total_Pop",
-    "Hisp_White_Alone_Pct_of_Total_Pop",
-    "Hisp_White_Pct_of_Total_Pop",
-    "Hisp_SOR_Alone_Pct_of_Hisp_Pop",
-    "Hisp_White_SOR_Pct_of_Hisp_Pop",
-    "Hisp_White_Alone_Pct_of_Hisp_Pop",
-    "Hisp_White_Pct_of_Hisp_Pop",
-    "largest",
-    "Most_SOR",
-    "Most_White_SOR",
-    "Most_White",
+    *(variable.var_name for variable in HISP_RACE_SHARES),
+    *CLASSIFICATION_TARGETS,
 )
 
 
-def add_pl_features_and_rename(df: pd.DataFrame) -> pd.DataFrame:
-    """Composites and renames: raw PL codes -> named counts. Calculates the two white-alone-or-in-combination totals."""
+def add_pl_counts(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute every declared PL fetch-list variable from its variable_computer.
+
+    The raw code columns stay in the frame; the manifest's processed-column
+    selection is what drops them at the end of the build.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The merged frame after numeric coercion, containing every raw PL
+        code column (P1_*, P2_*).
+
+    Returns
+    -------
+    pandas.DataFrame
+        A copy with one new column per declared PL variable.
+
+    Raises
+    ------
+    KeyError
+        If a raw PL code column a computer reads is absent -- the step ran
+        before the PL fetch was merged.
+    """
     df = df.copy()
-    # Each aggregate list holds ONE feature whose numerator_codes are the
-    # 32 lines to sum; the dataframe is indexed by those codes, not the
-    # feature objects.
-    white_combo = PL_WHITE_ALONE_OR_COMBINATION[0]
-    nh_white_combo = PL_NONHISPANIC_WHITE_ALONE_OR_COMBINATION[0]
-    df[white_combo.var_name] = df[list(white_combo.numerator_codes)].sum(axis=1)
-    df[nh_white_combo.var_name] = df[list(nh_white_combo.numerator_codes)].sum(axis=1)
-    return df.rename(columns=RENAME_DICT)
+    for variable in (
+        *PL_FEATURES,
+        *PL_HISP_FEATURES,
+        *PL_WHITE_ALONE_OR_COMBINATION,
+        *PL_NONHISPANIC_WHITE_ALONE_OR_COMBINATION,
+    ):
+        df[variable.var_name] = variable.variable_computer(df)
+    return df
 
 
-def add_hisp_race_percentages(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate Hispanic-of-race shares of total population and of Hispanic population."""
+def add_hisp_race_targets(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute the declared Hispanic-of-race counts, then the share targets.
+
+    List order is load-bearing: complements read the counts declared before
+    them, and every share reads a count, so HISP_RACE_COUNTS runs first.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The frame after `add_pl_counts`, containing every PL count column
+        the target computers read (TOTALPOP, HISPANIC, the race counts).
+
+    Returns
+    -------
+    pandas.DataFrame
+        A copy with the count and share target columns added.
+
+    Raises
+    ------
+    KeyError
+        If a count column a computer reads is absent -- the step ran
+        before `add_pl_counts`.
+    """
     df = df.copy()
-
-    total_pop = df["TOTALPOP"].replace(0, np.nan)
-    hisp_pop = df["HISPANIC"].replace(0, np.nan)
-
-    df["Hisp_Pct_of_Total_Pop"] = df["HISPANIC"] / total_pop
-
-    df["Hisp_SOR_Alone_Pct_of_Total_Pop"] = df["HSOR"] / total_pop
-    df["Hisp_White_Alone_Pct_of_Total_Pop"] = df["HWHITE"] / total_pop
-    df["Hisp_White_SOR_Pct_of_Total_Pop"] = df["HWHITESOR"] / total_pop
-    df["Hisp_White_Pct_of_Total_Pop"] = df["HWHITEACOMBO"] / total_pop
-
-    df["Hisp_SOR_Alone_Pct_of_Hisp_Pop"] = df["HSOR"] / hisp_pop
-    df["Hisp_White_Alone_Pct_of_Hisp_Pop"] = df["HWHITE"] / hisp_pop
-    df["Hisp_White_SOR_Pct_of_Hisp_Pop"] = df["HWHITESOR"] / hisp_pop
-    df["Hisp_White_Pct_of_Hisp_Pop"] = df["HWHITEACOMBO"] / hisp_pop
+    for variable in (*HISP_RACE_COUNTS, *HISP_RACE_SHARES):
+        df[variable.var_name] = variable.variable_computer(df)
     return df
 
 
@@ -105,48 +143,67 @@ def add_hisp_dominant_race_choice(df: pd.DataFrame) -> pd.DataFrame:
 
     Ranks the raw counts: same ordering as ranking either share family (the
     denominator is common), with no NaN comparisons where a denominator is 0.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The frame after `add_hisp_race_targets`, containing HSOR, HWHITE,
+        and HWHITESOR. Modified in place and returned.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The frame with the four classification columns
+        (CLASSIFICATION_TARGETS) added.
+
+    Raises
+    ------
+    KeyError
+        If a Hispanic-of-race count column is absent -- the step ran
+        before `add_hisp_race_targets`.
     """
     conditions = [
-        (df["HSOR"] >= df["HWHITE"]) & (df["HSOR"] >= df["HWHITESOR"]),
-        (df["HWHITE"] >= df["HSOR"]) & (df["HWHITE"] >= df["HWHITESOR"]),
+        (df[HSOR] >= df[HWHITE]) & (df[HSOR] >= df[HWHITESOR]),
+        (df[HWHITE] >= df[HSOR]) & (df[HWHITE] >= df[HWHITESOR]),
     ]
-    df["largest"] = np.select(conditions, [1, 3], default=2)
-    df["Most_SOR"] = (df["largest"] == 1).astype(int)
-    df["Most_White_SOR"] = (df["largest"] == 2).astype(int)
-    df["Most_White"] = (df["largest"] == 3).astype(int)
-    return df
-
-
-def add_hispanic_race_counts(df: pd.DataFrame) -> pd.DataFrame:
-    """For each race choice X: Hispanic-of-X (H*) and its complement (H_N_*).
-
-    Example:
-        `SORALONE` = total SOR population,
-        `NONHISPANICSORALONE` = non-Hispanic SOR population,
-        `HSOR` = SORALONE - NONHISPANICSORALONE = Hispanic SOR population,
-    """
-    df["HSOR"] = df["SORALONE"] - df["NONHISPANICSORALONE"]
-    df["H_N_SOR"] = df["HISPANIC"] - df["HSOR"]
-    df["HWHITESOR"] = df["WHITESOR"] - df["NONHISPANICWHITESOR"]
-    df["H_N_WHITESOR"] = df["HISPANIC"] - df["HWHITESOR"]
-    df["HWHITE"] = df["WHITEALONE"] - df["NONHISPANICWHITEALONE"]
-    df["H_N_WHITE"] = df["HISPANIC"] - df["HWHITE"]
-    df["HWHITEACOMBO"] = df["WHITEALONEORCOMBO"] - df["NONHISPANICWHITEALONEORCOMBO"]
-    df["H_N_WHITEACOMBO"] = df["HISPANIC"] - df["HWHITEACOMBO"]
+    df[DOMINANT_RACE_INDICATOR] = np.select(conditions, [1, 3], default=2)
+    df[MOST_SOR] = (df[DOMINANT_RACE_INDICATOR] == 1).astype(int)
+    df[MOST_WHITE_SOR] = (df[DOMINANT_RACE_INDICATOR] == 2).astype(int)
+    df[MOST_WHITE] = (df[DOMINANT_RACE_INDICATOR] == 3).astype(int)
     return df
 
 
 def clean_and_transform_pl_data(df: pd.DataFrame) -> pd.DataFrame:
-    """The full PL step: composites/renames, counts, shares, dominant race."""
-    df = add_pl_features_and_rename(df)
-    df = add_hispanic_race_counts(df)
-    df = add_hisp_race_percentages(df)
+    """The full PL step: counts, Hispanic-of-race counts, shares, dominant race.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The merged frame after numeric coercion, containing every raw PL
+        code column.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The frame with every PL-declared column added: the count
+        composites, the Hispanic-of-race counts, both share families, and
+        the classification targets.
+
+    Raises
+    ------
+    KeyError
+        If a raw PL code column is absent (fetch not merged), or -- from
+        the exit check -- if a column this step declares was not actually
+        created, meaning the declarations and the code have drifted.
+    """
+    df = add_pl_counts(df)
+    df = add_hisp_race_targets(df)
     df = add_hisp_dominant_race_choice(df)
-    # The declarations above and the code here cannot drift silently: every
-    # declared column must actually have been created.
+
     missing = {*PL_COUNT_COLUMNS, *HISPANIC_RACE_COUNT_COLUMNS, *TARGETS} - set(
         df.columns
     )
     if missing:
         raise KeyError(f"declared PL columns not created: {sorted(missing)}")
+
     return df
