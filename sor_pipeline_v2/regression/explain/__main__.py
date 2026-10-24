@@ -11,14 +11,27 @@ prediction the model would make about a county it has not seen. The R² in
 the beeswarm title is that same cross-validated fit. Accuracy claims still
 belong to the scored runs.
 
+Either level: `--level national_tracts` reads the tract build instead,
+`--states 06` the California one. The prose above says "county" because
+counties were the first thing this ran on; read it as "unit". A tract run
+drops the three predictors tracts do not have (TRACT_ABSENT_VARIABLES),
+exactly as the scored runs do, and `--counties` then takes 11-digit tract
+GEOIDs; left out, it draws three tracts at random from the sample, off the
+run's own seed. Random rather than the largest: there is no tract everyone
+already knows, and ranking by Hispanic population would show the same
+handful of Los Angeles tracts on every run. Each waterfall is titled with
+the tract's county, so a drawn tract can still be placed.
+
 Run: `python -m regression.explain [--model rf|lgbm] [--target T]
-[--top-percent X | --bottom-percent X] [--counties GEOID ...] [--seed N]`.
+[--top-percent X | --bottom-percent X] [--counties GEOID ...] [--seed N]
+[--level L] [--states FIPS ...]`.
 """
 
 from __future__ import annotations
 
 import argparse
 from datetime import UTC, datetime
+from typing import get_args
 
 import numpy as np
 import pandas as pd
@@ -27,15 +40,25 @@ from sklearn.metrics import r2_score
 from sklearn.model_selection import KFold
 
 from build_dataset.feature_manifest import SlugGroupName, group_features
-from build_dataset.ingest.geometry.geometry_api import load_county_geometry
-from regression.shared.fit import fit_weighted, make_regressor
+from regression.shared.fit import MODEL_DISPLAY_NAMES, fit_weighted, make_regressor
 from regression.shared.prepare_df import describe_sample, prepare_df_for_regression
-from regression.shared.run_config import REGRESSION_TARGETS
-from regression.shared.shap_figures import county_label, plot_beeswarm, plot_waterfall
+from regression.shared.run_config import (
+    REGRESSION_TARGETS,
+    absent_variables,
+    scope_suffix,
+)
+from regression.shared.shap_figures import (
+    feature_display_names,
+    plot_beeswarm,
+    plot_waterfall,
+)
+from regression.shared.unit_labels import load_unit_names, unit_label
 from utils import config
 
 # The three largest Hispanic populations.
 DEFAULT_COUNTIES = ("06037", "12086", "48201")
+# How many units a run draws waterfalls for when none were named.
+DEFAULT_UNITS_EXPLAINED = 3
 
 
 DEFAULT_FOLDS = 5
@@ -46,9 +69,11 @@ def run_single_seed_shap(
     target: str = next(iter(REGRESSION_TARGETS)),
     top_percent: float | None = None,
     bottom_percent: float | None = None,
-    counties: tuple[str, ...] = DEFAULT_COUNTIES,
+    counties: tuple[str, ...] | None = None,
     seed: int = 1,
     exclude_groups: list[SlugGroupName] | None = None,
+    level: config.GeographicBuildLevel = "national_counties",
+    state_fips: list[str] | None = None,
 ) -> None:
     """Fit one model on the runs' sample, write its SHAP figures.
 
@@ -57,19 +82,40 @@ def run_single_seed_shap(
     rather than scored. Where the sweep says how much R2 a group was
     carrying, this says which features the model reaches for once it is
     gone.
+
+    `level` and `state_fips` choose the build, as in `group_stability`.
+    `counties` left as None means DEFAULT_COUNTIES at county level and a
+    random draw at tract level, seeded by `seed`.
     """
-    unfiltered_df = pd.read_parquet(config.PROCESSED_NATIONAL_COUNTIES_PARQUET)
-    # The scored runs' own sample logic: full-matrix complete-case + stratum.
+    unfiltered_df = pd.read_parquet(config.processed_parquet_path(level, state_fips))
+    # The scored runs' own sample logic: full-matrix complete-case + stratum,
+    # and the full matrix FOR THIS LEVEL -- a tract has no TURNOUT column, so
+    # asking for one would not merely drop rows, it would raise.
     prepared_regression_data = prepare_df_for_regression(
         feature_groups=[],
         unfiltered_df=unfiltered_df,
         top_percent_hisp_pop=top_percent,
         bottom_percent_hisp_pop=bottom_percent,
+        exclude_variables=absent_variables(level),
     )
     feature_df = prepared_regression_data.full_feature_df
     target_values = prepared_regression_data.targets_df[target]
     weights = prepared_regression_data.hispanic_weights
     geoids = unfiltered_df.loc[feature_df.index, "GEOID"]
+    if counties is None:
+        if level == "national_counties":
+            counties = DEFAULT_COUNTIES
+        else:
+            # Drawn at random, not taken from the top: ranking tracts by
+            # Hispanic population would redraw the same few Los Angeles
+            # tracts every run and say nothing about the rest of the
+            # sample. Off the run's own seed, so a seed reproduces its
+            # tracts along with its folds.
+            drawn = np.random.default_rng(seed).choice(
+                len(geoids), size=DEFAULT_UNITS_EXPLAINED, replace=False
+            )
+            counties = tuple(geoids.iloc[drawn])
+            print(f"no --counties given; drew {', '.join(counties)} at random")
 
     ablation_suffix = ""
     if exclude_groups:
@@ -85,8 +131,9 @@ def run_single_seed_shap(
         feature_df = ablated
         ablation_suffix = "_without-" + "-".join(exclude_groups)
 
+    geography = config.describe_geography(level, state_fips)
     sample_note, stratum_suffix = describe_sample(
-        top_percent, bottom_percent, n_rows=len(feature_df)
+        top_percent, bottom_percent, n_rows=len(feature_df), geography=geography
     )
     if exclude_groups:
         sample_note += f", without {', '.join(exclude_groups)}"
@@ -96,27 +143,30 @@ def run_single_seed_shap(
         / "regression"
         / (
             f"shap_{datetime.now(UTC).astimezone().date()}_{model_name}"
-            f"{stratum_suffix}{ablation_suffix}"
+            f"{stratum_suffix}{ablation_suffix}{scope_suffix(level, state_fips)}"
         )
     )
     output_dir.mkdir(parents=True, exist_ok=True)
-    print(f"{model_name}, weighted, {target}: fit on {sample_note}")
+    model_display = MODEL_DISPLAY_NAMES[model_name]
+    print(f"{model_display}, weighted, {target}: fit on {sample_note}")
 
     explanation, predictions, out_of_fold_r2 = _fit_and_explain(
         model_name, target, seed, feature_df, target_values, weights
     )
 
-    model_note = f"{model_name} (seed {seed}), weighted"
+    model_note = f"{model_display}, weighted (seed {seed})"
     plot_beeswarm(
         explanation,
         title=(
-            f"SHAP beeswarm: {model_note} - {target}\n"
-            f"{sample_note} — out-of-fold R² {out_of_fold_r2:.2f} ({DEFAULT_FOLDS}-fold, seed {seed})"
+            f"SHAP beeswarm — {model_note}\n"
+            f"predicting {REGRESSION_TARGETS[target]} · {sample_note}\n"
+            f"out-of-fold R² {out_of_fold_r2:.2f} ({DEFAULT_FOLDS}-fold)"
         ),
         output_path=output_dir / "shap_beeswarm.png",
     )
 
-    county_names = load_county_geometry().set_index("GEOID")["NAME"]
+    unit_names = load_unit_names(level, geoids)
+    unit_noun = "county" if level == "national_counties" else "tract"
     for geoid in counties:
         matches = geoids[geoids == geoid]
         if matches.empty:
@@ -127,12 +177,13 @@ def run_single_seed_shap(
         row_position = int(np.flatnonzero(geoids.to_numpy() == geoid)[0])
         plot_waterfall(
             explanation[row_position],
-            county_title=county_label(geoid, county_names),
+            county_title=unit_label(geoid, unit_names),
             actual=target_values.iloc[row_position],
             predicted=predictions.iloc[row_position],
             target_label=REGRESSION_TARGETS[target],
             model_note=model_note,
             sample_note=sample_note,
+            unit_noun=unit_noun,
             output_path=output_dir / f"shap_waterfall_{geoid}.png",
         )
     print(f"outputs -> {output_dir}")
@@ -211,7 +262,10 @@ def _fit_and_explain(
         values=shap_values,
         base_values=base_values,
         data=feature_df.to_numpy(),
-        feature_names=list(feature_df.columns),
+        # The figures are the one place a feature is read without the
+        # codebook to hand, so they carry the declared display names. The
+        # fitting above used the columns themselves; only the labels differ.
+        feature_names=feature_display_names(list(feature_df.columns)),
     )
     return stitched, pd.Series(predictions, index=feature_df.index), out_of_fold_r2
 
@@ -232,9 +286,24 @@ def _parse_args():
     parser.add_argument(
         "--counties",
         nargs="+",
-        default=list(DEFAULT_COUNTIES),
+        default=None,
         metavar="GEOID",
-        help="counties to draw waterfalls for (5-digit GEOIDs)",
+        help="units to draw waterfalls for: 5-digit county or 11-digit tract "
+        "GEOIDs; omitted, the sample's largest Hispanic populations",
+    )
+    parser.add_argument(
+        "--level",
+        choices=list(get_args(config.GeographicBuildLevel)),
+        default="national_counties",
+        help="which dataset to fit (default: national_counties)",
+    )
+    parser.add_argument(
+        "--states",
+        nargs="+",
+        default=None,
+        metavar="FIPS",
+        help="tracts only: the state scope the build covered, e.g. --states 06 "
+        "reads processed_states-06.parquet; omit for the national tract file",
     )
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument(
@@ -255,7 +324,9 @@ if __name__ == "__main__":
         target=args.target,
         top_percent=args.top_percent,
         bottom_percent=args.bottom_percent,
-        counties=tuple(args.counties),
+        counties=tuple(args.counties) if args.counties else None,
         seed=args.seed,
         exclude_groups=args.exclude,
+        level=args.level,
+        state_fips=args.states,
     )

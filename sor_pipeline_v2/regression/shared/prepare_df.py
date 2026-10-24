@@ -103,7 +103,10 @@ def _feature_slugs_to_var_names(
 
 
 def describe_sample(
-    top_percent: float | None, bottom_percent: float | None, n_rows: int
+    top_percent: float | None,
+    bottom_percent: float | None,
+    n_rows: int,
+    geography: str = "rows",
 ) -> tuple[str, str]:
     """Name the stratum a run was fit on, for titles and output paths.
 
@@ -117,6 +120,12 @@ def describe_sample(
         most one is set.
     n_rows : int
         How many rows the prepared sample actually kept.
+    geography : str
+        What the rows ARE, from `config.describe_geography` -- "California
+        tracts", "US counties". A figure gets read far from the folder it
+        came out of, and "all complete-case rows" leaves a reader guessing
+        which build and which level produced it. The bare "rows" default
+        is a fallback, not something a driver should rely on.
 
     Returns
     -------
@@ -125,13 +134,13 @@ def describe_sample(
         name ("" for the unstratified sample).
     """
     if top_percent is not None:
-        stratum = f"top {top_percent:g}% by Hispanic population"
+        stratum = f"top {top_percent:g}% of {geography} by Hispanic population"
         suffix = f"_top-{top_percent:g}pct"
     elif bottom_percent is not None:
-        stratum = f"bottom {bottom_percent:g}% by Hispanic population"
+        stratum = f"bottom {bottom_percent:g}% of {geography} by Hispanic population"
         suffix = f"_bottom-{bottom_percent:g}pct"
     else:
-        stratum, suffix = "all complete-case rows", ""
+        stratum, suffix = f"all complete-case {geography}", ""
     return f"{stratum} (n={n_rows:,})", suffix
 
 

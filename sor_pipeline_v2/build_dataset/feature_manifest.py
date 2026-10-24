@@ -86,15 +86,25 @@ MODEL_GROUPS: dict[SlugGroupName, FeatureGroup] = {
 
 # Variables a TRACT fit drops, so the build's schema and any model fit on
 # tracts read one list rather than two that can drift. Two reasons, not
-# one: the first four need a prior-period figure tracts have no source
-# for, while TURNOUT exists and is wrong -- its votes are prorated by
-# total population against a denominator of voting-age citizens, which
-# puts 187 California tracts over 1.0, the worst at 15.66.
+# one. HISPGROWTH and FBGROWTH have their prior-period ACS inputs at this
+# level, but only for 62,522 of 85,395 tracts (73%): the 2011-2015
+# five-year file is on 2010 tract boundaries, and a tract redrawn for 2020
+# has no 2015 counterpart to grow from. Because the regression is
+# complete-case on the whole matrix, admitting either one would drop the
+# other 22,873 tracts out of every model, so they stay out until that
+# trade is worth making deliberately.
+#
+# TURNOUT also has both its inputs, and is wrong rather than missing. The
+# fault is the DENOMINATOR, not the votes: VOTINGAGEPOP comes from ACS
+# five-year estimates, whose error on a single tract is large enough that
+# 2,414 of 83,389 tracts report more votes cast than voting-age citizens,
+# the worst by a factor of 16. The same denominator is fine at county
+# level, where only 5 of 3,112 break 1.0. Measured on the GerryDB
+# release's own per-tract counts, so no vote allocation of ours is
+# involved -- California alone puts 205 tracts over 1.0.
 TRACT_ABSENT_VARIABLES: tuple[str, ...] = (
     "HISPGROWTH",
     "FBGROWTH",
-    "DEMGROWTH",
-    "REPGROWTH",
     "TURNOUT",
 )
 

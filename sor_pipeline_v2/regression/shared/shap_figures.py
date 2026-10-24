@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 
 import matplotlib
@@ -9,19 +10,46 @@ import matplotlib
 matplotlib.use("Agg")  # file output only
 import matplotlib.colors
 import matplotlib.pyplot as plt
-import pandas as pd
 import shap
 from matplotlib import patheffects
 from matplotlib.axes import Axes
 
-from utils.config import STATE_FIPS_TO_USPS
+from feature_report.metadata import column_meanings, meaning_for
 
-# State FIPS (a GEOID's first two digits) -> USPS abbreviation, for titles.
+# Longer than this and the labels crowd out the plot itself; the longest
+# declared display name runs 64 characters.
+MAX_LABEL_CHARS = 46
 
 
-def county_label(geoid: str, county_names: pd.Series) -> str:
-    state = STATE_FIPS_TO_USPS.get(geoid[:2], "??")
-    return f"{county_names.get(geoid, geoid)} County, {state} (GEOID {geoid})"
+def feature_display_names(columns: Sequence[str]) -> list[str]:
+    """Column names -> the display names the declarations already carry.
+
+    A SHAP figure is the one output a reader meets a feature in without
+    the codebook beside them, and HISPFBOTHERLTVW tells them nothing. The
+    declarations have written a display name for every variable; this is
+    only the lookup, so a renamed or reworded variable reaches the figures
+    without anything here changing.
+
+    Parameters
+    ----------
+    columns : sequence of str
+        The feature matrix's column names, in order.
+
+    Returns
+    -------
+    list of str
+        One label per column, truncated to MAX_LABEL_CHARS. A column with
+        no declaration keeps its own name, so an undeclared column is
+        visible rather than blank.
+    """
+    meanings = column_meanings()
+    labels = []
+    for column in columns:
+        label = meaning_for(column, meanings).display_name
+        if len(label) > MAX_LABEL_CHARS:
+            label = label[: MAX_LABEL_CHARS - 1].rstrip() + "\u2026"
+        labels.append(label)
+    return labels
 
 
 def plot_beeswarm(explanation, title: str, output_path: Path) -> None:
@@ -42,6 +70,7 @@ def plot_waterfall(
     model_note: str,
     sample_note: str,
     output_path: Path,
+    unit_noun: str = "county",
 ) -> None:
     plt.figure()
     shap.plots.waterfall(county_explanation, max_display=12, show=False)
@@ -56,10 +85,10 @@ def plot_waterfall(
     plt.figtext(
         0.5,
         -0.02,
-        "gray number = this county's value of that feature · each bar = the "
-        "feature's push on the prediction (red up, blue down)\n"
+        f"gray number = this {unit_noun}'s value of that feature · each bar = "
+        "the feature's push on the prediction (red up, blue down)\n"
         "E[f(X)] = the model's average prediction over this sample (the "
-        "baseline) · f(x) = its prediction for this county",
+        f"baseline) · f(x) = its prediction for this {unit_noun}",
         ha="center",
         va="top",
         fontsize=8,

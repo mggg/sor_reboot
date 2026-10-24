@@ -56,10 +56,13 @@ TRACT_ELECTION_FEATURES = [
     if feature.var_name not in feature_manifest.TRACT_ABSENT_VARIABLES
 ]
 
-# VEST publishes no 2020 file for Puerto Rico, which casts no presidential
-# ballots. Its tracts therefore come out with NaN vote columns, exactly as
-# its municipios already do in the county build.
-TRACT_ELECTION_MISSING_STATES = ("72",)
+# The GerryDB release ships a tract view for the 50 states only. Puerto
+# Rico casts no presidential ballots, so it has nothing to publish; DC
+# does vote but the release has no tract view for it. Both come out with
+# NaN vote columns, exactly as PR's municipios already do in the county
+# build. Nothing is derived to fill the gap -- the published tract
+# numbers are used as published or not at all.
+TRACT_ELECTION_MISSING_STATES = ("11", "72")
 
 
 def ingest_counties() -> pd.DataFrame:
@@ -161,12 +164,10 @@ def ingest_tracts(
     the county build's: every source left-joined onto that state's PL
     total-population frame.
 
-    The election source is the one that differs from the county build.
-    Presidential returns are published by precinct, and precincts do not
-    nest in tracts, so each state's votes are prorated onto its tracts
-    through census blocks (see `tract_election_api`) rather than read from
-    a published table. That proration is cached per state, so it is paid
-    once rather than on every rebuild.
+    The election source is the one that differs from the county build:
+    tract returns come from the lab's GerryDB release rather than MEDSL
+    (see `tract_election_api`). It is a plain read of a published figure
+    per tract, so there is nothing to cache.
 
     Parameters
     ----------
@@ -188,10 +189,10 @@ def ingest_tracts(
     """
     per_state_dfs: list[pd.DataFrame] = []
     total_missing_tracts: dict[str, int] = {}
-    # A 52-state run is an hour or more, most of it in one state's
-    # proration, so the postfix names the state being worked on rather
-    # than only how many are done. `progress.write` for the per-state line
-    # so it scrolls above the bar instead of through it.
+    # The postfix names the state being worked on rather than only how
+    # many are done, the run being long enough to want that. `progress.write`
+    # for the per-state line so it scrolls above the bar instead of
+    # through it.
     with tqdm(
         state_fips, total=len(state_fips), desc="states", unit="state"
     ) as progress:
@@ -208,7 +209,7 @@ def ingest_tracts(
             ]
             if fips_code not in TRACT_ELECTION_MISSING_STATES:
                 sources.append(
-                    ("election", tract_election_api.cached_tract_election(fips_code))
+                    ("election", tract_election_api.load_tract_election(fips_code))
                 )
             merged, missing = _merge_onto_spine(pl_total, sources, report=False)
             for source_name, missing_count in missing.items():
@@ -228,9 +229,9 @@ def ingest_tracts(
 def clean_and_derive_tracts(df: pd.DataFrame) -> pd.DataFrame:
     """Run the derive steps that apply at tract level, in dependency order.
 
-    The county steps, with the election one restricted to the features a
-    2020-only vote table supports; see `clean_and_derive_counties` for why
-    the order is what it is.
+    The county steps, with the election one restricted to the features
+    tracts can support (TURNOUT's denominator cannot carry it); see
+    `clean_and_derive_counties` for why the order is what it is.
 
     Parameters
     ----------
@@ -301,6 +302,7 @@ def clean_and_derive_counties(df: pd.DataFrame) -> pd.DataFrame:
 def build(
     level: config.GeographicBuildLevel = "national_counties",
     state_fips: Sequence[str] | None = None,
+    from_raw: bool = False,
 ) -> None:
     """Build the requested dataset: raw (as fetched) and processed (analysis-ready).
 
@@ -315,6 +317,15 @@ def build(
     state_fips : sequence of str or None
         Tracts only: which states to pull, defaulting to all 52. Ignored
         for the county build, which is a single national request.
+    from_raw : bool
+        Re-derive from the raw parquet already on disk instead of
+        fetching, and leave that raw file alone. The raw frame holds the
+        sources as published, so anything downstream of it -- a renamed
+        variable, a new derived feature, a changed formula -- is a pure
+        function of a file we already have, and re-fetching it from the
+        Census API would be minutes of network for an identical result.
+        Fetch (the default) whenever the question is whether the SOURCES
+        changed; this flag cannot answer that.
 
     Raises
     ------
@@ -332,15 +343,14 @@ def build(
 
     if level == "national_counties":
         unit = "counties"
-        raw = ingest_counties()
         derive = clean_and_derive_counties
         wanted = feature_manifest.processed_columns()
         raw_path = config.RAW_NATIONAL_COUNTIES_PARQUET
         processed_path = config.PROCESSED_NATIONAL_COUNTIES_PARQUET
+        ingest = ingest_counties
     else:
         unit = "tracts"
         states = list(state_fips or config.TRACT_PULL_STATE_FIPS)
-        raw = ingest_tracts(states)
         derive = clean_and_derive_tracts
         wanted = feature_manifest.processed_columns(
             exclude_variables=feature_manifest.TRACT_ABSENT_VARIABLES
@@ -349,9 +359,21 @@ def build(
         # overwrite the national dataset.
         raw_path, processed_path = config.tract_parquet_paths(states)
 
-    raw = raw.sort_values("GEOID").reset_index(drop=True)
-    store_df.save_df_to_parquet(raw, raw_path)
-    print(f"saved raw       {raw.shape[0]} x {raw.shape[1]} -> {raw_path}")
+        def ingest() -> pd.DataFrame:
+            return ingest_tracts(states)
+
+    if from_raw:
+        if not raw_path.exists():
+            raise FileNotFoundError(
+                f"{raw_path} does not exist -- --from-raw re-derives an "
+                "existing raw frame and cannot create one; run without it."
+            )
+        raw = store_df.load_df_from_parquet(raw_path)
+        print(f"read raw        {raw.shape[0]} x {raw.shape[1]} <- {raw_path}")
+    else:
+        raw = ingest().sort_values("GEOID").reset_index(drop=True)
+        store_df.save_df_to_parquet(raw, raw_path)
+        print(f"saved raw       {raw.shape[0]} x {raw.shape[1]} -> {raw_path}")
 
     df = derive(raw)
     absent = [c for c in wanted if c not in df.columns]
@@ -386,9 +408,16 @@ def _parse_args() -> argparse.Namespace:
         metavar="FIPS",
         help="tracts only: two-digit state codes to pull (default: all 52)",
     )
+    parser.add_argument(
+        "--from-raw",
+        action="store_true",
+        help="re-derive the processed frame from the raw parquet already on "
+        "disk, fetching nothing and rewriting no raw file; for changes "
+        "downstream of ingestion, such as a renamed or added feature",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = _parse_args()
-    build(level=args.level, state_fips=args.states)
+    build(level=args.level, state_fips=args.states, from_raw=args.from_raw)

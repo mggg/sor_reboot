@@ -29,8 +29,15 @@ The cross-validated R2 printed here is a fuller accuracy estimate than one
 split, but the project's accuracy claims belong to the scored runs
 (`regression.group_stability`), which this driver does not replace.
 
+Either level: `--level national_tracts` reads the tract build instead,
+`--states 06` the California one. The prose above says "county" because
+counties were the first thing this ran on; read it as "unit". A tract run
+drops the three predictors tracts do not have (TRACT_ABSENT_VARIABLES),
+exactly as the scored runs do, so its sample matches theirs.
+
 Run: `python -m regression.residual [--model rf|lgbm|ridge]
-[--target T] [--folds K] [--seed N] [--min-hispanic N]`.
+[--target T] [--folds K] [--seed N] [--min-hispanic N]
+[--level L] [--states FIPS ...]`.
 """
 
 from __future__ import annotations
@@ -38,14 +45,21 @@ from __future__ import annotations
 import argparse
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import get_args
 
 import pandas as pd
 from sklearn.metrics import r2_score
 
-from build_dataset.ingest.geometry.geometry_api import load_county_geometry
 from regression.shared.cross_val import DEFAULT_FOLDS, out_of_fold_predictions
+from regression.shared.fit import MODEL_DISPLAY_NAMES
 from regression.shared.prepare_df import describe_sample, prepare_df_for_regression
-from regression.shared.run_config import REGRESSION_TARGETS, WEIGHT_COL
+from regression.shared.run_config import (
+    REGRESSION_TARGETS,
+    WEIGHT_COL,
+    absent_variables,
+    scope_suffix,
+)
+from regression.shared.unit_labels import load_unit_names
 from utils import config
 
 PRINTED_ROWS = 10
@@ -58,8 +72,10 @@ def residual_table(
     seed: int = 1,
     top_percent: float | None = None,
     bottom_percent: float | None = None,
+    level: config.GeographicBuildLevel = "national_counties",
+    state_fips: list[str] | None = None,
 ) -> tuple[pd.DataFrame, float, str]:
-    """Build the per-county residual table on the scored runs' own sample.
+    """Build the per-unit residual table on the scored runs' own sample.
 
     Parameters
     ----------
@@ -77,11 +93,16 @@ def residual_table(
         counties at or above the 90th percentile, `bottom_percent=90`
         keeps those below it, so the two partition the sample exactly.
         At most one may be set.
+    level : config.GeographicBuildLevel
+        Which build to fit: counties, or tracts.
+    state_fips : list of str or None
+        Tracts only: the state scope the build covered. None reads the
+        national tract file.
 
     Returns
     -------
     tuple of (pandas.DataFrame, float, str)
-        The residual table -- GEOID, county, hispanic population, actual,
+        The residual table -- GEOID, name, hispanic population, actual,
         predicted, residual, abs_residual -- sorted most under-predicted
         first; the weighted out-of-fold R2; and the sample note.
 
@@ -93,13 +114,16 @@ def residual_table(
     if target not in REGRESSION_TARGETS:
         raise KeyError(f"unknown target {target!r}; known: {list(REGRESSION_TARGETS)}")
 
-    unfiltered_df = pd.read_parquet(config.PROCESSED_NATIONAL_COUNTIES_PARQUET)
-    # The scored runs' own sample logic: full-matrix complete-case.
+    unfiltered_df = pd.read_parquet(config.processed_parquet_path(level, state_fips))
+    # The scored runs' own sample logic: full-matrix complete-case, and
+    # the full matrix FOR THIS LEVEL -- a tract has no TURNOUT column, so
+    # asking for one would not merely drop rows, it would raise.
     prepared = prepare_df_for_regression(
         feature_groups=[],
         unfiltered_df=unfiltered_df,
         top_percent_hisp_pop=top_percent,
         bottom_percent_hisp_pop=bottom_percent,
+        exclude_variables=absent_variables(level),
     )
     feature_df = prepared.full_feature_df
     # The pandas stubs let a str key select a DataFrame (duplicate column
@@ -108,18 +132,26 @@ def residual_table(
     target_values = prepared.targets_df[target]
     weights = prepared.hispanic_weights
 
-    sample_note, _ = describe_sample(top_percent, bottom_percent, len(feature_df))
-    print(f"{model_name}, weighted, {target}: {sample_note}, {folds} folds")
+    sample_note, _ = describe_sample(
+        top_percent,
+        bottom_percent,
+        len(feature_df),
+        geography=config.describe_geography(level, state_fips),
+    )
+    print(
+        f"{MODEL_DISPLAY_NAMES[model_name]}, weighted, {target}: "
+        f"{sample_note}, {folds} folds"
+    )
     predictions = out_of_fold_predictions(
         model_name, feature_df, target_values, weights, folds, seed
     )
 
-    county_names = load_county_geometry().set_index("GEOID")["NAME"]
     geoids = unfiltered_df.loc[feature_df.index, "GEOID"]
+    unit_names = load_unit_names(level, geoids)
     table = pd.DataFrame(
         {
             "GEOID": geoids.to_numpy(),
-            "county": county_names.reindex(geoids).to_numpy(),
+            "name": unit_names.reindex(geoids).to_numpy(),
             WEIGHT_COL: weights.to_numpy(),
             "actual": target_values.to_numpy(),
             "predicted": predictions.to_numpy(),
@@ -134,15 +166,17 @@ def residual_table(
     return table.sort_values("residual", ascending=False), out_of_fold_r2, sample_note
 
 
-def _print_extremes(table: pd.DataFrame, target: str, min_hispanic: int) -> None:
-    """Print the most under- and over-predicted counties passing the filter."""
+def _print_extremes(
+    table: pd.DataFrame, target: str, min_hispanic: int, geography: str
+) -> None:
+    """Print the most under- and over-predicted units passing the filter."""
     shown = table[table[WEIGHT_COL] >= min_hispanic]
     note = (
-        f" (of counties with >= {min_hispanic:,} Hispanic residents)"
+        f" (of {geography} with >= {min_hispanic:,} Hispanic residents)"
         if min_hispanic
         else ""
     )
-    columns = ["GEOID", "county", WEIGHT_COL, "actual", "predicted", "residual"]
+    columns = ["GEOID", "name", WEIGHT_COL, "actual", "predicted", "residual"]
     for heading, rows in [
         (
             f"model UNDER-predicts {REGRESSION_TARGETS[target]}{note}",
@@ -165,6 +199,8 @@ def run_residuals(
     min_hispanic: int = 0,
     top_percent: float | None = None,
     bottom_percent: float | None = None,
+    level: config.GeographicBuildLevel = "national_counties",
+    state_fips: list[str] | None = None,
 ) -> Path:
     """Write the residual table and print its extremes.
 
@@ -177,6 +213,9 @@ def run_residuals(
         tables; the written CSV always holds every county of the sample.
     top_percent, bottom_percent : float or None
         Restrict the sample to one Hispanic-population stratum.
+    level, state_fips
+        As `residual_table`. Both are named in the output directory, so a
+        tract run cannot overwrite the county run of the same day.
 
     Returns
     -------
@@ -184,20 +223,26 @@ def run_residuals(
         The CSV written.
     """
     table, out_of_fold_r2, sample_note = residual_table(
-        model_name, target, folds, seed, top_percent, bottom_percent
+        model_name, target, folds, seed, top_percent, bottom_percent, level, state_fips
     )
+    geography = config.describe_geography(level, state_fips)
     print(
         f"\nweighted out-of-fold R2: {out_of_fold_r2:.3f} "
         f"({folds}-fold, seed {seed}) on {sample_note}"
     )
-    _print_extremes(table, target, min_hispanic)
+    _print_extremes(table, target, min_hispanic, geography)
 
-    _, stratum_suffix = describe_sample(top_percent, bottom_percent, len(table))
+    _, stratum_suffix = describe_sample(
+        top_percent, bottom_percent, len(table), geography=geography
+    )
     output_dir = (
         config.DATA_DIR
         / "prediction"
         / "regression"
-        / f"residuals_{datetime.now(UTC).astimezone().date()}_{model_name}{stratum_suffix}"
+        / (
+            f"residuals_{datetime.now(UTC).astimezone().date()}_{model_name}"
+            f"{stratum_suffix}{scope_suffix(level, state_fips)}"
+        )
     )
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"residuals_{target}_seed{seed}.csv"
@@ -228,6 +273,20 @@ def _parse_args() -> argparse.Namespace:
         metavar="N",
         help="hide counties below this Hispanic population from the printed tables",
     )
+    parser.add_argument(
+        "--level",
+        choices=list(get_args(config.GeographicBuildLevel)),
+        default="national_counties",
+        help="which dataset to fit (default: national_counties)",
+    )
+    parser.add_argument(
+        "--states",
+        nargs="+",
+        default=None,
+        metavar="FIPS",
+        help="tracts only: the state scope the build covered, e.g. --states 06 "
+        "reads processed_states-06.parquet; omit for the national tract file",
+    )
     return parser.parse_args()
 
 
@@ -241,4 +300,6 @@ if __name__ == "__main__":
         min_hispanic=args.min_hispanic,
         top_percent=args.top_percent,
         bottom_percent=args.bottom_percent,
+        level=args.level,
+        state_fips=args.states,
     )

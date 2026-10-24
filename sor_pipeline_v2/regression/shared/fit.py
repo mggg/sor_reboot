@@ -29,6 +29,16 @@ from regression.shared.run_config import RegressionParameters
 MODEL_LABELS = {"rf": "random_forest", "lgbm": "lightgbm", "ridge": "ridge"}
 
 
+# The CLI keys spelled for a reader. A figure title saying "rf" tells
+# someone who did not run it nothing; it is the same three estimators the
+# group-stability figures name in full.
+MODEL_DISPLAY_NAMES = {
+    "rf": "random forest",
+    "lgbm": "LightGBM",
+    "ridge": "ridge",
+}
+
+
 def make_regressor(
     model: str, seed: int, params: RegressionParameters | None = None
 ) -> RandomForestRegressor | LGBMRegressor | Pipeline:

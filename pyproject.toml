@@ -9,13 +9,16 @@ dependencies = [
     "geopandas>=1.1.4",
     "lightgbm>=4.7.0",
     "matplotlib>=3.11.2",
+    "maup>=2.1.0",
     "pandas>=3.0.5",
+    "plotly>=7.1.0",
     "pyarrow>=25.0.1",
     "python-dotenv>=1.2.3",
     "requests>=2.34.2",
     "scikit-learn>=1.9.1",
     "shap>=0.52.0",
     "tqdm>=4.70.1",
+    "unf>=0.11.0",
 ]
 
 [build-system]
@@ -28,6 +31,7 @@ package = false
 
 [dependency-groups]
 dev = [
+    "pandas-stubs>=3.0.5.260914",
     "pyright>=1.1.414",
     "ruff>=0.16.7",
 ]

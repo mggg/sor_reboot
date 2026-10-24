@@ -13,7 +13,7 @@ DHC_FEATURES: list[ModelVariable] = [
         var_name="URBANSHARE",
         display_name="Urban population share",
         description=(
-            "Share of the county's total population living in an urban "
+            "Share of the unit's total population living in an urban "
             "area (2020 Census urban/rural classification)"
         ),
         variable_computer=FractionalShare(

@@ -235,7 +235,7 @@ MOBILITY_FEATURES: list[ModelVariable] = [
         source="ACS",
         var_name="HISPGROWTH",
         display_name="Hispanic population growth",
-        description="Change in the county Hispanic population (B03001_003E) "
+        description="Change in the Hispanic population (B03001_003E) "
         "from the 2011-2015 ACS to the 2016-2020 ACS, as a log ratio: "
         "log(2020 + 1) - log(2015 + 1). Positive means growth.",
         variable_computer=LogGrowth(
@@ -251,7 +251,7 @@ MOBILITY_FEATURES: list[ModelVariable] = [
         source="ACS",
         var_name="FBGROWTH",
         display_name="Foreign-born population growth",
-        description="Change in the county foreign-born population (B05002_013E) "
+        description="Change in the foreign-born population (B05002_013E) "
         "from the 2011-2015 ACS to the 2016-2020 ACS, as a log ratio. "
         "Positive means growth.",
         variable_computer=LogGrowth(

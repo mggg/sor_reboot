@@ -17,10 +17,14 @@ from matplotlib.axes import Axes
 from regression.shared.run_config import FULL
 
 # One fixed hue per estimator, everywhere in the pipeline.
+# Okabe-Ito, which is colour-blind safe: the old brick/orange/green put two
+# adjacent hues on the two models that sit next to each other in the dodge,
+# and paired red with green. Vermillion goes to the MIDDLE dodge row so the
+# pairs that physically touch are the ones furthest apart in hue.
 MODEL_COLORS = {
-    "random_forest": "#b24745",
-    "lightgbm": "#d9822b",
-    "ridge": "#3b7a57",
+    "random_forest": "#d55e00",
+    "lightgbm": "#009e73",
+    "ridge": "#0072b2",
 }
 # Vertical offset per model, so three dots share a group row without overlap.
 MODEL_DODGE = {"ridge": -0.22, "random_forest": 0.0, "lightgbm": 0.22}

@@ -56,7 +56,7 @@ RACIAL_ETHNIC_FEATURES: list[ModelVariable] = [
         source="ACS",
         var_name="NONHISPANICMULTISHARE",
         display_name="Non-Hispanic multiracial share",
-        description="Non-Hispanic, two or more races -- the county's non-Hispanic propensity for "
+        description="Non-Hispanic, two or more races -- the unit's non-Hispanic propensity for "
         "multiracial reporting",
         variable_computer=FractionalShare(
             numerator_codes=[B03002.NOT_HISPANIC_OR_LATINO_TWO_OR_MORE_RACES],

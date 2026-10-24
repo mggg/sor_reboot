@@ -1,1 +1,8 @@
 __pycache__
+
+# Any directory named data/, at any depth: downloads and build outputs,
+# all of it regenerable. Records ABOUT those files live in source_records/.
+data/
+
+# Slurm job output, written by sor_pipeline_v2/slurm/sweep.sbatch on the cluster.
+sor_pipeline_v2/slurm/logs/

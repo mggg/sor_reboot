@@ -168,8 +168,10 @@ HOUSEHOLD_FEATURES: list[ModelVariable] = [
     ModelVariable(
         source="ACS",
         var_name="HHMARRIEDALL",
-        display_name="Married-couple households, county-wide",
-        description="Married-couple family households, county-wide",
+        display_name="Married-couple share of all households",
+        description="Married-couple family households as a share of every "
+        "household in the unit, Hispanic or not -- the counterpart to "
+        "HISPHHMARRIED, which is computed within Hispanic households",
         variable_computer=FractionalShare(
             numerator_codes=[B11001.FAMILY_HOUSEHOLDS_MARRIED_COUPLE_FAMILY],
             denominator_codes=[Denominator.ALL_HOUSEHOLDS],

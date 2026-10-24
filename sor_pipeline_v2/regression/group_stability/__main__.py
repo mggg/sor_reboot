@@ -141,17 +141,22 @@ def run_group_stability(
         f"params {tree_params} · {len(seeds)} seeds -> {n_fits} fits"
     )
     output_dir.mkdir(parents=True, exist_ok=True)
+    # One CSV per finished seed, so a run killed partway keeps every seed
+    # it completed instead of nothing.
+    seed_dir = output_dir / "by_seed"
+    seed_dir.mkdir(exist_ok=True)
 
     run_results = []
     with tqdm(total=n_fits, desc="group stability", unit="fit") as progress:
         for seed in seeds:  # Make one for loop; also merge with tqdm
+            seed_results = []
             for (group_name, group_df), model, weight, target in product(
                 run_group_name_to_features_df.items(),
                 MODEL_LABELS,
                 weightings.values(),
                 targets,
             ):
-                run_results.append(
+                seed_results.append(
                     asdict(
                         split_fit_and_score_regression(
                             group_name,
@@ -166,6 +171,10 @@ def run_group_stability(
                     )
                 )
                 progress.update(1)
+            pd.DataFrame(seed_results).to_csv(
+                seed_dir / f"seed_{seed}.csv", index=False
+            )
+            run_results.extend(seed_results)
             progress.set_postfix(seed=seed)
 
     by_seed = pd.DataFrame(run_results)

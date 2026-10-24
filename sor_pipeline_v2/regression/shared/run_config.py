@@ -1,4 +1,5 @@
 import re
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -123,6 +124,35 @@ def scope_from_run_dir(
     return "national_tracts", states.split("-") if states else None
 
 
+def scope_suffix(
+    level: config.GeographicBuildLevel, state_fips: Sequence[str] | None = None
+) -> str:
+    """The geography as an output-directory suffix; `scope_from_run_dir` reads it back.
+
+    Every driver that writes a run directory appends this, so a tract run
+    cannot land on top of the county run it would otherwise be named
+    identically to. Counties get "" -- they are the default and their
+    directory names predate levels existing.
+
+    Parameters
+    ----------
+    level : config.GeographicBuildLevel
+        The dataset the run covered.
+    state_fips : sequence of str or None
+        Tracts only: the state scope. None means the national file.
+
+    Returns
+    -------
+    str
+        "" for counties, "_tracts" nationally, "_tracts-06" for one state.
+    """
+    if level == "national_counties":
+        return ""
+    if not state_fips:
+        return "_tracts"
+    return "_tracts-" + "-".join(sorted(state_fips))
+
+
 def absent_variables(level: config.GeographicBuildLevel) -> tuple[str, ...]:
     """Predictors the level does not have, for `prepare_df_for_regression`.
 
@@ -155,10 +185,7 @@ def create_run_dir(run_params: FullRegressionModelRunParams) -> Path:
         )
     # The level only when it is not the county default, so a county run's
     # name is unchanged and a tract run is unmistakable.
-    if run_params.level == "national_tracts":
-        name += "_tracts"
-        if run_params.state_fips:
-            name += "-" + "-".join(sorted(run_params.state_fips))
+    name += scope_suffix(run_params.level, run_params.state_fips)
     defaults = asdict(RegressionParameters())
     for regression_param, value in asdict(run_params.regression_tree_params).items():
         if value != defaults[regression_param]:

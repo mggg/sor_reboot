@@ -16,6 +16,7 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 
+from regression.residual.county_map import name_column
 from utils import config
 
 RESIDUAL_ROOT = config.DATA_DIR / "prediction" / "regression"
@@ -74,7 +75,7 @@ def plot_residuals(min_hispanic: int = 0, output_path: Path | None = None) -> Pa
         y="residual",
         color="run",
         log_x=True,
-        hover_name="county",
+        hover_name=name_column(residuals),
         hover_data={
             "GEOID": True,
             "actual": ":.3f",

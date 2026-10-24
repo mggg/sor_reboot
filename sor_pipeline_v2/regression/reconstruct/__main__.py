@@ -178,7 +178,12 @@ def reconstruction_curve(
         # How much of the recoverable signal the single best feature gets:
         # near 1 means a proxy, well below means the signal is diffuse.
         "share_from_one": float(first / ceiling) if ceiling > 0 else float("nan"),
-        "sample": describe_sample(top_percent, bottom_percent, len(X))[0]
+        "sample": describe_sample(
+            top_percent,
+            bottom_percent,
+            len(X),
+            geography=config.describe_geography("national_counties"),
+        )[0]
         + (f", without {', '.join(exclude_groups)}" if exclude_groups else ""),
     }
     return curve, summary

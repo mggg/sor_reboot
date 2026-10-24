@@ -7,6 +7,7 @@ VOTINGAGEPOP, so it can only be computed after the ACS join.
 
 from build_dataset.ingest.acs.feats.citizenship_feats import VOTINGAGEPOP
 from build_dataset.ingest.declarations.feature_utils import (
+    Difference,
     FractionalShare,
     LogGrowth,
     ModelVariable,
@@ -26,17 +27,56 @@ REP_VOTES = "E_20_PRES_REP"
 DEM_VOTES_2016 = "E_16_PRES_DEM"
 REP_VOTES_2016 = "E_16_PRES_REP"
 
+# The two lean variables are spelled here because VOTELEANCHANGE subtracts
+# one from the other BY COLUMN NAME, so its declaration reads these rather
+# than repeating the strings. Both carry their year: the pair has to read
+# as a pair, and a bare VOTELEAN left a reader to guess which election it
+# meant.
+VOTELEAN_2020 = "VOTELEAN20"
+VOTELEAN_2016 = "VOTELEAN16"
+# Named for what it is -- a change in the lean -- rather than "swing",
+# which is the term of art and says nothing to anyone who does not
+# already have it.
+VOTELEAN_CHANGE = "VOTELEANCHANGE"
+
 # TURNOUT and NUMBEROFVOTERS sit under the elections group though they measure
-# participation and size; only VOTELEAN is preference proper.
+# participation and size; only the leans are preference proper.
 ELECTION_FEATURES: list[ModelVariable] = [
     ModelVariable(
         source="ELECTION",
-        var_name="VOTELEAN",
-        display_name="Two-party vote lean",
+        var_name=VOTELEAN_2020,
+        display_name="Two-party vote lean, 2020",
         description="(Republican - Democratic) share of the two-party 2020 "
         "presidential vote; positive = Republican-leaning",
         variable_computer=SignedLean(
             positive_codes=[REP_VOTES], negative_codes=[DEM_VOTES]
+        ),
+    ),
+    ModelVariable(
+        source="ELECTION",
+        var_name=VOTELEAN_2016,
+        display_name="Two-party vote lean, 2016",
+        description="(Republican - Democratic) share of the two-party 2016 "
+        "presidential vote; positive = Republican-leaning",
+        variable_computer=SignedLean(
+            positive_codes=[REP_VOTES_2016], negative_codes=[DEM_VOTES_2016]
+        ),
+    ),
+    # Declared after both leans because it reads them as columns, the way
+    # the Hispanic-of-race counts read the count declared before them.
+    # A level that cannot compute a lean cannot compute this either.
+    ModelVariable(
+        source="ELECTION",
+        var_name=VOTELEAN_CHANGE,
+        display_name="Change in two-party lean, 2016 to 2020",
+        description="2020 lean minus 2016 lean, in margin points: positive "
+        "= moved Republican. A tract can be strongly Democratic and still "
+        "have a large positive value -- this measures the direction it "
+        "moved, not where it stands. Margin moves twice as far as vote "
+        "share, since a switched vote is added to one side and taken off "
+        "the other.",
+        variable_computer=Difference(
+            minuend_code=VOTELEAN_2020, subtrahend_code=VOTELEAN_2016
         ),
     ),
     ModelVariable(

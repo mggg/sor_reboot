@@ -1,9 +1,11 @@
 """APIs for loading the election source file (a local CSV, nothing fetched).
 
-County only. There is no tract-level equivalent: precincts do not nest
-in tracts, so MEDSL publishes counties and stops, and any tract figure
-would be a block-level allocation rather than a canvass. The tract
-build therefore carries no election features.
+County only. MEDSL publishes counties and stops, because precincts do
+not nest in tracts and so no canvass is reported by tract. The tract
+build gets its returns elsewhere -- from the lab's GerryDB release, read
+by `tract_election_api` -- and the two paths share no code and no source
+file, which is what makes MEDSL an independent check on it
+(`data_audit.scripts.reconcile_tract_election`).
 """
 
 from __future__ import annotations

@@ -80,6 +80,17 @@ def load_residuals(run: str | None, min_hispanic: int) -> pd.DataFrame:
     return table[table["HISPANIC"] >= min_hispanic]
 
 
+
+def name_column(residuals: pd.DataFrame) -> str:
+    """Which column holds the unit's name.
+
+    The residual driver wrote "county" before it could run on tracts and
+    writes "name" since. A run directory is kept and re-read long after
+    it was written, so both spellings are accepted rather than the older
+    CSVs being orphaned.
+    """
+    return "name" if "name" in residuals.columns else "county"
+
 def county_geojson(geoids: pd.Series) -> dict:
     """Simplified polygons for the mapped counties, as GeoJSON keyed by GEOID.
 
@@ -146,7 +157,7 @@ def plot_county_map(
         color_continuous_scale=scale,
         range_color=color_range,
         scope="usa",
-        hover_name="county",
+        hover_name=name_column(residuals),
         hover_data={
             "GEOID": True,
             "HISPANIC": ":,",

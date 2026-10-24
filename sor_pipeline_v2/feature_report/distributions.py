@@ -29,46 +29,18 @@ from matplotlib.ticker import FuncFormatter, MaxNLocator
 
 from feature_report.metadata import ColumnMeaning, meaning_for
 
-# 150 leaves a histogram at 900x540, which is soft on any current
-# display and softer still in the feature grid, where that budget is
-# split across panels. matplotlib draws from vector internally, so this
-# is purely a question of what we ask it to raster at.
 DEFAULT_DPI = 200
-# Vector formats ignore DPI entirely and stay sharp at any zoom, which is
-# what a figure pasted into a memo or a slide actually wants.
 VECTOR_FORMATS = ("pdf", "svg")
 
-# Fixed rather than inferred. An automatic rule (Freedman-Diaconis) picks
-# its width from the spread of the bulk, which these features do not
-# have: a spike at zero holding half the rows plus a long thin tail makes
-# it choose either two bins or two thousand.
 HISTOGRAM_BINS = 50
-# The feature grid's width in panels; four across stays legible at the
-# page widths these get pasted into.
+
 GRID_COLUMNS = 4
-# Per-panel inches on the feature grid. Bigger than it looks necessary:
-# a panel rasters at this size times the DPI, and the sheet is the figure
-# people zoom into.
 GRID_PANEL_SIZE = (5.0, 3.2)
-# Above this, tick labels are abbreviated: a dollar feature running to
-# 300,000 otherwise prints six ticks that collide into one smear.
 ABBREVIATE_ABOVE = 10_000
-# Few enough that abbreviated labels never touch.
 MAX_X_TICKS = 6
-# Titles wrap rather than run off the canvas; a feature name plus the
-# formula is routinely wider than the figure. Measured, not guessed:
-# 110 characters of 8pt Helvetica Neue occupy 5.3 of the 6.95 inches a
-# left-aligned title has here, and it puts 122 of the 126 descriptions
-# on one line. The four it does not are 179 to 281 characters long --
-# paragraphs rather than labels, which no width would fit.
 TITLE_WIDTH = 110
-# Wide enough that the scope line, which is deliberately never wrapped,
-# fits on one line at TITLE_FONT_SIZE.
 FIGURE_SIZE = (8.0, 5.0)
-# Nothing here truncates. metadata.py budgets each side of a formula by
-# length and counts whatever does not fit ("+ 12 more"), so the longest
-# line any column produces is 106 characters, which this width holds at
-# TITLE_FONT_SIZE with room to spare.
+
 HEADLINE_FONT_SIZE = 11
 TITLE_FONT_SIZE = 8
 MEDIAN_COLOR = "#3b7a57"

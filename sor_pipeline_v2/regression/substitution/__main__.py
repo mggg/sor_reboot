@@ -30,12 +30,12 @@ from sklearn.metrics import r2_score
 from sklearn.model_selection import KFold
 
 from build_dataset.feature_manifest import SlugGroupName, group_features
-from build_dataset.ingest.geometry.geometry_api import load_county_geometry
 from regression.shared.cross_val import DEFAULT_FOLDS, out_of_fold_predictions
 from regression.shared.fit import fit_weighted, make_regressor
 from regression.shared.prepare_df import describe_sample, prepare_df_for_regression
 from regression.shared.run_config import REGRESSION_TARGETS
-from regression.shared.shap_figures import county_label, plot_waterfall
+from regression.shared.shap_figures import plot_waterfall
+from regression.shared.unit_labels import load_unit_names, unit_label
 from utils import config
 
 # Partners this correlated with the tested feature are reported as its cluster.
@@ -167,8 +167,8 @@ def plot_county_substitution(
     if positions.size == 0:
         raise KeyError(f"{county} is not in this sample")
     row = int(positions[0])
-    county_names = load_county_geometry().set_index("GEOID")["NAME"]
-    title = county_label(county, county_names)
+    county_names = load_unit_names("national_counties", geoids)
+    title = unit_label(county, county_names)
 
     written = []
     for label, matrix in (("with", X), ("without", X.drop(columns=[removed]))):
@@ -284,7 +284,12 @@ def substitution_test(
         "r2_before": float(r2_before),
         "r2_after": float(r2_after),
         "r2_cost": float(r2_before - r2_after),
-        "sample": describe_sample(top_percent, bottom_percent, len(X))[0]
+        "sample": describe_sample(
+            top_percent,
+            bottom_percent,
+            len(X),
+            geography=config.describe_geography("national_counties"),
+        )[0]
         + (f", without {', '.join(exclude_groups)}" if exclude_groups else ""),
         "X": X,
         "y": y,

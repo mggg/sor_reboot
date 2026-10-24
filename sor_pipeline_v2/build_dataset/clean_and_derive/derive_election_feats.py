@@ -4,10 +4,10 @@ Depends on step 2: TURNOUT's denominator (VOTINGAGEPOP) is an ACS feature
 born in the ACS step. Puerto Rico's 78 municipios have NaN vote columns
 (no presidential vote) and correctly come out NaN in all three features.
 
-Which features are asked for is the caller's choice, because the two
-levels have different inputs: counties carry both 2016 and 2020 votes and
-so support all five, while tracts carry 2020 only (VEST 2016 has not been
-prorated) and so ask for the three that need no prior year.
+Which features are asked for is the caller's choice. Both levels now
+carry 2016 and 2020 votes -- counties from MEDSL, tracts from the GerryDB
+release -- so both support every declared feature except TURNOUT, whose
+denominator is unusable at tract level (see TRACT_ABSENT_VARIABLES).
 """
 
 from __future__ import annotations
@@ -53,7 +53,11 @@ def add_election_features(
         for variable in features
         for column in variable.variable_computer.input_columns()
     }
-    missing = sorted(required - set(df.columns))
+    # Features compute in declaration order, so a later one may read an
+    # earlier one's output: VOTELEANCHANGE subtracts the two lean columns this
+    # step itself creates. Those are not expected on the way in.
+    produced = {variable.var_name for variable in features}
+    missing = sorted(required - set(df.columns) - produced)
     if missing:
         raise KeyError(
             f"election inputs absent: {missing} -- add_election_features must "

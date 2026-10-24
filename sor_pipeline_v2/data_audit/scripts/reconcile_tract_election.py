@@ -1,27 +1,31 @@
-"""Audit: do the prorated tract votes reconcile with the published canvass?
+"""Audit: do the release's tract votes reconcile with the published canvass?
 
-The tract election path (VEST precincts -> blocks -> tracts) shares no code
-and no source file with the county path (MEDSL). That makes MEDSL an
-independent channel, and this script is the comparison -- the same
-principle as the layer-1 scripts, applied to a derived geography.
+The tract election path (the lab's GerryDB release, built from Dave's
+Redistricting block data) shares no code and no source file with the
+county path (MEDSL). That makes MEDSL an independent channel, and this
+script is the comparison -- the same principle as the layer-1 scripts,
+applied to a geography nobody canvasses. It matters more now than it did
+when the tract figures were ours: this is the only check that the numbers
+we have adopted are the ones the states actually certified.
 
 Two checks, because they answer different questions:
 
   STATEWIDE, against MEDSL's total INCLUDING its FIPS-less reporting units
   (overseas and military ballots, statewide write-ins, Rhode Island's
-  federal precinct). This should match essentially exactly: VEST and MEDSL
-  are independent compilations of the same canvass, so a disagreement here
-  is a real sourcing difference worth chasing.
+  federal precinct). This should match essentially exactly: the release
+  and MEDSL are independent compilations of the same canvass, so a
+  disagreement here is a real sourcing difference worth chasing.
 
   BY COUNTY, against the county loader's output. This is EXPECTED to
   differ, by exactly the FIPS-less votes: `load_county_election` drops
-  rows with no county FIPS, while VEST allocates them into precincts. The
-  check reports the gap and whether it is explained by those units, rather
-  than pretending the two levels should agree.
+  rows with no county FIPS, while the release has every vote sitting in
+  some block. The check reports the gap and whether it is explained by
+  those units, rather than pretending the two levels should agree.
 
 A state that passes both is done. A state that fails the statewide check
-has a quirk -- a precinct-matching problem, a mode VEST and MEDSL treat
-differently -- and needs looking at before its tracts are trusted.
+has a quirk -- a precinct-matching problem upstream, a mode the two
+compilations treat differently -- and needs looking at before its tracts
+are trusted.
 
 Run: `python -m data_audit.scripts.reconcile_tract_election --states 44 25`
 """

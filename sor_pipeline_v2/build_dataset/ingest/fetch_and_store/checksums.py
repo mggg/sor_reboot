@@ -29,11 +29,6 @@ from build_dataset.ingest.election.election_api import (
     MEDSL_COUNTY_RAW_CSV,
     MEDSL_COUNTY_RAW_MD5,
 )
-from build_dataset.ingest.election.tract_election_api import (
-    TIGER_BLOCK_CACHE_TEMPLATE,
-    VEST_PRECINCT_CACHE_TEMPLATE,
-    read_vest_checksums,
-)
 from build_dataset.ingest.fetch_and_store.census_client import NATIONAL_COUNTIES
 from build_dataset.ingest.fetch_and_store.source_cache import cache_path
 from build_dataset.ingest.geometry.geometry_api import COUNTY_GEOMETRY_2020_PARQUET
@@ -127,12 +122,15 @@ RAW_SOURCE_ORIGINS: dict[str, ChecksumOrigin] = {
 # templates rather than names because which ones exist depends on which
 # states have been built, and `build_manifest` hard-fails on a declared
 # file that is absent -- a CA-only build has to stay recordable.
-PER_STATE_SOURCE_TEMPLATES: dict[str, ChecksumOrigin] = {
-    VEST_PRECINCT_CACHE_TEMPLATE: ChecksumOrigin.PUBLISHED,
-    # SELF, not PUBLISHED: www2.census.gov serves these as static files and
-    # publishes no digest to check them against.
-    TIGER_BLOCK_CACHE_TEMPLATE: ChecksumOrigin.CUSTOM,
-}
+# Raw files the build fetches one state at a time. Empty since the tract
+# election source became the lab's GerryDB release: that release is
+# delivered as files rather than fetched, and it is not written to
+# RAW_NATIONAL_DIR, which is the only directory this manifest covers.
+# The VEST and TIGER archives that used to be declared here are gone
+# along with the proration that read them; records already written for
+# them stay in the manifest, which is additive, until `--forget` drops
+# them by name.
+PER_STATE_SOURCE_TEMPLATES: dict[str, ChecksumOrigin] = {}
 
 PUBLISHED_CHECKSUMS: dict[str, PublishedChecksum] = {
     MEDSL_COUNTY_RAW_CSV: PublishedChecksum(
@@ -167,10 +165,10 @@ def declared_sources() -> dict[str, ChecksumOrigin]:
 def published_checksums() -> dict[str, PublishedChecksum]:
     """Depositor-published digests, by filename.
 
-    MEDSL's is pinned in `election_api`; VEST's are whatever the fetch
-    recorded in VEST_CHECKSUMS_JSON, which is why this is a function and
-    not a literal -- the set grows as states are built. That file spells
-    its fields as this one does, so a record copies across.
+    Only MEDSL's, pinned in `election_api`. Still a function rather than
+    a literal: it was one when VEST archives contributed their published
+    digests here, and a per-state source that publishes one can be added
+    back without changing the callers.
 
     Returns
     -------
@@ -179,18 +177,6 @@ def published_checksums() -> dict[str, PublishedChecksum]:
         was published in.
     """
     published = dict(PUBLISHED_CHECKSUMS)
-    for record in read_vest_checksums().values():
-        # DigestAlgorithm(...) rather than the string: a record naming an
-        # algorithm this module cannot compute should raise here, not
-        # compare a SHA-1 digest against an MD5 and blame the file.
-        published[record["cache_filename"]] = PublishedChecksum(
-            algorithm=DigestAlgorithm(record["algorithm"]),
-            checksum_value=record["checksum_value"],
-            checksum_source_description=(
-                f"Harvard Dataverse metadata API, {record['doi']} "
-                f"v{record['dataset_version']}"
-            ),
-        )
     return published
 
 

@@ -31,6 +31,11 @@ NATIONAL_DIR = DATA_DIR / "national"
 
 RAW_NATIONAL_DIR = NATIONAL_DIR / "raw"
 
+# The lab's GerryDB release: one geopackage per state per geography level,
+# delivered as files rather than fetched. Read-only input the build never
+# writes to, and the only source of tract-level election returns.
+GERRYDB_RELEASE_DIR = DATA_DIR / "RELEASE_geopackages"
+
 # Durable records ABOUT the raw sources: what each file's bytes hashed
 # to, and which published release a download came from. Its own directory,
 # outside DATA_DIR, because the whole job of these records is to outlive

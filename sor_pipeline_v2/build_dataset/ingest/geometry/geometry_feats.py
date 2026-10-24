@@ -27,14 +27,14 @@ GEOMETRY_FEATURES: list[ModelVariable] = [
         source="TIGER",
         var_name=INTERNAL_POINT_LATITUDE,
         display_name="Latitude",
-        description="Latitude of the county's internal point (TIGER/Line 2020)",
+        description="Latitude of the unit's internal point (TIGER/Line 2020)",
         variable_computer=Passthrough(code=INTERNAL_POINT_LATITUDE),
     ),
     ModelVariable(
         source="TIGER",
         var_name=INTERNAL_POINT_LONGITUDE,
         display_name="Longitude",
-        description="Longitude of the county's internal point (TIGER/Line 2020)",
+        description="Longitude of the unit's internal point (TIGER/Line 2020)",
         variable_computer=Passthrough(code=INTERNAL_POINT_LONGITUDE),
     ),
     ModelVariable(
