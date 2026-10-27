@@ -23,10 +23,15 @@ mkdir -p slurm/logs  # Slurm will not create the log directory itself
 # top of the other features.
 COUNTY_GROUPED=(--level national_tracts --split-grouping county --exclude geography)
 
+# 8 CPUs and single-threaded OpenBLAS: at sweep.sbatch's default 32 CPUs,
+# LightGBM and ridge crawled or returned NaN on q001's AMD EPYC 9965; the
+# runs that completed cleanly used these settings.
+export OPENBLAS_NUM_THREADS=1  # sbatch passes the submitting shell's environment to the job
+
 submit() {
     local name="$1"
     shift
-    sbatch --job-name="$name" slurm/sweep.sbatch "${COUNTY_GROUPED[@]}" "$@"
+    sbatch --cpus-per-task=8 --job-name="$name" slurm/sweep.sbatch "${COUNTY_GROUPED[@]}" "$@"
 }
 
 if [[ "${1:-}" == "test" ]]; then
