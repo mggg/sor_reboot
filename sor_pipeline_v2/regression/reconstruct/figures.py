@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from utils import config
+
 
 def plot_curve(curve: pd.DataFrame, summary: dict, output_path: Path) -> Path:
     """Figure 1: what each chosen feature adds, in selection order.
@@ -52,7 +54,8 @@ def plot_curve(curve: pd.DataFrame, summary: dict, output_path: Path) -> Path:
         f"explain {summary['r2_ceiling']:.0%}",
         fontsize=10,
     )
-    axes.spines[["top", "right"]].set_visible(False)
+    for side in ("top", "right"):
+        axes.spines[side].set_visible(False)
     figure.text(
         0.5,
         -0.01,
@@ -66,7 +69,7 @@ def plot_curve(curve: pd.DataFrame, summary: dict, output_path: Path) -> Path:
         color="0.35",
     )
     figure.tight_layout()
-    figure.savefig(output_path, dpi=150, bbox_inches="tight")
+    figure.savefig(output_path, dpi=config.FIGURE_DPI, bbox_inches="tight")
     plt.close(figure)
     return output_path
 
@@ -112,7 +115,8 @@ def plot_solo_versus_added(
         f"{summary['sample']}",
         fontsize=10,
     )
-    axes.spines[["top", "right"]].set_visible(False)
+    for side in ("top", "right"):
+        axes.spines[side].set_visible(False)
     figure.text(
         0.5,
         -0.01,
@@ -126,6 +130,6 @@ def plot_solo_versus_added(
         color="0.35",
     )
     figure.tight_layout()
-    figure.savefig(output_path, dpi=150, bbox_inches="tight")
+    figure.savefig(output_path, dpi=config.FIGURE_DPI, bbox_inches="tight")
     plt.close(figure)
     return output_path

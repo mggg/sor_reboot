@@ -19,6 +19,10 @@ if not success:
         "No .env file found. Make sure to set the CENSUS_API_KEY environment variable."
     )
 
+# --- Figures -----------------------------------------------------------------
+# Resolution for every saved raster figure; nothing in the pipeline goes below it.
+FIGURE_DPI = 300
+
 # --- Paths -------------------------------------------------------------------
 # Resolve relative to this package so scripts work regardless of CWD.
 PKG_ROOT = Path(__file__).resolve().parent
@@ -371,19 +375,14 @@ def tract_parquet_paths(state_fips: Sequence[str] | None) -> tuple[Path, Path]:
     return tract_dir / f"raw_{label}.parquet", tract_dir / f"processed_{label}.parquet"
 
 
-def describe_geography(
-    level: GeographicBuildLevel, state_fips: Sequence[str] | None = None
+def describe_geography_in_eng(
+    geo_level: GeographicBuildLevel, state_fips: Sequence[str] | None = None
 ) -> str:
     """The geography in words: "California tracts", "US counties".
 
-    A filename is not a description. `processed_states-06.parquet` tells
-    a reader nothing, and a figure gets read far from the folder it came
-    out of. Here rather than in any one package so a regression figure
-    and a feature report name the same geography the same way.
-
     Parameters
     ----------
-    level : GeographicBuildLevel
+    geo_level : GeographicBuildLevel
         Which dataset.
     state_fips : sequence of str or None
         Tracts only: the state scope. None means all of them.
@@ -393,7 +392,7 @@ def describe_geography(
     str
         e.g. "California tracts", "US tracts", "US counties".
     """
-    if level == "national_counties":
+    if geo_level == "national_counties":
         return "US counties"
     if not state_fips:
         return "US tracts"

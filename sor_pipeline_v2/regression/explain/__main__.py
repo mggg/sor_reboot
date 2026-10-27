@@ -131,7 +131,7 @@ def run_single_seed_shap(
         feature_df = ablated
         ablation_suffix = "_without-" + "-".join(exclude_groups)
 
-    geography = config.describe_geography(level, state_fips)
+    geography = config.describe_geography_in_eng(level, state_fips)
     sample_note, stratum_suffix = describe_sample(
         top_percent, bottom_percent, n_rows=len(feature_df), geography=geography
     )

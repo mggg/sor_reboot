@@ -136,7 +136,7 @@ def residual_table(
         top_percent,
         bottom_percent,
         len(feature_df),
-        geography=config.describe_geography(level, state_fips),
+        geography=config.describe_geography_in_eng(level, state_fips),
     )
     print(
         f"{MODEL_DISPLAY_NAMES[model_name]}, weighted, {target}: "
@@ -225,7 +225,7 @@ def run_residuals(
     table, out_of_fold_r2, sample_note = residual_table(
         model_name, target, folds, seed, top_percent, bottom_percent, level, state_fips
     )
-    geography = config.describe_geography(level, state_fips)
+    geography = config.describe_geography_in_eng(level, state_fips)
     print(
         f"\nweighted out-of-fold R2: {out_of_fold_r2:.3f} "
         f"({folds}-fold, seed {seed}) on {sample_note}"

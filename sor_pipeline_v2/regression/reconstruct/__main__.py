@@ -182,7 +182,7 @@ def reconstruction_curve(
             top_percent,
             bottom_percent,
             len(X),
-            geography=config.describe_geography("national_counties"),
+            geography=config.describe_geography_in_eng("national_counties"),
         )[0]
         + (f", without {', '.join(exclude_groups)}" if exclude_groups else ""),
     }

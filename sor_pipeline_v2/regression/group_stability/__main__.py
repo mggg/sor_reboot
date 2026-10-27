@@ -19,6 +19,7 @@ from tqdm import tqdm
 
 from build_dataset.feature_manifest import MODEL_GROUPS, group_features
 from build_dataset.ingest.fetch_and_store.store_df import load_df_from_parquet
+from model_utils.split import SplitGrouping, county_groups
 from regression.group_stability import figures
 from regression.shared.fit import MODEL_LABELS, split_fit_and_score_regression
 from regression.shared.prepare_df import prepare_df_for_regression
@@ -33,20 +34,10 @@ from regression.shared.run_config import (
 )
 from utils import config
 
-# One summary row per cell of the experiment grid (the four dimensions the
-# run loop iterates), aggregating across seeds. output column -> (input
-# column, statistic); r2 gets its full spread because the seed-noise reading
-# rule needs sd, min and max, ess gets min because the weighted reading rule
-# needs the worst fold.
-GRID_KEYS = ["group", "model", "weighting", "target"]
-SEED_AGGREGATIONS = {
-    # Both constant across a run -- every fit scores the same rows on
-    # the same 80/20 split -- but carried into the summary so that file
-    # says on its own how large the sample was, as it already does for
-    # the feature count. n_test is here because it is the DENOMINATOR of
-    # the ess columns below: ess is the effective size of the held-out
-    # fold, which is what an R2 is scored on, and it reads as
-    # implausibly small next to n unless n_test is beside it.
+# Collapse each combination's per-seed rows into one summary row.
+# Stats are: output column -> (input column, statistic).
+SUMMARY_ROW_KEYS = ["group", "model", "weighting", "target"]
+ACROSS_SEED_STATS = {
     "n": ("n", "first"),
     "n_test": ("n_test", "first"),
     "n_features": ("n_features", "first"),
@@ -65,14 +56,14 @@ def run_group_stability(
     full_regression_run_params: FullRegressionModelRunParams,
 ) -> pd.DataFrame:
     output_dir = create_run_dir(run_params=full_regression_run_params)
-    level = full_regression_run_params.level
+    geo_level = full_regression_run_params.geo_level
     input_path = config.processed_parquet_path(
-        level, full_regression_run_params.state_fips
+        geo_level, full_regression_run_params.state_fips
     )
     unfiltered_df = load_df_from_parquet(input_path)
-    # Tracts lack five declared predictors, so the "full matrix" is the
-    # full matrix FOR THIS LEVEL; see feature_manifest.TRACT_ABSENT_VARIABLES.
-    exclude_variables = absent_variables(level)
+    # Tracts don't have all the predictors that counties do due to the
+    # absence of certain variables at the tract level.
+    exclude_variables = absent_variables(geo_level)
 
     prepared_regression_data = prepare_df_for_regression(
         feature_groups=full_regression_run_params.feature_groups,
@@ -83,15 +74,25 @@ def run_group_stability(
     )
     full_feature_df = prepared_regression_data.full_feature_df
     n_rows = len(full_feature_df)
-    # Named, not just "tracts": a figure read on its own has to say
-    # WHICH tracts, and a CA-only run looks identical to a national one
-    # otherwise.
-    geography = config.describe_geography(level, full_regression_run_params.state_fips)
+
+    geography_in_eng = config.describe_geography_in_eng(
+        geo_level, full_regression_run_params.state_fips
+    )
     targets = list(REGRESSION_TARGETS.keys())
     seeds = full_regression_run_params.rng_seeds
     tree_params = full_regression_run_params.regression_tree_params
 
-    weightings = {
+    # If split grouping is county, then tracts get held out based on their county
+    # membership (not purely random at the tract level). This is meant to help avoid
+    # the model simply memorizing similar-looking tract features rather than learning
+    # generalizable patterns.
+    split_groups = (
+        county_groups(unfiltered_df.loc[full_feature_df.index, "GEOID"])
+        if full_regression_run_params.split_grouping == "county"
+        else None
+    )
+
+    hisp_weightings = {
         "unweighted": None,
         "weighted": prepared_regression_data.hispanic_weights,
     }
@@ -105,55 +106,52 @@ def run_group_stability(
             for group_name, feature_names in prepared_regression_data.feature_names_by_group.items()
         }
     )
-    # The ablation: the full matrix minus the excluded groups' columns, fit
-    # alongside the untouched full baseline so the pair is directly
-    # comparable -- same rows, same seeds, same split.
+
     if full_regression_run_params.exclude_groups:
-        dropped = {
+        dropped_groups = {
             name
-            for slug in full_regression_run_params.exclude_groups
-            for name in group_features([slug], exclude_variables)
+            for feat_group in full_regression_run_params.exclude_groups
+            for name in group_features([feat_group], exclude_variables)
         }
-        kept = [c for c in full_feature_df.columns if c not in dropped]
+        kept = [c for c in full_feature_df.columns if c not in dropped_groups]
         ablation_name = FULL_MINUS + "-".join(full_regression_run_params.exclude_groups)
-        # The stubs let a list key select a Series; a list of column names
-        # always yields a DataFrame, so narrow it.
+
         ablation_matrix = full_feature_df[kept]
         run_group_name_to_features_df[ablation_name] = ablation_matrix
         print(
             f"ablation {ablation_name}: {len(full_feature_df.columns)} -> {len(kept)} "
-            f"features ({len(dropped)} dropped)"
+            f"features ({len(dropped_groups)} dropped)"
         )
 
     n_fits = (
         len(seeds)
         * len(run_group_name_to_features_df)
         * len(MODEL_LABELS)
-        * len(weightings)
+        * len(hisp_weightings)
         * len(targets)
     )
     print(
         f"group stability -> {output_dir}\n"
         f"{input_path.name} · "
-        f"{n_rows:,} {geography} (complete on the full matrix) · "
+        f"{n_rows:,} {geography_in_eng} (complete on the full matrix) · "
         f"{len(full_feature_df.columns)} features · "
         f"matrices: {', '.join(run_group_name_to_features_df)} · "
-        f"params {tree_params} · {len(seeds)} seeds -> {n_fits} fits"
+        f"params {tree_params} · split grouping: {full_regression_run_params.split_grouping} · "
+        f"{len(seeds)} seeds -> {n_fits} fits"
     )
     output_dir.mkdir(parents=True, exist_ok=True)
-    # One CSV per finished seed, so a run killed partway keeps every seed
-    # it completed instead of nothing.
+
     seed_dir = output_dir / "by_seed"
     seed_dir.mkdir(exist_ok=True)
 
     run_results = []
     with tqdm(total=n_fits, desc="group stability", unit="fit") as progress:
-        for seed in seeds:  # Make one for loop; also merge with tqdm
+        for seed in seeds:
             seed_results = []
             for (group_name, group_df), model, weight, target in product(
                 run_group_name_to_features_df.items(),
                 MODEL_LABELS,
-                weightings.values(),
+                hisp_weightings.values(),
                 targets,
             ):
                 seed_results.append(
@@ -167,6 +165,7 @@ def run_group_stability(
                             seed,
                             weights=weight,
                             params=tree_params,
+                            groups=split_groups,
                         )
                     )
                 )
@@ -185,16 +184,16 @@ def run_group_stability(
 
     if full_regression_run_params.top_percent is not None:
         sample_note = (
-            f"top {full_regression_run_params.top_percent:g}% of {geography} "
+            f"top {full_regression_run_params.top_percent:g}% of {geography_in_eng} "
             f"by Hispanic population (n={n_rows:,})"
         )
     elif full_regression_run_params.bottom_percent is not None:
         sample_note = (
-            f"bottom {full_regression_run_params.bottom_percent:g}% of {geography} "
+            f"bottom {full_regression_run_params.bottom_percent:g}% of {geography_in_eng} "
             f"by Hispanic population (n={n_rows:,})"
         )
     else:
-        sample_note = f"all complete-case {geography} (n={n_rows:,})"
+        sample_note = f"all complete-case {geography_in_eng} (n={n_rows:,})"
     figures.plot_group_comparison(
         summary, output_dir, n_seeds=len(seeds), sample_note=sample_note
     )
@@ -204,7 +203,7 @@ def run_group_stability(
 
 def _summarize_across_seeds(by_seed: pd.DataFrame) -> pd.DataFrame:
     """Collapse per-fit rows to mean ± spread per experiment-grid cell."""
-    return by_seed.groupby(GRID_KEYS).agg(**SEED_AGGREGATIONS).reset_index()
+    return by_seed.groupby(SUMMARY_ROW_KEYS).agg(**ACROSS_SEED_STATS).reset_index()
 
 
 def _parse_args() -> FullRegressionModelRunParams:
@@ -297,6 +296,15 @@ def _parse_args() -> FullRegressionModelRunParams:
         "alongside the untouched full baseline: --exclude geography answers "
         "'what survives when the model cannot use location?'",
     )
+    parser.add_argument(
+        "--split-grouping",
+        choices=list(get_args(SplitGrouping)),
+        default="none",
+        help="which tracts the 80/20 train/test split keeps together. "
+        "'none' (default): each tract goes to train or test independently. "
+        "'county' (tract data only): a county's tracts all go to the same "
+        "side, so the model is trained and scored on different counties",
+    )
     args = parser.parse_args()
 
     # 'full' is the default request
@@ -320,8 +328,9 @@ def _parse_args() -> FullRegressionModelRunParams:
         bottom_percent=args.bottom_percent,
         include_full_baseline=include_full_baseline,
         exclude_groups=args.exclude or [],
-        level=args.level,
+        geo_level=args.level,
         state_fips=args.states,
+        split_grouping=args.split_grouping,
     )
 
 

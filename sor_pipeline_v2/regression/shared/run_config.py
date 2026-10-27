@@ -16,6 +16,7 @@ from build_dataset.ingest.pl.feats.hisp_race_targets import (
     HISP_WHITE_PCT_OF_HISP_POP,
     HISP_WHITE_SOR_PCT_OF_HISP_POP,
 )
+from model_utils.split import SplitGrouping
 from utils import config
 
 # Target column -> the short label used in output tables.
@@ -59,17 +60,25 @@ class FullRegressionModelRunParams:
     # Which dataset to fit. `state_fips` scopes a tract run to the states
     # that build covered, and both appear in the run directory's name, so
     # a tract run cannot overwrite a county run's outputs.
-    level: config.GeographicBuildLevel = "national_counties"
+    geo_level: config.GeographicBuildLevel = "national_counties"
     state_fips: list[str] | None = None
+    # Which tracts each seed's train/test split keeps together; see model_utils.split.
+    split_grouping: SplitGrouping = "none"
 
     def __post_init__(self) -> None:
         if self.top_percent is not None and self.bottom_percent is not None:
             raise ValueError("pass top_percent or bottom_percent, not both")
 
-        if self.state_fips and self.level == "national_counties":
+        if self.state_fips and self.geo_level == "national_counties":
             raise ValueError(
                 "state_fips scopes a tract build; the county build is one "
                 "national pull with no state subsets"
+            )
+
+        if self.split_grouping == "county" and self.geo_level == "national_counties":
+            raise ValueError(
+                "county grouping keeps a county's tracts together; at the "
+                "county level every row is already its own county"
             )
 
         if self.feature_groups is None:
@@ -93,7 +102,12 @@ class FullRegressionModelRunParams:
 
 # The inverse of what `create_run_dir` writes into the name: "_tracts"
 # optionally followed by "-" and the state codes it covered.
-RUN_DIR_SCOPE = re.compile(r"_tracts(?:-(?P<states>[0-9]{2}(?:-[0-9]{2})*))?")
+# Runs before 2026-10-27 spelled the states as FIPS codes ("06"), later
+# ones as USPS codes ("CA"); both still read back.
+RUN_DIR_SCOPE = re.compile(
+    r"_tracts(?:-(?P<states>(?:[0-9]{2}|[A-Z]{2})(?:-(?:[0-9]{2}|[A-Z]{2}))*))?"
+)
+_USPS_TO_STATE_FIPS = {usps: fips for fips, usps in config.STATE_FIPS_TO_USPS.items()}
 
 
 def scope_from_run_dir(
@@ -109,7 +123,7 @@ def scope_from_run_dir(
     Parameters
     ----------
     name : str
-        A run directory's name, e.g. "2026-10-18_seeds-1-50_tracts-06".
+        A run directory's name, e.g. "2026-10-18_seeds-1-50_tracts-CA".
 
     Returns
     -------
@@ -121,7 +135,11 @@ def scope_from_run_dir(
     if not found:
         return "national_counties", None
     states = found.group("states")
-    return "national_tracts", states.split("-") if states else None
+    if not states:
+        return "national_tracts", None
+    return "national_tracts", [
+        _USPS_TO_STATE_FIPS.get(code, code) for code in states.split("-")
+    ]
 
 
 def scope_suffix(
@@ -144,13 +162,15 @@ def scope_suffix(
     Returns
     -------
     str
-        "" for counties, "_tracts" nationally, "_tracts-06" for one state.
+        "" for counties, "_tracts" nationally, "_tracts-CA" for one state.
     """
     if level == "national_counties":
         return ""
     if not state_fips:
         return "_tracts"
-    return "_tracts-" + "-".join(sorted(state_fips))
+    return "_tracts-" + "-".join(
+        sorted(config.STATE_FIPS_TO_USPS[fips] for fips in state_fips)
+    )
 
 
 def absent_variables(level: config.GeographicBuildLevel) -> tuple[str, ...]:
@@ -185,7 +205,7 @@ def create_run_dir(run_params: FullRegressionModelRunParams) -> Path:
         )
     # The level only when it is not the county default, so a county run's
     # name is unchanged and a tract run is unmistakable.
-    name += scope_suffix(run_params.level, run_params.state_fips)
+    name += scope_suffix(run_params.geo_level, run_params.state_fips)
     defaults = asdict(RegressionParameters())
     for regression_param, value in asdict(run_params.regression_tree_params).items():
         if value != defaults[regression_param]:
@@ -194,6 +214,8 @@ def create_run_dir(run_params: FullRegressionModelRunParams) -> Path:
         name += f"_top-{run_params.top_percent:g}pct"
     if run_params.bottom_percent is not None:
         name += f"_bottom-{run_params.bottom_percent:g}pct"
+    if run_params.split_grouping != "none":
+        name += f"_grouped-by-{run_params.split_grouping}"
     # Only a subset run names its groups; the every-group default stays
     # short. Named from the matrices actually fit, so `--groups full` --
     # which leaves feature_groups empty, the baseline being a runner

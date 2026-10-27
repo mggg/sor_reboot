@@ -156,6 +156,7 @@ def split_fit_and_score_regression(
     seed: int,
     weights: pd.Series | None = None,
     params: RegressionParameters | None = None,
+    groups: pd.Series | None = None,
 ) -> RegressionFitMetrics:
     """Split, fit, score -- the metrics of one fit.
 
@@ -168,8 +169,10 @@ def split_fit_and_score_regression(
       2. the scoring (R²/RMSE with the same test weights -- otherwise you
                       train on people and grade on counties)
 
+    `groups` (aligned to X's index, e.g. county codes) switches the split
+    from random rows to whole groups held out; see `split_train_test`.
     """
-    X_train, X_test, y_train, y_test = split_train_test(X, y, seed)
+    X_train, X_test, y_train, y_test = split_train_test(X, y, seed, groups=groups)
     w_train = None if weights is None else weights.loc[X_train.index].to_numpy()
     w_test = None if weights is None else weights.loc[X_test.index].to_numpy()
     ess = (

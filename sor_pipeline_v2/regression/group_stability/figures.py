@@ -15,6 +15,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 
 from regression.shared.run_config import FULL
+from utils import config
 
 # One fixed hue per estimator, everywhere in the pipeline.
 # Okabe-Ito, which is colour-blind safe: the old brick/orange/green put two
@@ -145,7 +146,8 @@ def _plot_one_figure(
     if group_order and group_order[0] == FULL:
         axes.axhline(0.5, color="0.8", lw=1)  # separate `full` from the groups
     axes.set_xlim(*x_limits)
-    axes.spines[["top", "right"]].set_visible(False)
+    for side in ("top", "right"):
+        axes.spines[side].set_visible(False)
     axes.grid(axis="x", alpha=0.3)
     axes.set_axisbelow(True)
     axes.set_yticks(range(len(group_order)), group_order)
@@ -186,7 +188,7 @@ def _plot_one_figure(
     fig.tight_layout()
     fig.savefig(
         output_dir / f"group_comparison_{target}_{weighting}.png",
-        dpi=150,
+        dpi=config.FIGURE_DPI,
         bbox_inches="tight",
     )
     plt.close(fig)
@@ -197,7 +199,6 @@ if __name__ == "__main__":
     import sys
 
     from regression.shared.run_config import scope_from_run_dir
-    from utils import config
 
     run_dir = Path(sys.argv[1])
     summary = pd.read_csv(run_dir / "group_summary.csv")
@@ -205,7 +206,7 @@ if __name__ == "__main__":
     # The directory name is the only record of what a finished run
     # covered, so both the stratum and the geography are read back out
     # of it rather than assumed.
-    geography = config.describe_geography(*scope_from_run_dir(run_dir.name))
+    geography = config.describe_geography_in_eng(*scope_from_run_dir(run_dir.name))
     # Every fit in a run scores the same rows, so the per-seed table's
     # `n` is the run's sample size. Read back rather than dropped: a
     # figure without its n says nothing about how much it rests on.

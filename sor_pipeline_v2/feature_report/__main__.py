@@ -106,7 +106,9 @@ def _report_dir(
     """
     scope = "counties" if level == "national_counties" else "tracts"
     if state_fips:
-        scope += "-" + "-".join(sorted(state_fips))
+        scope += "-" + "-".join(
+            sorted(config.STATE_FIPS_TO_USPS[fips] for fips in state_fips)
+        )
     name = f"{datetime.now(UTC).astimezone().date()}_{scope}_{'-'.join(feature_groups)}"
     if sample_choice != "model":
         name += f"_{sample_choice}"
@@ -177,7 +179,7 @@ def report_group(
 
     unit = "counties" if geographic_level == "national_counties" else "tracts"
     scope_note = (
-        f"{config.describe_geography(geographic_level, state_fips)}: "
+        f"{config.describe_geography_in_eng(geographic_level, state_fips)}: "
         f"{len(sample_df):,} of "
         f"{len(unfiltered_df):,}, {SAMPLE_NOTES[sample_choice]}"
     )
@@ -251,7 +253,7 @@ def _parse_args() -> argparse.Namespace:
         "--dpi",
         type=int,
         default=DEFAULT_DPI,
-        help=f"raster resolution for png output (default: {DEFAULT_DPI})",
+        help=f"raster resolution for png output (default and minimum: {DEFAULT_DPI})",
     )
     parser.add_argument(
         "--format",
@@ -268,7 +270,10 @@ def _parse_args() -> argparse.Namespace:
         "complete-case rows (default); 'per_feature' describes each feature "
         "over its own non-null rows",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.dpi < DEFAULT_DPI:
+        parser.error(f"--dpi must be at least {DEFAULT_DPI}")
+    return args
 
 
 if __name__ == "__main__":

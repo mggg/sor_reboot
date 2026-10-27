@@ -15,6 +15,7 @@ from matplotlib import patheffects
 from matplotlib.axes import Axes
 
 from feature_report.metadata import column_meanings, meaning_for
+from utils import config
 
 # Longer than this and the labels crowd out the plot itself; the longest
 # declared display name runs 64 characters.
@@ -57,7 +58,7 @@ def plot_beeswarm(explanation, title: str, output_path: Path) -> None:
     shap.plots.beeswarm(explanation, max_display=15, show=False)
     plt.title(title, fontsize=10)
     plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.savefig(output_path, dpi=config.FIGURE_DPI, bbox_inches="tight")
     plt.close("all")
 
 
@@ -95,7 +96,7 @@ def plot_waterfall(
         color="0.35",
     )
     plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.savefig(output_path, dpi=config.FIGURE_DPI, bbox_inches="tight")
     plt.close("all")
     print(f"  {county_title}: waterfall written")
 

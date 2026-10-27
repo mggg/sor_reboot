@@ -28,8 +28,9 @@ from matplotlib.axes import Axes
 from matplotlib.ticker import FuncFormatter, MaxNLocator
 
 from feature_report.metadata import ColumnMeaning, meaning_for
+from utils import config
 
-DEFAULT_DPI = 200
+DEFAULT_DPI = config.FIGURE_DPI
 VECTOR_FORMATS = ("pdf", "svg")
 
 HISTOGRAM_BINS = 50
