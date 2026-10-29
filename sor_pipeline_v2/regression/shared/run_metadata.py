@@ -12,6 +12,7 @@ before running on them, and the metadata records them either way.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import platform
@@ -26,15 +27,16 @@ from typing import Any
 import pandas as pd
 
 from build_dataset.ingest.declarations.feature_utils import ModelVariable
-from build_dataset.ingest.fetch_and_store.checksums import (
-    RAW_CHECKSUM_MANIFEST,
-    file_sha256,
-)
 from build_dataset.model_groups import MODEL_GROUPS
 from regression.shared.run_config import run_file
 from utils import config
 
 PIPELINE_DIR = Path(__file__).resolve().parents[2]  # sor_pipeline_v2/
+# The record `build_dataset.ingest.fetch_and_store.checksums` writes. Not
+# imported from there: that module loads the Census API client, which
+# refuses to import without CENSUS_API_KEY, and a run that only reads
+# finished parquets (as on the cluster) has no key.
+RAW_CHECKSUM_MANIFEST = config.SOURCE_RECORDS_DIR / "raw_checksums.json"
 # What the run's code is: the pipeline, plus the environment files that
 # live one level up at the repo root.
 CODE_PATHS = [".", "../pyproject.toml", "../uv.lock"]
@@ -102,6 +104,12 @@ def warn_if_uncommitted(git: dict[str, Any]) -> None:
         return
     if input("run anyway? [y/N] ").strip().lower() != "y":
         raise SystemExit("stopped: commit the changes, or answer y to run on them")
+
+
+def file_sha256(path: Path) -> str:
+    """The file's SHA-256, as the checksum manifest records it."""
+    with path.open("rb") as handle:
+        return hashlib.file_digest(handle, "sha256").hexdigest()
 
 
 def _shown_path(path: Path) -> str:
