@@ -1,7 +1,7 @@
 """Persist and reload pipeline artifacts across the data/ tree.
 
-Thin helpers over parquet/json so each stage reads from and writes to a known
-location (data/raw -> data/interim -> data/processed) instead of dumping files
+Thin helpers over parquet so each stage reads from and writes to a known
+location under data/ (the paths in utils.config) instead of dumping files
 into the working directory the way the notebooks do.
 """
 

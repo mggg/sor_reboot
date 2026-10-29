@@ -41,15 +41,15 @@ def load_dhc_features(scope: GeoScope) -> pd.DataFrame:
     Columns come back prefixed (see `DHC_COLUMN_PREFIX`): DHC's P2 codes share
     names with the PL file's P2 codes and would collide in the merged dataset.
 
-    The national all-counties pull is cached in RAW_NATIONAL_DIR and served
-    from disk on later builds. The cache validates itself against the
+    Each scope's pull is cached in RAW_NATIONAL_DIR and served from disk
+    on later builds. The cache validates itself against the
     declared features: if a newly declared DHC feature needs a column the
     cached file predates, the file is refetched and overwritten.
 
     Parameters
     ----------
-    for_geo, in_geo : str
-        The `for=` / `in=` clauses, e.g. "county:*" / "state:*".
+    scope : GeoScope
+        Which geographies to fetch, and which cache file holds them.
 
     Returns
     -------

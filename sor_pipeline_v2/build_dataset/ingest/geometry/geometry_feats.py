@@ -42,7 +42,7 @@ GEOMETRY_FEATURES: list[ModelVariable] = [
         var_name="DENSITY",
         display_name="Population density",
         description="Population density: PL total population divided by TIGER "
-        "land area (ALAND); rows with no land area are dropped",
+        "land area (ALAND); NaN where a unit has no land area",
         variable_computer=FractionalShare(
             numerator_codes=[TOTALPOP], denominator_codes=[LAND_AREA]
         ),

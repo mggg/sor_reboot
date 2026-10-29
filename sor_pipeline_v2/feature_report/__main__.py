@@ -5,48 +5,47 @@ named the same way the build and the regression name it, so
 `--level national_tracts --states 06` here reads exactly the file that
 `main_build` wrote and `regression.group_stability` fit.
 
-Two samples are available, and they answer different questions:
+Two row selections are available, and they answer different questions:
 
-  MODEL (default) describes every feature over the same rows -- the ones
+  COMPLETE_CASE (default) describes every feature over the same rows -- the ones
   the regression keeps, complete on the FULL feature matrix and every
   target. Distributions are comparable across features and consistent
   with the R2 values, because the rows are identical.
 
-  PER_FEATURE describes each feature over whichever rows published it, so
+  AVAILABLE_CASE describes each feature over whichever rows published it, so
   the row set differs from column to column. Truer to the variable's own
   distribution in that geography, but two features in the table are then
   no longer describing the same units.
 
-Either way the `pct_missing` column is measured on the unfiltered frame,
+Either way the `pct_of_file_missing` column is measured on the unfiltered frame,
 so what complete-case filtering cost is always visible.
 
-Beyond the model's own feature groups, the population columns no model
-fits on are reachable by name -- the decennial counts, the race-choice
-shares of the Hispanic population and of the total population, and the
-dominant-choice labels. `feature_report.groups` owns that mapping and
-checks that no processed column is left unreachable.
+Groups are the model's predictor groups, plus "targets" for the four
+shares the regression predicts; `feature_report.groups` maps each name to
+its columns.
 
 Run:
   python -m feature_report --level national_tracts --states 06 --groups income
   python -m feature_report --level national_counties --groups language geography
-  python -m feature_report --level national_tracts --states 06 \
-      --groups share_of_hisp share_of_pop counts
+  python -m feature_report --level national_tracts --states 06 --groups targets
 """
 
 from __future__ import annotations
 
 import argparse
 from collections.abc import Sequence
+from dataclasses import InitVar, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal, get_args
 
-from build_dataset.feature_manifest import MODEL_GROUPS
 from build_dataset.ingest.fetch_and_store.store_df import load_df_from_parquet
 from build_dataset.ingest.pl.feats.hisp_pop_feats import HISPANIC
 from build_dataset.ingest.pl.feats.hisp_race_targets import (
     HISP_SOR_ALONE_PCT_OF_HISP_POP,
 )
+from build_dataset.model_groups import MODEL_GROUPS
+from feature_report.column_meanings import column_meanings
 from feature_report.distributions import (
     DEFAULT_DPI,
     VECTOR_FORMATS,
@@ -54,13 +53,11 @@ from feature_report.distributions import (
 )
 from feature_report.glossary import GLOSSARY_MD, write_glossary
 from feature_report.groups import (
-    POPULATION_GROUPS,
     ReportGroupName,
-    model_slugs,
+    model_group_names,
     resolve_columns,
     validated_group_names,
 )
-from feature_report.metadata import column_meanings
 from feature_report.stats import feature_stats
 from regression.shared.prepare_df import prepare_df_for_regression
 from regression.shared.run_config import absent_variables
@@ -68,12 +65,102 @@ from utils import config
 
 STATS_CSV = "feature_stats.csv"
 
-SAMPLE_NOTES = {
-    "model": "only units with every model feature present (the regression's sample)",
-    "per_feature": "each feature over whatever units published it",
+ROW_SELECTION_NOTES = {
+    "complete_case": "only units with every model feature present (the regression's sample)",
+    "available_case": "each feature over whatever units published it",
 }
 
-SampleChoice = Literal["model", "per_feature"]
+RowSelection = Literal["complete_case", "available_case"]
+ImageFormat = Literal["png", "pdf", "svg"]
+
+
+@dataclass(frozen=True)
+class FeatureReportParams:
+    """Everything one feature report is parameterized by, checked on creation.
+
+    Attributes
+    ----------
+    geographic_level : config.GeographicBuildLevel
+        Which dataset to describe.
+    state_fips : list of str or None
+        Tracts only: the state scope the build covered.
+    requested_groups : sequence of str or None
+        Model group names, or "targets"; every model group when
+        omitted, so the targets are opt-in. Checked and narrowed to
+        ReportGroupName here, so strings from the CLI can be passed as is.
+        A constructor argument only; the checked list is `feature_groups`.
+    row_selection : RowSelection
+        "complete_case" or "available_case"; see the module docstring.
+    dpi : int
+        Raster resolution for png output; vector formats ignore it.
+    image_format : ImageFormat
+        "png", "pdf" or "svg".
+    feature_groups : list of ReportGroupName
+        Set from `requested_groups` on creation, not passed in.
+
+    Raises
+    ------
+    ValueError
+        If a value is outside what the report can use: an unknown level,
+        row selection, or image format; states on a county report or an
+        unknown state FIPS code; a dpi below DEFAULT_DPI.
+    KeyError
+        If a named group is neither a model group nor "targets".
+    """
+
+    geographic_level: config.GeographicBuildLevel = "national_counties"
+    state_fips: list[str] | None = None
+    requested_groups: InitVar[Sequence[str] | None] = None
+    row_selection: RowSelection = "complete_case"
+    dpi: int = DEFAULT_DPI
+    image_format: ImageFormat = "png"
+    feature_groups: list[ReportGroupName] = field(init=False)
+
+    def __post_init__(self, requested_groups: Sequence[str] | None) -> None:
+        levels = get_args(config.GeographicBuildLevel)
+        if self.geographic_level not in levels:
+            raise ValueError(
+                f"unknown geographic level {self.geographic_level!r}; known: {list(levels)}"
+            )
+
+        if self.state_fips and self.geographic_level == "national_counties":
+            raise ValueError(
+                "state_fips scopes a tract build; the county build is one "
+                "national pull with no state subsets"
+            )
+        if self.state_fips:
+            unknown_states = [
+                fips
+                for fips in self.state_fips
+                if fips not in config.STATE_FIPS_TO_USPS
+            ]
+            if unknown_states:
+                raise ValueError(f"unknown state FIPS code(s) {unknown_states}")
+
+        object.__setattr__(
+            self,
+            "feature_groups",
+            (
+                validated_group_names(requested_groups)
+                if requested_groups
+                else [*MODEL_GROUPS]
+            ),
+        )
+
+        if self.row_selection not in get_args(RowSelection):
+            raise ValueError(
+                f"unknown row selection {self.row_selection!r}; "
+                f"known: {list(get_args(RowSelection))}"
+            )
+
+        if self.dpi < DEFAULT_DPI:
+            raise ValueError(f"dpi must be at least {DEFAULT_DPI}, got {self.dpi}")
+
+        if self.image_format not in get_args(ImageFormat):
+            raise ValueError(
+                f"unknown image format {self.image_format!r}; "
+                f"known: {list(get_args(ImageFormat))}"
+            )
 
 
 def _scope_phrase(
@@ -96,9 +183,9 @@ def _report_dir(
     level: config.GeographicBuildLevel,
     state_fips: list[str] | None,
     feature_groups: Sequence[ReportGroupName],
-    sample_choice: SampleChoice,
+    row_selection: RowSelection,
 ) -> Path:
-    """`<date>_<scope>_<feature_groups>[_per_feature]`, beside the regression's runs.
+    """`<date>_<scope>_<feature_groups>[_available_case]`, beside the regression's runs.
 
     The scope and the feature_groups are both in the name because the same group
     on two geographies is two different answers, and nothing else in the
@@ -110,38 +197,18 @@ def _report_dir(
             sorted(config.STATE_FIPS_TO_USPS[fips] for fips in state_fips)
         )
     name = f"{datetime.now(UTC).astimezone().date()}_{scope}_{'-'.join(feature_groups)}"
-    if sample_choice != "model":
-        name += f"_{sample_choice}"
+    if row_selection != "complete_case":
+        name += f"_{row_selection}"
     return config.DATA_DIR / "report" / "features" / name
 
 
-def report_group(
-    geographic_level: config.GeographicBuildLevel = "national_counties",
-    state_fips: list[str] | None = None,
-    feature_groups: Sequence[ReportGroupName] | None = None,
-    sample_choice: SampleChoice = "model",
-    dpi: int = DEFAULT_DPI,
-    image_format: str = "png",
-) -> Path:
+def report_group(params: FeatureReportParams) -> Path:
     """Write one group's stats table and histograms; return the directory.
 
     Parameters
     ----------
-    geographic_level : config.GeographicBuildLevel
-        Which dataset to describe.
-    state_fips : list of str or None
-        Tracts only: the state scope the build covered.
-    feature_groups : sequence of ReportGroupName or None
-        Group names, model or population; every model group when
-        omitted. Population groups are opt-in, because asking for
-        everything is 127 columns. Strings from outside go through
-        `groups.validated_group_names` first -- the CLI does that.
-    sample_choice : SampleChoice
-        "model" or "per_feature"; see the module docstring.
-    dpi : int
-        Raster resolution for png output; vector formats ignore it.
-    image_format : str
-        "png", "pdf" or "svg".
+    params : FeatureReportParams
+        What to describe and how; its values are checked on creation.
 
     Returns
     -------
@@ -150,22 +217,21 @@ def report_group(
 
     Raises
     ------
-    KeyError
-        If a named group is neither a model nor a population group.
     FileNotFoundError
         If the level's processed parquet has not been built.
     """
-    requested_groups: list[ReportGroupName] = (
-        list(feature_groups) if feature_groups else [*MODEL_GROUPS]
-    )
+    geographic_level = params.geographic_level
+    state_fips = params.state_fips
+    row_selection = params.row_selection
+    requested_groups = params.feature_groups
     input_path = config.processed_parquet_path(geographic_level, state_fips)
     unfiltered_df = load_df_from_parquet(input_path)
     exclude_variables = absent_variables(geographic_level)
     column_names = resolve_columns(requested_groups, exclude_variables)
 
-    if sample_choice == "model":
+    if row_selection == "complete_case":
         prepared_df = prepare_df_for_regression(
-            feature_groups=model_slugs(requested_groups),
+            feature_groups=model_group_names(requested_groups),
             unfiltered_df=unfiltered_df,
             exclude_variables=exclude_variables,
         )
@@ -181,11 +247,11 @@ def report_group(
     scope_note = (
         f"{config.describe_geography_in_eng(geographic_level, state_fips)}: "
         f"{len(sample_df):,} of "
-        f"{len(unfiltered_df):,}, {SAMPLE_NOTES[sample_choice]}"
+        f"{len(unfiltered_df):,}, {ROW_SELECTION_NOTES[row_selection]}"
     )
 
     output_dir = _report_dir(
-        geographic_level, state_fips, requested_groups, sample_choice
+        geographic_level, state_fips, requested_groups, row_selection
     )
     output_dir.mkdir(parents=True, exist_ok=True)
     stats = feature_stats(
@@ -203,8 +269,8 @@ def report_group(
         scope_note,
         _scope_phrase(geographic_level, state_fips),
         meanings,
-        dpi,
-        image_format,
+        params.dpi,
+        params.image_format,
     )
     write_glossary(output_dir, scope_note, list(sample_df.columns))
 
@@ -213,15 +279,15 @@ def report_group(
         f"{scope_note}\n"
         f"groups: {', '.join(requested_groups)}\n"
         f"  {len(stats)} columns -> {STATS_CSV}\n"
-        f"  {len(figures)} {image_format} figures"
-        f"{'' if image_format in VECTOR_FORMATS else f' at {dpi} dpi'}"
+        f"  {len(figures)} {params.image_format} figures"
+        f"{'' if params.image_format in VECTOR_FORMATS else f' at {params.dpi} dpi'}"
         " (one per column, plus the feature grid)\n"
         f"  column glossary -> {GLOSSARY_MD}"
     )
     return output_dir
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args() -> FeatureReportParams:
     parser = argparse.ArgumentParser(
         prog="python -m feature_report",
         description="Distributions and descriptive stats for a feature group.",
@@ -246,8 +312,8 @@ def _parse_args() -> argparse.Namespace:
         default=None,
         metavar="G",
         help="groups to describe (default: every model group). Model groups: "
-        f"{list(MODEL_GROUPS)}. Population groups, opt-in by name: "
-        f"{list(POPULATION_GROUPS)}",
+        f"{list(MODEL_GROUPS)}; or 'targets' for the four regression "
+        "targets",
     )
     parser.add_argument(
         "--dpi",
@@ -258,31 +324,32 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--format",
         dest="image_format",
-        choices=("png", *VECTOR_FORMATS),
+        choices=list(get_args(ImageFormat)),
         default="png",
         help="figure format; pdf and svg stay sharp at any zoom and ignore --dpi",
     )
     parser.add_argument(
-        "--sample",
-        choices=list(get_args(SampleChoice)),
-        default="model",
-        help="'model' describes every feature over the regression's "
-        "complete-case rows (default); 'per_feature' describes each feature "
+        "--rows",
+        dest="row_selection",
+        choices=list(get_args(RowSelection)),
+        default="complete_case",
+        help="'complete_case' describes every feature over the regression's "
+        "complete-case rows (default); 'available_case' describes each feature "
         "over its own non-null rows",
     )
     args = parser.parse_args()
-    if args.dpi < DEFAULT_DPI:
-        parser.error(f"--dpi must be at least {DEFAULT_DPI}")
-    return args
+    try:
+        return FeatureReportParams(
+            geographic_level=args.level,
+            state_fips=args.states,
+            requested_groups=args.groups,
+            row_selection=args.row_selection,
+            dpi=args.dpi,
+            image_format=args.image_format,
+        )
+    except (ValueError, KeyError) as error:
+        parser.error(str(error))
 
 
 if __name__ == "__main__":
-    args = _parse_args()
-    report_group(
-        geographic_level=args.level,
-        state_fips=args.states,
-        feature_groups=validated_group_names(args.groups or []) or None,
-        sample_choice=args.sample,
-        dpi=args.dpi,
-        image_format=args.image_format,
-    )
+    report_group(_parse_args())

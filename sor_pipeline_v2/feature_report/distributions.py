@@ -27,7 +27,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.ticker import FuncFormatter, MaxNLocator
 
-from feature_report.metadata import ColumnMeaning, meaning_for
+from feature_report.column_meanings import ColumnMeaning, meaning_for
 from utils import config
 
 DEFAULT_DPI = config.FIGURE_DPI
@@ -77,7 +77,7 @@ def write_distributions(
         The short form for the centred headline, e.g. "the California
         tract level".
     meanings : dict
-        Column name -> its meaning, from `metadata.column_meanings`.
+        Column name -> its meaning, from `column_meanings.column_meanings`.
     dpi : int
         Raster resolution. Ignored by the vector formats.
     image_format : str
@@ -97,9 +97,7 @@ def write_distributions(
         meaning = meaning_for(str(column_name), meanings)
         figure, axes = plt.subplots(figsize=FIGURE_SIZE)
         _draw_histogram(axes, column_values, meaning, geographic_unit)
-        # Two text objects, not one: set_title applies a single
-        # alignment to its whole string, so a centred headline above a
-        # left-aligned block has to be drawn separately.
+
         figure.suptitle(_headline(meaning, scope_phrase), fontsize=HEADLINE_FONT_SIZE)
         axes.set_title(
             _title_block(meaning, scope_note), fontsize=TITLE_FONT_SIZE, loc="left"
@@ -145,11 +143,7 @@ def _title_block(meaning: ColumnMeaning, scope_note: str) -> str:
     if meaning.description:
         lines.append(textwrap.fill(meaning.description, TITLE_WIDTH))
     if meaning.formula:
-        # Neither wrapped nor cut: metadata.py has already made it short
-        # enough, by counting the terms it does not name.
         lines.append(f"Calculated as: {meaning.formula}")
-    # Deliberately unwrapped: the scope reads as one line or not at all,
-    # which is what FIGURE_SIZE is sized for.
     lines.append(scope_note)
     return "\n".join(lines)
 

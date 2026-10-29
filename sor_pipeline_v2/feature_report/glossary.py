@@ -25,9 +25,9 @@ COLUMN_GLOSSARY = """\
   where the relevant population is too small to publish.
 - **pct_of_file_missing** - that shortfall, as a percent of the file.
 - **n_rows_in_this_report** - how many rows THIS report describes. Under
-  the model sample it is identical for every column, because the
+  complete-case rows it is identical for every column, because the
   regression keeps only rows complete on every feature at once; under
-  the native sample it varies by column.
+  available-case rows it varies by column.
 
 ### Where the values sit
 

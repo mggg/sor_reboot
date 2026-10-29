@@ -14,7 +14,7 @@ import shap
 from matplotlib import patheffects
 from matplotlib.axes import Axes
 
-from feature_report.metadata import column_meanings, meaning_for
+from feature_report.column_meanings import column_meanings, meaning_for
 from utils import config
 
 # Longer than this and the labels crowd out the plot itself; the longest

@@ -80,7 +80,6 @@ def load_residuals(run: str | None, min_hispanic: int) -> pd.DataFrame:
     return table[table["HISPANIC"] >= min_hispanic]
 
 
-
 def name_column(residuals: pd.DataFrame) -> str:
     """Which column holds the unit's name.
 
@@ -90,6 +89,7 @@ def name_column(residuals: pd.DataFrame) -> str:
     CSVs being orphaned.
     """
     return "name" if "name" in residuals.columns else "county"
+
 
 def county_geojson(geoids: pd.Series) -> dict:
     """Simplified polygons for the mapped counties, as GeoJSON keyed by GEOID.

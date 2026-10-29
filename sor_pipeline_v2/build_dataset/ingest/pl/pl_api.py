@@ -37,10 +37,8 @@ def fetch_decennial_pl(scope: GeoScope) -> tuple[pd.DataFrame, pd.DataFrame]:
 
     Parameters
     ----------
-    for_geo : str
-        The `for=` clause, e.g. "county:*" or "tract:*".
-    in_geo : str
-        The `in=` clause, e.g. "state:*" or "state:06".
+    scope : GeoScope
+        Which geographies to fetch, and which cache files hold them.
 
     Returns
     -------

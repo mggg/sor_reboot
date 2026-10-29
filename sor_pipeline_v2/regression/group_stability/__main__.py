@@ -17,8 +17,8 @@ from typing import get_args
 import pandas as pd
 from tqdm import tqdm
 
-from build_dataset.feature_manifest import MODEL_GROUPS, group_features
 from build_dataset.ingest.fetch_and_store.store_df import load_df_from_parquet
+from build_dataset.model_groups import MODEL_GROUPS, group_features
 from model_utils.split import SplitGrouping, county_groups
 from regression.group_stability import figures
 from regression.shared.fit import MODEL_LABELS, split_fit_and_score_regression
@@ -31,6 +31,15 @@ from regression.shared.run_config import (
     RegressionParameters,
     absent_variables,
     create_run_dir,
+    run_file,
+)
+from regression.shared.run_metadata import (
+    describe_features,
+    describe_sample,
+    finish_run_metadata,
+    git_state,
+    start_run_metadata,
+    warn_if_uncommitted,
 )
 from utils import config
 
@@ -55,6 +64,8 @@ ACROSS_SEED_STATS = {
 def run_group_stability(
     full_regression_run_params: FullRegressionModelRunParams,
 ) -> pd.DataFrame:
+    git = git_state()
+    warn_if_uncommitted(git)
     output_dir = create_run_dir(run_params=full_regression_run_params)
     geo_level = full_regression_run_params.geo_level
     input_path = config.processed_parquet_path(
@@ -140,6 +151,18 @@ def run_group_stability(
         f"{len(seeds)} seeds -> {n_fits} fits"
     )
     output_dir.mkdir(parents=True, exist_ok=True)
+    metadata = start_run_metadata(
+        output_dir,
+        git,
+        settings=asdict(full_regression_run_params),
+        inputs=[input_path],
+        sample=describe_sample(
+            unfiltered_df,
+            full_feature_df.index,
+            [*full_feature_df.columns, *targets],
+        ),
+        features=describe_features(list(full_feature_df.columns)),
+    )
 
     seed_dir = output_dir / "by_seed"
     seed_dir.mkdir(exist_ok=True)
@@ -171,7 +194,8 @@ def run_group_stability(
                 )
                 progress.update(1)
             pd.DataFrame(seed_results).to_csv(
-                seed_dir / f"seed_{seed}.csv", index=False
+                run_file(output_dir, f"seed_{seed}", subdir=seed_dir.name),
+                index=False,
             )
             run_results.extend(seed_results)
             progress.set_postfix(seed=seed)
@@ -179,8 +203,8 @@ def run_group_stability(
     by_seed = pd.DataFrame(run_results)
     summary = _summarize_across_seeds(by_seed)
 
-    by_seed.to_csv(output_dir / "group_metrics_by_seed.csv", index=False)
-    summary.to_csv(output_dir / "group_summary.csv", index=False)
+    by_seed.to_csv(run_file(output_dir, "group_metrics_by_seed"), index=False)
+    summary.to_csv(run_file(output_dir, "group_summary"), index=False)
 
     if full_regression_run_params.top_percent is not None:
         sample_note = (
@@ -197,6 +221,7 @@ def run_group_stability(
     figures.plot_group_comparison(
         summary, output_dir, n_seeds=len(seeds), sample_note=sample_note
     )
+    finish_run_metadata(output_dir, metadata)
     print(f"wrote group-stability outputs -> {output_dir}")
     return summary
 

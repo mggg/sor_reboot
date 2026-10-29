@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 # The dataset a feature's raw inputs come from: the two decennial files, the
-# ACS 5-year, the TIGER/Line shapefile, or the local election-returns CSV.
+# ACS 5-year, the TIGER/Line shapefile, or the lab's GerryDB election release.
 SourceName = Literal["PL", "ACS", "DHC", "TIGER", "ELECTION"]
 
 # Sequence[str] (not list[str]): lists are invariant, so list[str] would

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.axes import Axes
 
-from regression.shared.run_config import FULL
+from regression.shared.run_config import FULL, find_run_file, run_file
 from utils import config
 
 # One fixed hue per estimator, everywhere in the pipeline.
@@ -39,7 +39,7 @@ WEIGHTING_TITLES = {
 def plot_group_comparison(
     summary: pd.DataFrame, output_dir, n_seeds: int, sample_note: str = ""
 ) -> None:
-    """Write `group_comparison_<target>_<weighting>.png` for every target."""
+    """Write `group_comparison_<target>_<weighting>_<run name>.png` for every target."""
     output_dir = Path(output_dir)
     _use_report_fonts()
     for target in summary["target"].unique():
@@ -187,7 +187,7 @@ def _plot_one_figure(
 
     fig.tight_layout()
     fig.savefig(
-        output_dir / f"group_comparison_{target}_{weighting}.png",
+        run_file(output_dir, f"group_comparison_{target}_{weighting}", ".png"),
         dpi=config.FIGURE_DPI,
         bbox_inches="tight",
     )
@@ -201,8 +201,8 @@ if __name__ == "__main__":
     from regression.shared.run_config import scope_from_run_dir
 
     run_dir = Path(sys.argv[1])
-    summary = pd.read_csv(run_dir / "group_summary.csv")
-    by_seed = pd.read_csv(run_dir / "group_metrics_by_seed.csv")
+    summary = pd.read_csv(find_run_file(run_dir, "group_summary"))
+    by_seed = pd.read_csv(find_run_file(run_dir, "group_metrics_by_seed"))
     # The directory name is the only record of what a finished run
     # covered, so both the stratum and the geography are read back out
     # of it rather than assumed.

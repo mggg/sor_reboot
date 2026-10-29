@@ -1,6 +1,6 @@
 """How the geometry source is obtained: TIGER/Line 2020 downloads.
 
-Each frame is downloaded once and cached to data/raw as GeoParquet with its
+Each frame is downloaded once and cached to RAW_NATIONAL_DIR as GeoParquet with its
 polygons intact; the loaders return only the attribute columns the dataset
 uses. Anything spatial (maps, joins) reads the cached GeoParquet directly.
 """

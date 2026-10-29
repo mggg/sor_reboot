@@ -1,4 +1,4 @@
-"""PL features for ingestion from the Census Bureau's API."""
+"""White alone-or-in-combination population features for ingestion from the Census Bureau's API."""
 
 from build_dataset.ingest.declarations.census_codes import PL_P1
 from build_dataset.ingest.declarations.feature_utils import ModelVariable, SumFeature

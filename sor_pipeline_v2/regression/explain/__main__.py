@@ -39,7 +39,7 @@ import shap
 from sklearn.metrics import r2_score
 from sklearn.model_selection import KFold
 
-from build_dataset.feature_manifest import SlugGroupName, group_features
+from build_dataset.model_groups import ModelGroupName, group_features
 from regression.shared.fit import MODEL_DISPLAY_NAMES, fit_weighted, make_regressor
 from regression.shared.prepare_df import describe_sample, prepare_df_for_regression
 from regression.shared.run_config import (
@@ -71,7 +71,7 @@ def run_single_seed_shap(
     bottom_percent: float | None = None,
     counties: tuple[str, ...] | None = None,
     seed: int = 1,
-    exclude_groups: list[SlugGroupName] | None = None,
+    exclude_groups: list[ModelGroupName] | None = None,
     level: config.GeographicBuildLevel = "national_counties",
     state_fips: list[str] | None = None,
 ) -> None:

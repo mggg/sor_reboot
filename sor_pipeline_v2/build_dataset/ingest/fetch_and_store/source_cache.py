@@ -1,7 +1,7 @@
-"""The national-pull cache halves shared by the census source APIs.
+"""The cache halves shared by the census source APIs, at every scope.
 
 Each api keeps its own linear fetch flow and calls these at the top and
-bottom; only the two invariants live here, exactly once:
+bottom; only the three invariants live here, exactly once:
 
   - reads are dtype=str, so a cached build is identical to a fetched one
     (the census client returns every value as a string and raw.parquet

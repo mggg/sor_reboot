@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from build_dataset.feature_manifest import (
-    SlugGroupName,
+from build_dataset.model_groups import (
+    ModelGroupName,
     all_model_features,
     group_features,
 )
@@ -23,11 +23,11 @@ class PreparedRegressionData:
     full_feature_df: pd.DataFrame
     targets_df: pd.DataFrame
     hispanic_weights: pd.Series
-    feature_names_by_group: dict[SlugGroupName, list[str]]
+    feature_names_by_group: dict[ModelGroupName, list[str]]
 
 
 def prepare_df_for_regression(
-    feature_groups: list[SlugGroupName],
+    feature_groups: list[ModelGroupName],
     unfiltered_df: pd.DataFrame,
     top_percent_hisp_pop: float | None = None,
     bottom_percent_hisp_pop: float | None = None,
@@ -47,7 +47,7 @@ def prepare_df_for_regression(
 
     `exclude_variables` names predictors this level does not have, so the
     full matrix is the full matrix FOR THIS LEVEL -- pass
-    `feature_manifest.TRACT_ABSENT_VARIABLES` to fit on tracts. It applies
+    `model_groups.TRACT_ABSENT_VARIABLES` to fit on tracts. It applies
     to the per-group matrices too, so a group and the full matrix cannot
     disagree about which columns exist.
     """
@@ -93,10 +93,10 @@ def prepare_df_for_regression(
 
 
 def _feature_slugs_to_var_names(
-    feature_groups_slugs: list[SlugGroupName],
+    feature_groups_slugs: list[ModelGroupName],
     exclude_variables: Sequence[str] = (),
-) -> dict[SlugGroupName, list[str]]:
-    """Group slug -> that group's predictor column names, in manifest order."""
+) -> dict[ModelGroupName, list[str]]:
+    """Group slug -> that group's predictor column names, in group order."""
     return {
         slug: group_features([slug], exclude_variables) for slug in feature_groups_slugs
     }

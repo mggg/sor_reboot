@@ -24,7 +24,18 @@ from matplotlib.colors import LinearSegmentedColormap
 
 from regression.group_stability.figures import _use_report_fonts
 from regression.shared.fit import MODEL_DISPLAY_NAMES, MODEL_LABELS
-from regression.shared.run_config import FULL, REGRESSION_TARGETS, scope_from_run_dir
+from regression.shared.run_config import (
+    FULL,
+    REGRESSION_TARGETS,
+    find_run_file,
+    scope_from_run_dir,
+)
+from regression.shared.run_metadata import (
+    describe_source_run,
+    git_state,
+    warn_if_uncommitted,
+    write_figure_metadata,
+)
 from utils import config
 
 R2_CMAP = LinearSegmentedColormap.from_list(
@@ -54,7 +65,7 @@ def load_r2_matrix(
     """
     mean_r2, sd_r2, n = {}, {}, {}
     for run_dir in run_dirs:
-        summary = pd.read_csv(run_dir / "group_summary.csv")
+        summary = pd.read_csv(find_run_file(run_dir, "group_summary"))
         kept = summary[
             (summary["model"] == model)
             & (summary["weighting"] == weighting)
@@ -195,6 +206,8 @@ def _parse_args() -> argparse.Namespace:
 
 if __name__ == "__main__":
     args = _parse_args()
+    git = git_state()
+    warn_if_uncommitted(git)
     r2, sd, n = load_r2_matrix(args.run_dirs, args.model, args.weighting, args.target)
     order = _row_order(r2)
     r2, sd = r2.loc[order], sd.loc[order]
@@ -204,7 +217,7 @@ if __name__ == "__main__":
     model_name: str = MODEL_DISPLAY_NAMES.get(model_key, str(args.model))
     level, _ = scope_from_run_dir(args.run_dirs[0].name)
     unit = "counties" if level == "national_counties" else "tracts"
-    n_seeds = pd.read_csv(args.run_dirs[0] / "group_metrics_by_seed.csv")[
+    n_seeds = pd.read_csv(find_run_file(args.run_dirs[0], "group_metrics_by_seed"))[
         "seed"
     ].nunique()
     weighting_note = (
@@ -230,4 +243,26 @@ if __name__ == "__main__":
         subtitle=subtitle,
         caption="",
     )
-    print(f"wrote {args.output}")
+    # Every run supplies its summary; the first also its per-seed file,
+    # for the seed count in the subtitle.
+    source_runs = [
+        describe_source_run(
+            run_dir,
+            [find_run_file(run_dir, "group_summary")]
+            + ([find_run_file(run_dir, "group_metrics_by_seed")] if i == 0 else []),
+        )
+        for i, run_dir in enumerate(args.run_dirs)
+    ]
+    metadata_path = write_figure_metadata(
+        args.output,
+        git,
+        settings={
+            "model": args.model,
+            "weighting": args.weighting,
+            "target": args.target,
+            "columns": list(r2.columns),
+            "rows": list(r2.index),
+        },
+        source_runs=source_runs,
+    )
+    print(f"wrote {args.output} and {metadata_path.name}")

@@ -1,4 +1,4 @@
-"""SHA-256 digests of the raw source files, and what each one is actually worth.
+"""SHA-256 digests of every source file the county and tract builds read.
 
 Report the current state:
 `python -m build_dataset.ingest.fetch_and_store.checksums`
@@ -8,6 +8,12 @@ Record the files as they stand now (after an intentional refetch):
 
 Drop a record for a source the build no longer uses:
 `python -m build_dataset.ingest.fetch_and_store.checksums --forget FILE`
+
+The inputs live in two directories under DATA_DIR -- the raw caches the
+build writes (RAW_NATIONAL_DIR) and the GerryDB release it only reads
+(GERRYDB_RELEASE_DIR) -- so every record is keyed by its path relative
+to DATA_DIR, e.g. `national/raw/dhc_national_counties.csv` or
+`RELEASE_geopackages/ri_districtr_tract_view_v2.gpkg`.
 """
 
 from __future__ import annotations
@@ -15,10 +21,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
+from typing import get_args
 
 from build_dataset.ingest.acs.acs_api import (
     ACS5_2015_PRIOR_STEM,
@@ -26,37 +33,41 @@ from build_dataset.ingest.acs.acs_api import (
 )
 from build_dataset.ingest.dhc.dhc_api import DHC_STEM
 from build_dataset.ingest.election.election_api import (
-    MEDSL_COUNTY_RAW_CSV,
-    MEDSL_COUNTY_RAW_MD5,
+    GERRYDB_VIEW_TEMPLATE,
+    GerryDBLevel,
 )
-from build_dataset.ingest.fetch_and_store.census_client import NATIONAL_COUNTIES
+from build_dataset.ingest.fetch_and_store.census_client import (
+    NATIONAL_COUNTIES,
+    state_tracts,
+)
 from build_dataset.ingest.fetch_and_store.source_cache import cache_path
-from build_dataset.ingest.geometry.geometry_api import COUNTY_GEOMETRY_2020_PARQUET
+from build_dataset.ingest.geometry.geometry_api import (
+    COUNTY_GEOMETRY_2020_PARQUET,
+    TRACT_GEOMETRY_2020_PARQUET_TEMPLATE,
+)
 from build_dataset.ingest.pl.pl_api import (
     PL_2020_HISPANIC_STEM,
     PL_2020_TOTAL_STEM,
 )
 from utils.config import (
+    DATA_DIR,
+    GERRYDB_RELEASE_DIR,
     RAW_NATIONAL_DIR,
     SOURCE_RECORDS_DIR,
-    STATE_FIPS_TO_NAME,
+    STATE_FIPS_TO_USPS,
 )
 
 RAW_CHECKSUM_MANIFEST = SOURCE_RECORDS_DIR / "raw_checksums.json"
+DIGEST_ALGORITHM = "sha256"
 
-
-class ChecksumOrigin(StrEnum):
-    """Where a recorded checksum came from. Either published by the depositor or computed by ourselves."""
-
-    PUBLISHED = "published"
-    CUSTOM = "custom_self"
-
-
-class DigestAlgorithm(StrEnum):
-    """The algorithm used to compute a checksum."""
-
-    SHA256 = "sha256"
-    MD5 = "md5"
+# The census sources fetched through the API, one cache per scope.
+CENSUS_CACHE_STEMS: tuple[str, ...] = (
+    PL_2020_TOTAL_STEM,
+    PL_2020_HISPANIC_STEM,
+    DHC_STEM,
+    ACS5_2020_STEM,
+    ACS5_2015_PRIOR_STEM,
+)
 
 
 class ChecksumStatus(StrEnum):
@@ -69,130 +80,102 @@ class ChecksumStatus(StrEnum):
 
 
 @dataclass(frozen=True)
-class PublishedChecksum:
-    """A checksum a depositor published, in whatever algorithm they chose."""
-
-    algorithm: DigestAlgorithm
-    checksum_value: str
-    checksum_source_type: str = ChecksumOrigin.PUBLISHED
-    checksum_source_description: str | None = None
-
-
-@dataclass(frozen=True)
-class SelfRecordedChecksum:
-    """A checksum we computed and recorded in the manifest."""
-
-    checksum_sha_256_value: str
-    checksum_source_type: str = ChecksumOrigin.CUSTOM
-
-
-@dataclass
-class FullChecksumEntry:
-    self_recorded_checksum: SelfRecordedChecksum
-    published_checksum: PublishedChecksum | None = None
-
-
-def _county_cache_name(stem: str) -> str:
-    """The filename a census source's national-counties cache carries.
-
-    Parameters
-    ----------
-    stem : str
-        The source's cache filename stem.
-
-    Returns
-    -------
-    str
-        The basename inside RAW_NATIONAL_DIR -- the key the manifest uses.
-    """
-    return cache_path(stem, NATIONAL_COUNTIES).name
-
-
-RAW_SOURCE_ORIGINS: dict[str, ChecksumOrigin] = {
-    _county_cache_name(PL_2020_TOTAL_STEM): ChecksumOrigin.CUSTOM,
-    _county_cache_name(PL_2020_HISPANIC_STEM): ChecksumOrigin.CUSTOM,
-    _county_cache_name(DHC_STEM): ChecksumOrigin.CUSTOM,
-    _county_cache_name(ACS5_2020_STEM): ChecksumOrigin.CUSTOM,
-    _county_cache_name(ACS5_2015_PRIOR_STEM): ChecksumOrigin.CUSTOM,
-    COUNTY_GEOMETRY_2020_PARQUET: ChecksumOrigin.CUSTOM,
-    MEDSL_COUNTY_RAW_CSV: ChecksumOrigin.PUBLISHED,
-}
-
-# The raw caches the tract build writes, one file per state. Declared as
-# templates rather than names because which ones exist depends on which
-# states have been built, and `build_manifest` hard-fails on a declared
-# file that is absent -- a CA-only build has to stay recordable.
-# Raw files the build fetches one state at a time. Empty since the tract
-# election source became the lab's GerryDB release: that release is
-# delivered as files rather than fetched, and it is not written to
-# RAW_NATIONAL_DIR, which is the only directory this manifest covers.
-# The VEST and TIGER archives that used to be declared here are gone
-# along with the proration that read them; records already written for
-# them stay in the manifest, which is additive, until `--forget` drops
-# them by name.
-PER_STATE_SOURCE_TEMPLATES: dict[str, ChecksumOrigin] = {}
-
-PUBLISHED_CHECKSUMS: dict[str, PublishedChecksum] = {
-    MEDSL_COUNTY_RAW_CSV: PublishedChecksum(
-        algorithm=DigestAlgorithm.MD5,
-        checksum_value=MEDSL_COUNTY_RAW_MD5,
-        checksum_source_type=ChecksumOrigin.PUBLISHED,
-        checksum_source_description="Harvard Dataverse metadata API, doi:10.7910/DVN/VOQCHQ",
-    ),
-}
-
-
-def declared_sources() -> dict[str, ChecksumOrigin]:
-    """Every raw file the manifest covers, in inventory order.
-
-    The national sources always; each per-state cache only when it is on
-    disk, so the inventory tracks what has actually been built.
-
-    Returns
-    -------
-    dict
-        Filename in RAW_NATIONAL_DIR -> where its checksum comes from.
-    """
-    declared = dict(RAW_SOURCE_ORIGINS)
-    for template, origin in PER_STATE_SOURCE_TEMPLATES.items():
-        for state_fips in sorted(STATE_FIPS_TO_NAME):
-            filename = template.format(state_fips=state_fips)
-            if (RAW_NATIONAL_DIR / filename).exists():
-                declared[filename] = origin
-    return declared
-
-
-def published_checksums() -> dict[str, PublishedChecksum]:
-    """Depositor-published digests, by filename.
-
-    Only MEDSL's, pinned in `election_api`. Still a function rather than
-    a literal: it was one when VEST archives contributed their published
-    digests here, and a per-state source that publishes one can be added
-    back without changing the callers.
-
-    Returns
-    -------
-    dict
-        Filename -> the depositor's own checksum, naming the release it
-        was published in.
-    """
-    published = dict(PUBLISHED_CHECKSUMS)
-    return published
-
-
-@dataclass(frozen=True)
 class ChecksumFinding:
     """One file's SHA-256 compared against the manifest."""
 
-    filename: str
+    key: str
     status: ChecksumStatus
-    origin: ChecksumOrigin
     recorded: str
     actual: str
 
 
+def manifest_key(path: Path) -> str:
+    """The name a file is recorded under: its path relative to DATA_DIR.
+
+    Parameters
+    ----------
+    path : Path
+        A file inside DATA_DIR.
+
+    Returns
+    -------
+    str
+        The relative path, with forward slashes on every platform.
+
+    Raises
+    ------
+    ValueError
+        If `path` is not inside DATA_DIR.
+    """
+    return path.relative_to(DATA_DIR).as_posix()
+
+
+def national_sources() -> list[Path]:
+    """The county build's single-file inputs, which must all be present.
+
+    Returns
+    -------
+    list of Path
+        The five national census caches and the county geometry.
+    """
+    return [
+        *(cache_path(stem, NATIONAL_COUNTIES) for stem in CENSUS_CACHE_STEMS),
+        RAW_NATIONAL_DIR / COUNTY_GEOMETRY_2020_PARQUET,
+    ]
+
+
+def per_state_sources(state_fips: str) -> list[Path]:
+    """Every file either build reads for one state.
+
+    The tract build's census caches and tract geometry, plus the
+    state's GerryDB views at both levels -- the county build reads the
+    county view, the tract build the tract view.
+
+    Parameters
+    ----------
+    state_fips : str
+        Two-digit state FIPS code.
+
+    Returns
+    -------
+    list of Path
+        Where each of the state's input files would be; whether it
+        exists is the caller's question.
+    """
+    scope = state_tracts(state_fips)
+    usps = STATE_FIPS_TO_USPS[state_fips].lower()
+    return [
+        *(cache_path(stem, scope) for stem in CENSUS_CACHE_STEMS),
+        RAW_NATIONAL_DIR
+        / TRACT_GEOMETRY_2020_PARQUET_TEMPLATE.format(state_fips=state_fips),
+        *(
+            GERRYDB_RELEASE_DIR / GERRYDB_VIEW_TEMPLATE.format(usps=usps, level=level)
+            for level in get_args(GerryDBLevel)
+        ),
+    ]
+
+
+def declared_sources() -> list[Path]:
+    """Every source file the manifest covers, in inventory order.
+
+    The national sources always; each per-state file only when it is on
+    disk, so the inventory tracks what has actually been built (a
+    CA-only tract build has to stay recordable) and DC and Puerto Rico,
+    which have no GerryDB views, simply contribute none.
+
+    Returns
+    -------
+    list of Path
+        The national sources, then each state's present files.
+    """
+    declared = national_sources()
+    for state_fips in sorted(STATE_FIPS_TO_USPS):
+        declared.extend(path for path in per_state_sources(state_fips) if path.exists())
+    return declared
+
+
 def file_sha256(path: Path) -> str:
-    """The file's SHA-256.
+    """The file's SHA-256, read in chunks so a large file is never held whole.
 
     Parameters
     ----------
@@ -209,109 +192,54 @@ def file_sha256(path: Path) -> str:
     FileNotFoundError
         If the file does not exist.
     """
-    return hashlib.new(DigestAlgorithm.SHA256, path.read_bytes()).hexdigest()
+    with path.open("rb") as handle:
+        return hashlib.file_digest(handle, DIGEST_ALGORITHM).hexdigest()
 
 
-def file_md5(path: Path) -> str:
-    """The file's MD5 -- ONLY for comparing against a depositor's published value.
-
-    Parameters
-    ----------
-    path : Path
-        The file to hash.
-
-    Returns
-    -------
-    str
-        Lowercase hex digest.
-
-    Raises
-    ------
-    FileNotFoundError
-        If the file does not exist.
-    """
-    return hashlib.new(DigestAlgorithm.MD5, path.read_bytes()).hexdigest()
-
-
-def build_manifest() -> dict[str, str | dict[str, FullChecksumEntry | dict]]:
-    """Hash every declared raw file and assemble the manifest.
-
-    A PUBLISHED file is additionally verified against the depositor's own
-    digest, in the depositor's algorithm, as it is recorded -- so the
-    manifest cannot be written from a file that already fails its
-    provenance check.
+def build_manifest() -> dict:
+    """Hash every declared source file and assemble the manifest.
 
     Additive: an entry recorded earlier for a file no longer on disk is
-    carried through unchanged rather than dropped. A per-state cache is
-    declared by being PRESENT, so deleting a 10 GB archive to free space
-    would otherwise take its SHA-256 out of the record on the next write,
-    and the record is the only thing that still says what the dataset was
+    carried through unchanged rather than dropped. A per-state file is
+    declared by being PRESENT, so deleting one to free space would
+    otherwise take its SHA-256 out of the record on the next write, and
+    the record is the only thing that still says what the dataset was
     built from. `forget_entries` is the one way an entry goes away.
 
     Returns
     -------
     dict
-        `written` (an ISO-8601 local timestamp) and `files`: one entry
-        per declared source, carrying the SHA-256 we computed and, for a
-        published file, the depositor's own checksum -- plus any earlier
-        entry whose file is gone, exactly as it was recorded.
+        `written` (an ISO-8601 local timestamp), `algorithm`, and
+        `files`: the key of each declared source -> its SHA-256, plus any
+        earlier entry whose file is gone, exactly as it was recorded.
 
     Raises
     ------
     FileNotFoundError
-        If a declared raw file is absent -- run the build first. A file
-        that is merely no longer declared is kept, not raised on.
-    ValueError
-        If a PUBLISHED file's digest differs from the published value.
+        If a national source is absent -- run the county build first. A
+        file that is merely no longer declared is kept, not raised on.
     """
-    file_manifest: dict[str, FullChecksumEntry] = {}
-    published_by_filename = published_checksums()
-    for filename in declared_sources():
-        path = RAW_NATIONAL_DIR / filename
+    files: dict[str, dict[str, str]] = {}
+    for path in declared_sources():
         if not path.exists():
             raise FileNotFoundError(
-                f"{filename} is not in {RAW_NATIONAL_DIR}; run the build before "
-                "recording checksums."
+                f"{manifest_key(path)} is not on disk; run the county build "
+                "before recording checksums."
             )
-        # Deliberately not the file's origin: this digest is one we
-        # computed, whoever published the file. A PUBLISHED file's own
-        # digest goes in `published_checksum` below, and the origin is
-        # reported from RAW_SOURCE_ORIGINS at verify time.
-        file_entry: FullChecksumEntry = FullChecksumEntry(
-            self_recorded_checksum=SelfRecordedChecksum(
-                checksum_sha_256_value=file_sha256(path),
-            )
-        )
-        published = published_by_filename.get(filename)
-        if published is not None:
-            orig_hash = (
-                file_md5(path)
-                if published.algorithm == DigestAlgorithm.MD5
-                else file_sha256(path)
-            )
-            if orig_hash != published.checksum_value:
-                raise ValueError(
-                    f"{filename}: {published.algorithm} {orig_hash} does not match the "
-                    f"published checksum {published.checksum_value}; the local copy is not "
-                    "the released file, so it must not be recorded as provenance."
-                )
-            file_entry.published_checksum = published
-        file_manifest[filename] = file_entry
+        files[manifest_key(path)] = {DIGEST_ALGORITHM: file_sha256(path)}
 
     carried = {
-        filename: entry
-        for filename, entry in _recorded_entries().items()
-        if filename not in file_manifest
+        key: entry for key, entry in _recorded_entries().items() if key not in files
     }
     if carried:
         print(
             f"  carried forward {len(carried)} record(s) for files no longer on "
             f"disk: {', '.join(sorted(carried))}"
         )
-    merged: dict[str, FullChecksumEntry | dict] = {**carried, **file_manifest}
     return {
         "written": datetime.now(UTC).astimezone().isoformat(timespec="seconds"),
-        "files": merged,
+        "algorithm": DIGEST_ALGORITHM,
+        "files": {**carried, **files},
     }
 
 
@@ -321,7 +249,7 @@ def _recorded_entries() -> dict[str, dict]:
     Returns
     -------
     dict
-        Filename -> the entry as it was written, left as read so a
+        Key -> the entry as it was written, left as read so a
         carried-forward record is byte-identical to what it replaced.
     """
     if not RAW_CHECKSUM_MANIFEST.exists():
@@ -329,16 +257,36 @@ def _recorded_entries() -> dict[str, dict]:
     return dict(read_manifest()["files"])
 
 
-def forget_entries(filenames: list[str]) -> Path:
-    """Drop records by name, for sources the build no longer uses.
+def _write(manifest: dict) -> Path:
+    """Write the manifest in its canonical form.
+
+    Parameters
+    ----------
+    manifest : dict
+        As `build_manifest` returns.
+
+    Returns
+    -------
+    Path
+        The manifest written.
+    """
+    RAW_CHECKSUM_MANIFEST.parent.mkdir(parents=True, exist_ok=True)
+    RAW_CHECKSUM_MANIFEST.write_text(
+        json.dumps(manifest, sort_keys=True, indent=2) + "\n"
+    )
+    return RAW_CHECKSUM_MANIFEST
+
+
+def forget_entries(keys: list[str]) -> Path:
+    """Drop records by key, for sources the build no longer uses.
 
     The counterpart to `build_manifest` never removing anything: an entry
     for a retired source would otherwise be carried forward forever.
 
     Parameters
     ----------
-    filenames : list of str
-        Names exactly as the manifest records them.
+    keys : list of str
+        Keys exactly as the manifest records them.
 
     Returns
     -------
@@ -350,24 +298,21 @@ def forget_entries(filenames: list[str]) -> Path:
     FileNotFoundError
         If no manifest has been recorded yet.
     KeyError
-        If any name is not in the manifest -- naming all of them, so a
+        If any key is not in the manifest -- naming all of them, so a
         typo does not silently drop nothing.
     """
     manifest = read_manifest()
     recorded = manifest["files"]
-    absent = [filename for filename in filenames if filename not in recorded]
+    absent = [key for key in keys if key not in recorded]
     if absent:
         raise KeyError(f"not in the manifest: {absent}")
-    for filename in filenames:
-        del recorded[filename]
-    RAW_CHECKSUM_MANIFEST.write_text(
-        json.dumps(manifest, sort_keys=True, indent=2, default=asdict) + "\n"
-    )
-    return RAW_CHECKSUM_MANIFEST
+    for key in keys:
+        del recorded[key]
+    return _write(manifest)
 
 
 def write_manifest() -> Path:
-    """Record the raw files as they stand now.
+    """Record the source files as they stand now.
 
     Returns
     -------
@@ -377,15 +322,9 @@ def write_manifest() -> Path:
     Raises
     ------
     FileNotFoundError
-        If a declared raw file is absent.
-    ValueError
-        If a PUBLISHED file fails its published-checksum check.
+        If a national source is absent.
     """
-    manifest = build_manifest()
-    RAW_CHECKSUM_MANIFEST.write_text(
-        json.dumps(manifest, sort_keys=True, indent=2, default=asdict) + "\n"
-    )
-    return RAW_CHECKSUM_MANIFEST
+    return _write(build_manifest())
 
 
 def read_manifest() -> dict:
@@ -409,35 +348,17 @@ def read_manifest() -> dict:
     return json.loads(RAW_CHECKSUM_MANIFEST.read_text())
 
 
-def _recorded_sha256(entry: dict) -> str:
-    """The SHA-256 a manifest entry records, or "" if it records none.
-
-    Parameters
-    ----------
-    entry : dict
-        One `files` value as read back from the manifest JSON.
-
-    Returns
-    -------
-    str
-        The recorded digest, or "" when the entry has no self-recorded
-        checksum -- a manifest written before this field existed.
-    """
-    self_recorded = entry.get("self_recorded_checksum") or {}
-    return str(self_recorded.get("checksum_sha_256_value", ""))
-
-
 def verify_manifest() -> list[ChecksumFinding]:
-    """Compare every raw file on disk against the manifest's SHA-256s.
+    """Compare every source file on disk against the manifest's SHA-256s.
 
     Returns findings rather than raising, because an intentional refetch
     legitimately changes a census cache; the caller decides what a
-    mismatch means. `election_api` is what hard-fails the published file.
+    mismatch means.
 
     Returns
     -------
     list of ChecksumFinding
-        One per declared source, in inventory order.
+        One per recorded or declared file, recorded ones first.
 
     Raises
     ------
@@ -445,44 +366,46 @@ def verify_manifest() -> list[ChecksumFinding]:
         If no manifest has been recorded yet.
     """
     recorded_files = read_manifest()["files"]
-    declared = declared_sources()
-    # The union: a per-state cache is declared by being present, so one
+    # The union: a per-state file is declared by being present, so one
     # that was recorded and then deleted would otherwise drop out of the
     # report rather than show up as ABSENT.
-    inventory = {**dict.fromkeys(recorded_files, ChecksumOrigin.CUSTOM), **declared}
+    inventory = [
+        *recorded_files,
+        *(
+            key
+            for key in map(manifest_key, declared_sources())
+            if key not in recorded_files
+        ),
+    ]
     findings: list[ChecksumFinding] = []
-    for filename, origin in inventory.items():
-        path = RAW_NATIONAL_DIR / filename
-        entry = recorded_files.get(filename, {})
-        if not entry:
-            findings.append(
-                ChecksumFinding(
-                    filename,
-                    ChecksumStatus.UNRECORDED,
-                    origin,
-                    "",
-                    file_sha256(path) if path.exists() else "",
-                )
+    for key in inventory:
+        path = DATA_DIR / key
+        recorded = str(recorded_files.get(key, {}).get(DIGEST_ALGORITHM, ""))
+        if not recorded:
+            actual = file_sha256(path) if path.exists() else ""
+            findings.append(ChecksumFinding(key, ChecksumStatus.UNRECORDED, "", actual))
+        elif not path.exists():
+            findings.append(ChecksumFinding(key, ChecksumStatus.ABSENT, recorded, ""))
+        else:
+            actual = file_sha256(path)
+            status = (
+                ChecksumStatus.MATCH if actual == recorded else ChecksumStatus.MISMATCH
             )
-            continue
-        recorded = _recorded_sha256(entry)
-        if not path.exists():
-            findings.append(
-                ChecksumFinding(filename, ChecksumStatus.ABSENT, origin, recorded, "")
-            )
-            continue
-        actual = file_sha256(path)
-        status = ChecksumStatus.MATCH if actual == recorded else ChecksumStatus.MISMATCH
-        findings.append(ChecksumFinding(filename, status, origin, recorded, actual))
+            findings.append(ChecksumFinding(key, status, recorded, actual))
     return findings
 
 
 def print_findings(findings: list[ChecksumFinding], written: str) -> None:
-    """Print one line per file, then a status tally."""
-    print(f"manifest recorded {written} ({DigestAlgorithm.SHA256})\n")
-    width = max(len(finding.filename) for finding in findings)
+    """Print one line per file that is not a match, then a status tally.
+
+    Matches are only counted: with several hundred per-state files, a
+    line for each would bury the ones that need attention.
+    """
+    print(f"manifest recorded {written} ({DIGEST_ALGORITHM})\n")
     for finding in findings:
-        line = f"  {finding.filename:<{width}}  {finding.origin:<9}  {finding.status}"
+        if finding.status is ChecksumStatus.MATCH:
+            continue
+        line = f"  {finding.status:<10}  {finding.key}"
         if finding.status is ChecksumStatus.MISMATCH:
             line += (
                 f"\n      recorded {finding.recorded}\n      actual   {finding.actual}"
@@ -496,7 +419,8 @@ def print_findings(findings: list[ChecksumFinding], written: str) -> None:
     if tally.get(str(ChecksumStatus.MISMATCH)):
         print(
             "\nA census cache mismatch is expected after declaring a feature whose "
-            "column the cache lacked (the api refetches and overwrites). Confirm "
+            "column the cache lacked (the api refetches and overwrites). A GerryDB "
+            "view mismatch means the release file itself was replaced. Confirm "
             "that is what happened, then re-record with --write."
         )
 
@@ -504,7 +428,7 @@ def print_findings(findings: list[ChecksumFinding], written: str) -> None:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="python -m build_dataset.ingest.fetch_and_store.checksums",
-        description="SHA-256s of the raw source files: report drift, or re-record.",
+        description="SHA-256s of the source files: report drift, or re-record.",
     )
     # Mutually exclusive, and verifying stays the default: forgetting a
     # flag must never overwrite the manifest you were checking against.
@@ -512,7 +436,7 @@ def _parse_args() -> argparse.Namespace:
     action.add_argument(
         "--verify",
         action="store_true",
-        help="compare the raw files against the manifest (the default)",
+        help="compare the source files against the manifest (the default)",
     )
     action.add_argument(
         "--write",
@@ -524,7 +448,7 @@ def _parse_args() -> argparse.Namespace:
         "--forget",
         nargs="+",
         default=None,
-        metavar="FILE",
+        metavar="KEY",
         help="drop these records, for a source the build no longer uses. "
         "--write never removes one, so this is the only way an entry goes away.",
     )

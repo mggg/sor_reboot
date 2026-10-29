@@ -1,12 +1,13 @@
 """Step 5: the election features, each computed by its declared computer.
 
 Depends on step 2: TURNOUT's denominator (VOTINGAGEPOP) is an ACS feature
-born in the ACS step. Puerto Rico's 78 municipios have NaN vote columns
-(no presidential vote) and correctly come out NaN in all three features.
+born in the ACS step. Puerto Rico and DC have NaN vote columns (PR casts
+no presidential vote; the release has no DC view) and correctly come out
+NaN in every election feature.
 
 Which features are asked for is the caller's choice. Both levels now
-carry 2016 and 2020 votes -- counties from MEDSL, tracts from the GerryDB
-release -- so both support every declared feature except TURNOUT, whose
+carry 2016 and 2020 votes, both from the GerryDB release, so both support
+every declared feature -- except that tracts leave out TURNOUT, whose
 denominator is unusable at tract level (see TRACT_ABSENT_VARIABLES).
 """
 

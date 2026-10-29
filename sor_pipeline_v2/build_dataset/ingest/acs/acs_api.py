@@ -39,7 +39,7 @@ from build_dataset.ingest.fetch_and_store.source_cache import (
     write_canonical_cache,
 )
 
-# Annual Community Survey 5-year (2016-2020) for most features.
+# American Community Survey 5-year (2016-2020) for most features.
 ACS5_2020_URL = "https://api.census.gov/data/2020/acs/acs5"
 
 # Prior ACS 5-year (2011-2015) for growth features. The 2011-2015 vintage is the last one that can be compared to 2016-2020 without overlapping years.
@@ -56,7 +56,7 @@ def estimate_codes() -> list[str]:
     and sorted.
 
     The growth computers also read `_PRIOR`-suffixed columns; those are not
-    Census variables -- `fetch_acs_prior` invents them by renaming its
+    Census variables -- `load_acs_prior` invents them by renaming its
     2011-2015 fetch -- so they are dropped from this request list.
 
     Returns

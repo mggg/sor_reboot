@@ -8,8 +8,8 @@ from build_dataset.ingest.declarations.feature_utils import (
     SumFeature,
 )
 
-# Referenced beyond its own declaration (TURNOUT's denominator, the manifest's
-# NOT_PREDICTORS), so the name is spelled exactly once.
+# Referenced beyond its own declaration (TURNOUT's denominator, in
+# election_feats), so the name is spelled exactly once.
 VOTINGAGEPOP = "VOTINGAGEPOP"
 
 CITIZENSHIP_FEATURES: list[ModelVariable] = [

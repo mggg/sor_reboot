@@ -70,7 +70,7 @@ def get_census_data(
     Parameters
     ----------
     source_url : str
-        Base endpoint (Decennial PL or ACS 5-year).
+        Base endpoint (Decennial PL or DHC, or ACS 5-year).
     feature_codes : list of str
         Census variable codes to request.
     for_geo, in_geo : str

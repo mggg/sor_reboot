@@ -4,11 +4,8 @@ The feats packages declare every column ingest produces, and the derive stage
 declares the columns it creates (counts and targets, next to the code that
 makes them). Each declaration carries its own role (predictor / target /
 context), so this module owns only the one judgment nobody else can make:
-how the predictors partition into thematic groups. It assembles the
-processed.parquet schema from those imported pieces.
-
-The import arrow points one way: the manifest imports from the sources and
-the derive stage; neither knows the manifest exists.
+how the predictors partition into thematic groups. The processed.parquet
+schema built from these groups lives in `processed_schema`.
 """
 
 from __future__ import annotations
@@ -17,11 +14,6 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Literal, get_args
 
-from build_dataset.clean_and_derive.clean_and_derive_pl import (
-    HISPANIC_RACE_COUNT_COLUMNS,
-    PL_COUNT_COLUMNS,
-    TARGETS,
-)
 from build_dataset.ingest.acs.feats import (
     CITIZENSHIP_FEATURES,
     EDUCATION_FEATURES,
@@ -38,7 +30,7 @@ from build_dataset.ingest.dhc.dhc_feats import DHC_FEATURES
 from build_dataset.ingest.election.election_feats import ELECTION_FEATURES
 from build_dataset.ingest.geometry.geometry_feats import GEOMETRY_FEATURES
 
-SlugGroupName = Literal[
+ModelGroupName = Literal[
     "language",
     "citizenship",
     "national_origin",
@@ -61,7 +53,7 @@ class FeatureGroup:
     features: list[ModelVariable]
 
 
-MODEL_GROUPS: dict[SlugGroupName, FeatureGroup] = {
+MODEL_GROUPS: dict[ModelGroupName, FeatureGroup] = {
     "language": FeatureGroup("Language", LANGUAGE_FEATURES),
     "citizenship": FeatureGroup(
         "US Citizenship and Residency Status", CITIZENSHIP_FEATURES
@@ -84,22 +76,20 @@ MODEL_GROUPS: dict[SlugGroupName, FeatureGroup] = {
 }
 
 
-# Variables a TRACT fit drops, so the build's schema and any model fit on
-# tracts read one list rather than two that can drift. Two reasons, not
-# one. HISPGROWTH and FBGROWTH have their prior-period ACS inputs at this
-# level, but only for 62,522 of 85,395 tracts (73%): the 2011-2015
+# Tract runs cannot include certain variables that are only available at higher geographic levels.
+# Two reasons: (1) HISPGROWTH and FBGROWTH have their prior-period ACS inputs at this
+# level, but only for 62,522 of 85,395 tracts (73%); the 2011-2015
 # five-year file is on 2010 tract boundaries, and a tract redrawn for 2020
 # has no 2015 counterpart to grow from. Because the regression is
 # complete-case on the whole matrix, admitting either one would drop the
-# other 22,873 tracts out of every model, so they stay out until that
-# trade is worth making deliberately.
+# other 22,873 tracts out of every model, so they stay out.
 #
-# TURNOUT also has both its inputs, and is wrong rather than missing. The
+# (2) In contrast, TURNOUT has both its inputs, but wrong rather than missing. The
 # fault is the DENOMINATOR, not the votes: VOTINGAGEPOP comes from ACS
 # five-year estimates, whose error on a single tract is large enough that
 # 2,414 of 83,389 tracts report more votes cast than voting-age citizens,
 # the worst by a factor of 16. The same denominator is fine at county
-# level, where only 5 of 3,112 break 1.0. Measured on the GerryDB
+# level, where only 6 of 3,142 break 1.0. Measured on the GerryDB
 # release's own per-tract counts, so no vote allocation of ours is
 # involved -- California alone puts 205 tracts over 1.0.
 TRACT_ABSENT_VARIABLES: tuple[str, ...] = (
@@ -114,7 +104,7 @@ def _predictors(features: list[ModelVariable]) -> list[str]:
     return [f.var_name for f in features if f.role == "predictor"]
 
 
-def _context_columns(slugs: Sequence[SlugGroupName] | None = None) -> list[str]:
+def context_columns(slugs: Sequence[ModelGroupName] | None = None) -> list[str]:
     """Every declared context variable across the groups, sorted.
 
     Context variables (e.g. VOTINGAGEPOP, TURNOUT's denominator) are kept
@@ -143,14 +133,14 @@ def all_model_features(exclude_variables: Sequence[str] = ()) -> list[str]:
     Returns
     -------
     list of str
-        The predictor names, in manifest order.
+        The predictor names, in group order.
 
     Raises
     ------
     KeyError
         If a named variable is not declared in any model group.
     """
-    _refuse_undeclared(exclude_variables)
+    refuse_undeclared(exclude_variables)
     return [
         name
         for group in MODEL_GROUPS.values()
@@ -159,7 +149,7 @@ def all_model_features(exclude_variables: Sequence[str] = ()) -> list[str]:
     ]
 
 
-def _refuse_undeclared(variable_names: Sequence[str]) -> None:
+def refuse_undeclared(variable_names: Sequence[str]) -> None:
     """Raise unless every name is a declared model variable.
 
     Parameters
@@ -183,7 +173,7 @@ def _refuse_undeclared(variable_names: Sequence[str]) -> None:
 
 
 def group_features(
-    slugs: list[SlugGroupName], exclude_variables: Sequence[str] = ()
+    slugs: list[ModelGroupName], exclude_variables: Sequence[str] = ()
 ) -> list[str]:
     """The predictor columns of the selected groups, in order.
 
@@ -193,7 +183,7 @@ def group_features(
     unknown = [s for s in slugs if s not in MODEL_GROUPS]
     if unknown:
         raise KeyError(f"unknown model group(s) {unknown}; known: {list(MODEL_GROUPS)}")
-    _refuse_undeclared(exclude_variables)
+    refuse_undeclared(exclude_variables)
     return [
         name
         for slug in slugs
@@ -202,67 +192,9 @@ def group_features(
     ]
 
 
-# --- The processed.parquet schema --------------------------------------------
-IDENTIFIERS: tuple[str, ...] = ("GEOID",)
-
-
-def processed_columns(
-    exclude_groups: Sequence[SlugGroupName] = (),
-    exclude_variables: Sequence[str] = (),
-) -> list[str]:
-    """Every column of processed.parquet: identifiers, counts, targets,
-    the model features, and the declared non-predictors (kept for audit).
-
-    Parameters
-    ----------
-    exclude_groups : sequence of SlugGroupName
-        Groups whose variables this level does not have at all -- the
-        tract build passes ("election",), since presidential returns do
-        not exist below county level. The PL counts and targets are
-        never affected: every level derives those.
-    exclude_variables : sequence of str
-        Individual variables to omit, for when a level loses some of a
-        group's members but not the group. Named variables that are not
-        declared anywhere are refused, so a typo cannot silently leave
-        the column in.
-
-    Returns
-    -------
-    list of str
-        The schema, in order.
-
-    Raises
-    ------
-    KeyError
-        If a named group does not exist, or a named variable is not
-        declared in any group.
-    """
-    unknown = [slug for slug in exclude_groups if slug not in MODEL_GROUPS]
-    if unknown:
-        raise KeyError(f"unknown model group(s) {unknown}; known: {list(MODEL_GROUPS)}")
-    _refuse_undeclared(exclude_variables)
-    # Annotated: iterating the dict widens the Literal keys to str.
-    kept: list[SlugGroupName] = [
-        slug for slug in MODEL_GROUPS if slug not in exclude_groups
-    ]
-    dropped = set(exclude_variables)
-    return [
-        *IDENTIFIERS,
-        *PL_COUNT_COLUMNS,
-        *HISPANIC_RACE_COUNT_COLUMNS,
-        *TARGETS,
-        *(name for name in group_features(kept) if name not in dropped),
-        *(name for name in _context_columns(kept) if name not in dropped),
-    ]
-
-
-# --- Import-time checks: refuse a manifest that contradicts itself -----------
+# --- Import-time checks: refuse groups that contradict themselves ------------
 _names = [f.var_name for g in MODEL_GROUPS.values() for f in g.features]
 assert len(_names) == len(set(_names)), "a feature appears in more than one model group"
-assert set(get_args(SlugGroupName)) == set(MODEL_GROUPS), (
-    "GroupName drifted from MODEL_GROUPS"
-)
-_derived = {*PL_COUNT_COLUMNS, *HISPANIC_RACE_COUNT_COLUMNS, *TARGETS}
-assert not _derived & set(_names), (
-    f"derive-stage columns collide with feature names: {sorted(_derived & set(_names))}"
-)
+assert set(get_args(ModelGroupName)) == set(
+    MODEL_GROUPS
+), "ModelGroupName drifted from MODEL_GROUPS"

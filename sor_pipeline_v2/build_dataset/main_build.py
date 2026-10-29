@@ -3,14 +3,13 @@
 The build produces two artifacts. `raw.parquet` is the assembled ingest
 output, untouched by the derive steps -- every source column as the API or
 file delivered it, the audit trail. `processed.parquet` is the derived
-frame, restricted to the manifest's declared schema. The derive steps are
+frame, restricted to the declared schema in `processed_schema`. The derive steps are
 pure arithmetic on raw, so everything in between is cheap to recompute.
 
-The two levels differ in three places and nowhere else: tracts are pulled
+The two levels differ in two places and nowhere else: tracts are pulled
 one state at a time (the API refuses a state wildcard below county level),
-their election votes are prorated from VEST precincts rather than read
-from a published county table, and their processed schema therefore omits
-the two vote-growth features, which would need a 2016 proration as well.
+and their processed schema omits TRACT_ABSENT_VARIABLES. Both read their
+election votes from the lab's GerryDB release, at their own level.
 """
 
 import argparse
@@ -20,7 +19,7 @@ from typing import get_args
 import pandas as pd
 from tqdm import tqdm
 
-from build_dataset import feature_manifest
+from build_dataset import model_groups, processed_schema
 from build_dataset.clean_and_derive.clean_and_derive_acs import (
     main_acs_clean_and_transform,
 )
@@ -36,7 +35,7 @@ from build_dataset.clean_and_derive.derive_geometry_feats import (
 from build_dataset.ingest.acs import acs_api
 from build_dataset.ingest.acs.feats import ACS_FEATURES
 from build_dataset.ingest.dhc import dhc_api
-from build_dataset.ingest.election import election_api, tract_election_api
+from build_dataset.ingest.election import election_api
 from build_dataset.ingest.election.election_feats import ELECTION_FEATURES
 from build_dataset.ingest.fetch_and_store import store_df
 from build_dataset.ingest.fetch_and_store.census_client import (
@@ -48,21 +47,21 @@ from build_dataset.ingest.pl import pl_api
 from utils import config
 
 # The election features a tract build can actually compute, taken from
-# the manifest's own list of what tracts lack so the schema, the derive
+# model_groups' own list of what tracts lack so the schema, the derive
 # step and any model fit on tracts cannot disagree.
 TRACT_ELECTION_FEATURES = [
     feature
     for feature in ELECTION_FEATURES
-    if feature.var_name not in feature_manifest.TRACT_ABSENT_VARIABLES
+    if feature.var_name not in model_groups.TRACT_ABSENT_VARIABLES
 ]
 
-# The GerryDB release ships a tract view for the 50 states only. Puerto
-# Rico casts no presidential ballots, so it has nothing to publish; DC
-# does vote but the release has no tract view for it. Both come out with
-# NaN vote columns, exactly as PR's municipios already do in the county
-# build. Nothing is derived to fill the gap -- the published tract
-# numbers are used as published or not at all.
-TRACT_ELECTION_MISSING_STATES = ("11", "72")
+# The GerryDB release ships county and tract views for the 50 states
+# only. Puerto Rico casts no presidential ballots, so it has nothing to
+# publish; DC does vote but the release has no view for it at either
+# level. Both come out with NaN vote columns at both levels. Nothing is
+# derived to fill the gap -- the published numbers are used as published
+# or not at all.
+ELECTION_MISSING_STATES = ("11", "72")
 
 
 def ingest_counties() -> pd.DataFrame:
@@ -88,6 +87,11 @@ def ingest_counties() -> pd.DataFrame:
         GEOIDs would silently multiply spine rows.
     """
     pl_total, pl_hispanic = pl_api.fetch_decennial_pl(NATIONAL_COUNTIES)
+    election_states = [
+        fips
+        for fips in config.TRACT_PULL_STATE_FIPS
+        if fips not in ELECTION_MISSING_STATES
+    ]
 
     sources = [
         ("pl_hispanic", pl_hispanic),
@@ -95,7 +99,10 @@ def ingest_counties() -> pd.DataFrame:
         ("acs_prior", acs_api.load_acs_prior(NATIONAL_COUNTIES)),
         ("dhc", dhc_api.load_dhc_features(NATIONAL_COUNTIES)),
         ("geometry", geometry_api.load_county_geometry()),
-        ("election", election_api.load_county_election()),
+        (
+            "election",
+            election_api.load_election_for_states(election_states, "county"),
+        ),
     ]
 
     print(f"spine (pl_total): {len(pl_total)} counties")
@@ -119,7 +126,7 @@ def _merge_onto_spine(
         Each source's name and frame; every one must carry GEOID.
     report : bool
         Print a ledger line per source. The county build does; the tract
-        build does not, because 52 states would print 260 lines -- it
+        build does not, because 52 states would print over 300 lines -- it
         totals the counts and prints them once instead.
 
     Returns
@@ -164,10 +171,10 @@ def ingest_tracts(
     the county build's: every source left-joined onto that state's PL
     total-population frame.
 
-    The election source is the one that differs from the county build:
-    tract returns come from the lab's GerryDB release rather than MEDSL
-    (see `tract_election_api`). It is a plain read of a published figure
-    per tract, so there is nothing to cache.
+    The election source is the county build's too -- the lab's GerryDB
+    release (see `election_api`), read at tract level. It is a
+    plain read of a published figure per tract, so there is nothing to
+    cache.
 
     Parameters
     ----------
@@ -207,9 +214,9 @@ def ingest_tracts(
                 ("dhc", dhc_api.load_dhc_features(geo_scope)),
                 ("geometry", geometry_api.load_tract_geometry(fips_code)),
             ]
-            if fips_code not in TRACT_ELECTION_MISSING_STATES:
+            if fips_code not in ELECTION_MISSING_STATES:
                 sources.append(
-                    ("election", tract_election_api.load_tract_election(fips_code))
+                    ("election", election_api.load_election(fips_code, "tract"))
                 )
             merged, missing = _merge_onto_spine(pl_total, sources, report=False)
             for source_name, missing_count in missing.items():
@@ -269,8 +276,10 @@ def clean_and_derive_counties(df: pd.DataFrame) -> pd.DataFrame:
     5. Election: votes, lean, turnout, growth (TURNOUT needs step 2's
        VOTINGAGEPOP).
 
-    Each step preflights its own inputs and raises a KeyError naming the
-    step that should have created them, so order violations fail loudly.
+    Every step after PL preflights its own inputs and raises a KeyError
+    naming the step that should have created them. The PL step reads only
+    raw codes, so a missing one fails as a plain KeyError, and it checks
+    its own outputs on exit. Either way, order violations fail loudly.
 
     Parameters
     ----------
@@ -282,8 +291,8 @@ def clean_and_derive_counties(df: pd.DataFrame) -> pd.DataFrame:
     -------
     pandas.DataFrame
         The frame with every derived variable added; no rows are ever
-        dropped, and raw columns are kept (the manifest selection is what
-        trims them).
+        dropped, and raw columns are kept (the processed_schema selection is
+        what trims them).
 
     Raises
     ------
@@ -332,8 +341,8 @@ def build(
     NotImplementedError
         If `level` is not a config.GeographicBuildLevel.
     KeyError
-        If a column the manifest declares is missing from the derived
-        frame -- the manifest and the derive stage have drifted apart.
+        If a column processed_schema declares is missing from the derived
+        frame -- the schema and the derive stage have drifted apart.
     """
     if level not in get_args(config.GeographicBuildLevel):
         raise NotImplementedError(
@@ -344,7 +353,7 @@ def build(
     if level == "national_counties":
         unit = "counties"
         derive = clean_and_derive_counties
-        wanted = feature_manifest.processed_columns()
+        wanted = processed_schema.processed_columns()
         raw_path = config.RAW_NATIONAL_COUNTIES_PARQUET
         processed_path = config.PROCESSED_NATIONAL_COUNTIES_PARQUET
         ingest = ingest_counties
@@ -352,8 +361,8 @@ def build(
         unit = "tracts"
         states = list(state_fips or config.TRACT_PULL_STATE_FIPS)
         derive = clean_and_derive_tracts
-        wanted = feature_manifest.processed_columns(
-            exclude_variables=feature_manifest.TRACT_ABSENT_VARIABLES
+        wanted = processed_schema.processed_columns(
+            exclude_variables=model_groups.TRACT_ABSENT_VARIABLES
         )
         # Scope-named unless every state was built, so a partial run cannot
         # overwrite the national dataset.
@@ -380,7 +389,7 @@ def build(
     if absent:
         raise KeyError(
             f"{len(absent)} processed column(s) missing from the derived "
-            f"frame, first few: {absent[:5]} -- the feature_manifest schema and "
+            f"frame, first few: {absent[:5]} -- the processed_schema columns and "
             "the clean_and_derive stage have drifted apart."
         )
     processed = df[wanted]

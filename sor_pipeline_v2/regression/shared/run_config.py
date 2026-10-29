@@ -4,17 +4,17 @@ from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
-from build_dataset.feature_manifest import (
-    MODEL_GROUPS,
-    TRACT_ABSENT_VARIABLES,
-    SlugGroupName,
-)
 from build_dataset.ingest.pl.feats.hisp_pop_feats import HISPANIC
 from build_dataset.ingest.pl.feats.hisp_race_targets import (
     HISP_SOR_ALONE_PCT_OF_HISP_POP,
     HISP_WHITE_ALONE_PCT_OF_HISP_POP,
     HISP_WHITE_PCT_OF_HISP_POP,
     HISP_WHITE_SOR_PCT_OF_HISP_POP,
+)
+from build_dataset.model_groups import (
+    MODEL_GROUPS,
+    TRACT_ABSENT_VARIABLES,
+    ModelGroupName,
 )
 from model_utils.split import SplitGrouping
 from utils import config
@@ -49,14 +49,14 @@ class FullRegressionModelRunParams:
 
     rng_seeds: list[int]
     regression_tree_params: RegressionParameters
-    feature_groups: list[SlugGroupName]
+    feature_groups: list[ModelGroupName]
     top_percent: int | None = None
     bottom_percent: int | None = None
     include_full_baseline: bool = True
     # Groups to ABLATE: each run also fits the full matrix with these
     # groups' features removed, alongside the untouched full baseline, so
     # one run yields the comparison an ablation is asking for.
-    exclude_groups: list[SlugGroupName] = field(default_factory=list)
+    exclude_groups: list[ModelGroupName] = field(default_factory=list)
     # Which dataset to fit. `state_fips` scopes a tract run to the states
     # that build covered, and both appear in the run directory's name, so
     # a tract run cannot overwrite a county run's outputs.
@@ -185,9 +185,47 @@ def absent_variables(level: config.GeographicBuildLevel) -> tuple[str, ...]:
     -------
     tuple of str
         Empty for counties, which have every declared predictor; the
-        manifest's tract list otherwise.
+        model_groups tract list otherwise.
     """
     return () if level == "national_counties" else TRACT_ABSENT_VARIABLES
+
+
+def run_file(
+    run_dir: Path,
+    what: str | None = None,
+    suffix: str = ".csv",
+    subdir: str | None = None,
+) -> Path:
+    """A run's output file, named for the run: `<what>_<run dir name><suffix>`.
+
+    A file dragged out of its run directory still says which run it came
+    from. With no `what`, the file is named for the run alone.
+
+    Parameters
+    ----------
+    run_dir : Path
+        The run directory; its name goes into the file name.
+    what : str or None
+        What the file holds, e.g. "group_summary".
+    suffix : str
+        The extension, with its dot.
+    subdir : str or None
+        A folder inside the run directory to put the file in.
+
+    Returns
+    -------
+    Path
+        e.g. run_dir/group_summary_2026-10-27_seeds-1-50_tracts-GA.csv.
+    """
+    name = run_dir.name if what is None else f"{what}_{run_dir.name}"
+    folder = run_dir / subdir if subdir else run_dir
+    return folder / f"{name}{suffix}"
+
+
+def find_run_file(run_dir: Path, what: str, suffix: str = ".csv") -> Path:
+    """The file `run_file` names, or the bare `<what><suffix>` of runs before 2026-10-29."""
+    named = run_file(run_dir, what, suffix)
+    return named if named.exists() else run_dir / f"{what}{suffix}"
 
 
 def create_run_dir(run_params: FullRegressionModelRunParams) -> Path:

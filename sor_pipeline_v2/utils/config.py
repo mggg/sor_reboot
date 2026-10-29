@@ -1,4 +1,4 @@
-"""Shared configuration: paths, state codes, thresholds, and covariate groupings.
+"""Shared configuration: paths, state codes, regions, and build levels.
 
 These were previously hard-coded in several places across the notebooks. Centralizing
 them here is what lets the national and tract drivers share the same logic.
@@ -37,7 +37,7 @@ RAW_NATIONAL_DIR = NATIONAL_DIR / "raw"
 
 # The lab's GerryDB release: one geopackage per state per geography level,
 # delivered as files rather than fetched. Read-only input the build never
-# writes to, and the only source of tract-level election returns.
+# writes to, and the source of the election returns at both levels.
 GERRYDB_RELEASE_DIR = DATA_DIR / "RELEASE_geopackages"
 
 # Durable records ABOUT the raw sources: what each file's bytes hashed
@@ -116,8 +116,8 @@ TRACT_PULL_STATE_FIPS: tuple[str, ...] = (
 )
 
 # Two-digit state FIPS -> USPS abbreviation, for the 50 states, DC and PR.
-# Lives here because both arms need it: SHAP county labels and the VEST
-# precinct filenames, which are keyed by lowercase abbreviation.
+# Lives here because both arms need it: SHAP county labels and the GerryDB
+# release filenames, which are keyed by lowercase abbreviation.
 STATE_FIPS_TO_USPS: dict[str, str] = {
     "01": "AL",
     "02": "AK",

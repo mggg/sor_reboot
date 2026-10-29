@@ -9,7 +9,7 @@
 
 #SBATCH --partition=DDRI
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=1-00:00:00
 #SBATCH --output=slurm/logs/%x_%j.out
@@ -17,9 +17,13 @@
 set -euo pipefail
 
 # Both tree libraries default to every core they can see; on a shared
-# 768-CPU node that is not the 32 this job was given.
+# 768-CPU node that is far more than this job was given.
 export OMP_NUM_THREADS="$SLURM_CPUS_PER_TASK"     # LightGBM
 export LOKY_MAX_CPU_COUNT="$SLURM_CPUS_PER_TASK"  # scikit-learn's random forest
+# Single-threaded OpenBLAS, and 8 CPUs above: at 32 CPUs, LightGBM and
+# ridge crawled or returned NaN on q001's AMD EPYC 9965; the runs that
+# completed cleanly used these settings.
+export OPENBLAS_NUM_THREADS=1                     # numpy's linear algebra (ridge)
 export MPLBACKEND=Agg                             # compute nodes have no display
 
 echo "job $SLURM_JOB_ID ($SLURM_JOB_NAME) on $(hostname), $SLURM_CPUS_PER_TASK CPUs"

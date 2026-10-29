@@ -1,135 +1,1260 @@
 {
+  "algorithm": "sha256",
   "files": {
-    "acs5_2015_prior_national_counties.csv": {
-      "published_checksum": null,
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "b0f47bc175ff95950c078eab3aeb4ac4952bd5fde6593698617bef9ca6b4441f",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/ak_districtr_county_view_v2.gpkg": {
+      "sha256": "f84f93b2add7645d264cb6312ad10c709f58dc2bec92969bfc4bed0a2d255826"
     },
-    "acs5_2020_national_counties.csv": {
-      "published_checksum": null,
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "139ee1d1b3b14b0d08a4d67ccfa2b869e0f5d1cdb80fa9ea221998d1563b248d",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/ak_districtr_tract_view_v2.gpkg": {
+      "sha256": "c47419ffd1a934698a0eb0cf5cce30cf469bcbfc4fc78ee3988bb414b03c910c"
     },
-    "county_geometry_2020.parquet": {
-      "published_checksum": null,
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "118fa126ba547b9f2c311b190d06035db94c7ae6621c8e8b8eac1da0b9fb4d00",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/al_districtr_county_view_v2.gpkg": {
+      "sha256": "8bfa873c6f7197cae89570e3255d09bdfe8a36ab806195ae775460fb50ed4bf0"
     },
-    "countypres_2000-2024.csv": {
-      "published_checksum": {
-        "algorithm": "md5",
-        "checksum_source_description": "Harvard Dataverse metadata API, doi:10.7910/DVN/VOQCHQ",
-        "checksum_source_type": "published",
-        "checksum_value": "bd6661282936006b4ef4f5ee71418f3e"
-      },
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "9299583148f5f8264baf50b5d929c260699c46d915909b13ea3c3850918946f8",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/al_districtr_tract_view_v2.gpkg": {
+      "sha256": "fd4b3c0d45b32e80134f6dd846d8be8ebd8899c2f5e4077fef10655f5004a0df"
     },
-    "dhc_national_counties.csv": {
-      "published_checksum": null,
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "be29284e446061aaa5cb4e4c3c59b9c16fdf78b201850373e82fc622ae09e3fa",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/ar_districtr_county_view_v2.gpkg": {
+      "sha256": "79056d2065a35dd086857fe6a41d3d23e1a60d828c52fa53e895f815b5b9e639"
     },
-    "pl_2020_hispanic_national_counties.csv": {
-      "published_checksum": null,
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "bd4eab2464dc1cb5de80d8b8ed657048c3c9fd493a693b69889eb1d855a8eca2",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/ar_districtr_tract_view_v2.gpkg": {
+      "sha256": "66c7b68a22410802356c2e8da9c29dbeb73d1c1bdbfbc01b750e779544eb67f6"
     },
-    "pl_2020_total_national_counties.csv": {
-      "published_checksum": null,
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "072c9c8be50d552f3992c259384f0169ff6120577e7f43c4b19022abfbd4abd4",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/az_districtr_county_view_v2.gpkg": {
+      "sha256": "ead97a002b77f31689fc07dac30da9755e8907d9e58cb12af648f5b515bd9044"
     },
-    "tiger_2020_blocks_04.zip": {
-      "published_checksum": null,
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "206e94e94cf4b5ea30cf286f6569c4de697ba454659cac7252224e5c5d2c4703",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/az_districtr_tract_view_v2.gpkg": {
+      "sha256": "a61717abab5b1a4bcfadbee5b0467b86ed78cdda769e0607adc2f4e066df7c0e"
     },
-    "tiger_2020_blocks_06.zip": {
-      "published_checksum": null,
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "154ffb979e4d1f8cae4ff2676cbba9030ef39a92d4620644bc8aa7f7be2ad85f",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/ca_districtr_county_view_v2.gpkg": {
+      "sha256": "a26f6f9d79f1d276bb001d56e954f566a2bf9d5df20c0609f7641592733a7cbf"
     },
-    "tiger_2020_blocks_41.zip": {
-      "published_checksum": null,
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "2a057daf7185823ff5d5195c82f91a984a5d68c2fa4e785ff90f2dc111bad283",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/ca_districtr_tract_view_v2.gpkg": {
+      "sha256": "abc9b68252a18b60b229b4f6a05e21b2ebd352535bf836210bafe6dbc80eabc8"
     },
-    "tiger_2020_blocks_44.zip": {
-      "published_checksum": null,
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "79d10c9dfec1e3e0962e13d6295b53856db286a156d9937d3737adb0c542f35b",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/co_districtr_county_view_v2.gpkg": {
+      "sha256": "2efb2b54a1fa629830398930a4242be36345c1c075fad453b69432102a6b8bb3"
     },
-    "vest_2020_precincts_04.zip": {
-      "published_checksum": {
-        "algorithm": "md5",
-        "checksum_source_description": "Harvard Dataverse metadata API, doi:10.7910/DVN/K7760H v49.0",
-        "checksum_source_type": "published",
-        "checksum_value": "8647a286d04cb5dfbe5dd7c0e3078c29"
-      },
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "35b987a9c87b062c10e37c6665bf541fb00817f0ad4d0ba2869e833510c012e6",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/co_districtr_tract_view_v2.gpkg": {
+      "sha256": "40e71feb89a9b2131379b61c4ef433114c01f5e65918a68a83da26e326fc67d9"
     },
-    "vest_2020_precincts_06.zip": {
-      "published_checksum": {
-        "algorithm": "md5",
-        "checksum_source_description": "Harvard Dataverse metadata API, doi:10.7910/DVN/K7760H v49.0",
-        "checksum_source_type": "published",
-        "checksum_value": "d59edec0d3103de469b119265cba943f"
-      },
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "68cf698d46c6d94b4624540e309fc630bc8dc46410e9427d4dc957ec6002a11c",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/ct_districtr_county_view_v2.gpkg": {
+      "sha256": "110312b0abed5c5bf7588f810e94a11c41adc192904f3ceb423cf95fa2927cc6"
     },
-    "vest_2020_precincts_41.zip": {
-      "published_checksum": {
-        "algorithm": "md5",
-        "checksum_source_description": "Harvard Dataverse metadata API, doi:10.7910/DVN/K7760H v49.0",
-        "checksum_source_type": "published",
-        "checksum_value": "cb92362f37e7dc765ca8e434009eda69"
-      },
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "f90c0dc759088c29dc6a4e958f441782e65659f8f697219896b3a33192bd73ef",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/ct_districtr_tract_view_v2.gpkg": {
+      "sha256": "26e3f3a5567f256c92d6d2dcc6728cf65fb860502709e6562bb2ce7418b871b3"
     },
-    "vest_2020_precincts_44.zip": {
-      "published_checksum": {
-        "algorithm": "md5",
-        "checksum_source_description": "Harvard Dataverse metadata API, doi:10.7910/DVN/K7760H v49.0",
-        "checksum_source_type": "published",
-        "checksum_value": "ac907b652c9178518ee574d76efe1b54"
-      },
-      "self_recorded_checksum": {
-        "checksum_sha_256_value": "ddecbf262ea476c60751067915c80c1fad26c71455ae5b926d6177f3144bbbad",
-        "checksum_source_type": "custom_self"
-      }
+    "RELEASE_geopackages/de_districtr_county_view_v2.gpkg": {
+      "sha256": "aeb98ec7624b0a2d830e826447d167d14d255b74c52b4d136996b11e730f8e90"
+    },
+    "RELEASE_geopackages/de_districtr_tract_view_v2.gpkg": {
+      "sha256": "f34a38d0549327568ca5fc48576caf5a5e81aa01333222f21e74c7c91876e2a6"
+    },
+    "RELEASE_geopackages/fl_districtr_county_view_v2.gpkg": {
+      "sha256": "19c0f5120755aba91d0e728bad2c2aa15728e989fd4ef8c1e5eb4d413e2212b3"
+    },
+    "RELEASE_geopackages/fl_districtr_tract_view_v2.gpkg": {
+      "sha256": "961e03fe863af2912787a274eb309c2dde8a6fff9cf22c5a766e1f1e9a6ab61d"
+    },
+    "RELEASE_geopackages/ga_districtr_county_view_v2.gpkg": {
+      "sha256": "748d38ed5f266fd894582f03f714763d3e7b5ee145b5c8d7a19b88742223d5f4"
+    },
+    "RELEASE_geopackages/ga_districtr_tract_view_v2.gpkg": {
+      "sha256": "d18ca82e3ce48e6b574de92e965058cdcd6f787da8b32284b4840758fb11e736"
+    },
+    "RELEASE_geopackages/hi_districtr_county_view_v2.gpkg": {
+      "sha256": "f69e6d490f3471555d3114457511a9784c8c2b42d869ed9694d137529dcf41fa"
+    },
+    "RELEASE_geopackages/hi_districtr_tract_view_v2.gpkg": {
+      "sha256": "7d7a8718fbb525aeb47947a49ef16cac8741a034f2d03c791eeea07f305f5b8f"
+    },
+    "RELEASE_geopackages/ia_districtr_county_view_v2.gpkg": {
+      "sha256": "f19ac2a5be1c60808c7c2f48b21a8ba6567f4eb146f306ea9fc6c505c182a29c"
+    },
+    "RELEASE_geopackages/ia_districtr_tract_view_v2.gpkg": {
+      "sha256": "d55657c957d34202402ee1a192c3523dd703e9cd1c9286c4975365c3f7ec72e1"
+    },
+    "RELEASE_geopackages/id_districtr_county_view_v2.gpkg": {
+      "sha256": "1b68d840911ab2b3e1e9c473d6e91298e89194a64a663db0b68effe651b6e039"
+    },
+    "RELEASE_geopackages/id_districtr_tract_view_v2.gpkg": {
+      "sha256": "7270169cadd9d2d150223d0cdf559518419bf65dd9b5e18218ac096fbd4838ca"
+    },
+    "RELEASE_geopackages/il_districtr_county_view_v2.gpkg": {
+      "sha256": "f3fddc82005b31377fff83061eea20420dbbe14a6d5c465168a430b1ca2c7826"
+    },
+    "RELEASE_geopackages/il_districtr_tract_view_v2.gpkg": {
+      "sha256": "437973a8cb526d84010c0f0e2420a09497d90e4b73ddd50470e5afea0dabce98"
+    },
+    "RELEASE_geopackages/in_districtr_county_view_v2.gpkg": {
+      "sha256": "255d37a94f26679701aec39195703fd003993cc00d1d99850a6d6b9266bbda40"
+    },
+    "RELEASE_geopackages/in_districtr_tract_view_v2.gpkg": {
+      "sha256": "5c8721d47ee35333bacb3d9a576d2676afd867d538f20f967f44d96268d4a674"
+    },
+    "RELEASE_geopackages/ks_districtr_county_view_v2.gpkg": {
+      "sha256": "49f88f8674c8c34317a0e95ac5cc1478e41b3b4a58fd99c6064dc42159713347"
+    },
+    "RELEASE_geopackages/ks_districtr_tract_view_v2.gpkg": {
+      "sha256": "ebfd01536470fd3b07c1ceed0f06790dcf40dd6b93396cf4c23cd33d5ab622a0"
+    },
+    "RELEASE_geopackages/ky_districtr_county_view_v2.gpkg": {
+      "sha256": "3befa001e675bb31e009292e8738231b442d7d4d87da8561a20889b7be53b064"
+    },
+    "RELEASE_geopackages/ky_districtr_tract_view_v2.gpkg": {
+      "sha256": "21221211e8065e2a5f926b2d446b826526a2a89976bd8ea3ffe3ca26ba0e64f6"
+    },
+    "RELEASE_geopackages/la_districtr_county_view_v2.gpkg": {
+      "sha256": "cf48c8ebbc514f91cee185f398a981feae3aaf51df68dd10b7963e44f3aea2ca"
+    },
+    "RELEASE_geopackages/la_districtr_tract_view_v2.gpkg": {
+      "sha256": "d0e57a7d4708fe1e40d2dd4be9675b5cb75223fefbd50274269ac7caef56385d"
+    },
+    "RELEASE_geopackages/ma_districtr_county_view_v2.gpkg": {
+      "sha256": "1bf3424ccf21fb96e8ee01e29761b6d101a389ca0aa2bb488f9701abd519d8a4"
+    },
+    "RELEASE_geopackages/ma_districtr_tract_view_v2.gpkg": {
+      "sha256": "3360e47c6dd8d43400bc234888040a6dc0c1f5fbe5ca23010394ae85577e14b2"
+    },
+    "RELEASE_geopackages/md_districtr_county_view_v2.gpkg": {
+      "sha256": "2b660a0c72226677899e6e24e84068b2561d979eadbbc480c3b4ec65a88377e4"
+    },
+    "RELEASE_geopackages/md_districtr_tract_view_v2.gpkg": {
+      "sha256": "bbc4818d2eb342c6945749cdd3ad158355ba18b62a05aed33a08981d3d9e28fe"
+    },
+    "RELEASE_geopackages/me_districtr_county_view_v2.gpkg": {
+      "sha256": "2a6e8131fc510d0e527b58a0a67597724353642aea82912cbad29f49f2fab73b"
+    },
+    "RELEASE_geopackages/me_districtr_tract_view_v2.gpkg": {
+      "sha256": "ca2b4cd268a45e7e75b3c9aa3c446888e2c17411fd3be2e98880c31aedc3c838"
+    },
+    "RELEASE_geopackages/mi_districtr_county_view_v2.gpkg": {
+      "sha256": "b733288ac3ec323b5b2cf6ee768461e7bd8b28afc4e729229c0137c2a2e1ff56"
+    },
+    "RELEASE_geopackages/mi_districtr_tract_view_v2.gpkg": {
+      "sha256": "2f01727ce92d4812c06678d729e2c54764366e4b4452d4b330551182cc72bae6"
+    },
+    "RELEASE_geopackages/mn_districtr_county_view_v2.gpkg": {
+      "sha256": "7577069f4d493e8b2204d86f6bc7360cab19a3160a2e25dde84ee4ddb902920e"
+    },
+    "RELEASE_geopackages/mn_districtr_tract_view_v2.gpkg": {
+      "sha256": "0545bbe4b06ed9e13f2ecf7f58849a42546250cf0fb57c050d0982a24f2d47ee"
+    },
+    "RELEASE_geopackages/mo_districtr_county_view_v2.gpkg": {
+      "sha256": "bf280d28cdd2ef8676641910ed6bc1876bd5d5833f8a22e449b5879a18110b47"
+    },
+    "RELEASE_geopackages/mo_districtr_tract_view_v2.gpkg": {
+      "sha256": "2c05f416e90cb334b4d62e55c0b10ecf45ff5e082931295a6efcddfb42f1a268"
+    },
+    "RELEASE_geopackages/ms_districtr_county_view_v2.gpkg": {
+      "sha256": "afcdf61406446cbdf5a8f8e548e19183436390ac07d1c8aece318ad5b4ead524"
+    },
+    "RELEASE_geopackages/ms_districtr_tract_view_v2.gpkg": {
+      "sha256": "70be478bccf466b43d2515260b09e6da2ccf307e0120c3c41156a5de4325364a"
+    },
+    "RELEASE_geopackages/mt_districtr_county_view_v2.gpkg": {
+      "sha256": "12efdeba7697b326c2c1e6bdccab9fc5545e98988dad4c987bbb3c3efd31511f"
+    },
+    "RELEASE_geopackages/mt_districtr_tract_view_v2.gpkg": {
+      "sha256": "378fb2c53f2b0173b2fe5c05c93176a0e3b2b66853196c320945541d5d7441db"
+    },
+    "RELEASE_geopackages/nc_districtr_county_view_v2.gpkg": {
+      "sha256": "3057b5fb33f5f305b137e845d73b8f12414b8d0b14fb8f9a5fcba805bc562376"
+    },
+    "RELEASE_geopackages/nc_districtr_tract_view_v2.gpkg": {
+      "sha256": "f34534e4523993490c8fb12c5a1522d2bb4080a2a99d53932a192f8b5b30821e"
+    },
+    "RELEASE_geopackages/nd_districtr_county_view_v2.gpkg": {
+      "sha256": "e87b20669a8575d14a4a63537544e8555e9a0501672520a34ed6e2dc9225ecc7"
+    },
+    "RELEASE_geopackages/nd_districtr_tract_view_v2.gpkg": {
+      "sha256": "d9dada2afa6abba62c0694f6abe5695e2ca5103fb2b2c0b692cc7bd4958663a6"
+    },
+    "RELEASE_geopackages/ne_districtr_county_view_v2.gpkg": {
+      "sha256": "8faaffc54e3c670234bb480c5b46641c1fb45286fb2e9be79b9e2645acdf472a"
+    },
+    "RELEASE_geopackages/ne_districtr_tract_view_v2.gpkg": {
+      "sha256": "c2c12412dd959592d093899fddde505ca57574fd96da8a3453b2bca1bcaa0f10"
+    },
+    "RELEASE_geopackages/nh_districtr_county_view_v2.gpkg": {
+      "sha256": "60219a6a7777ec9b551173e18742998263640d510d254bfe7111a023599cd9c7"
+    },
+    "RELEASE_geopackages/nh_districtr_tract_view_v2.gpkg": {
+      "sha256": "d257e9b19e71f86826bf87dcb8f1ea6eebd34999eb18a850b4dc0480930a9b3e"
+    },
+    "RELEASE_geopackages/nj_districtr_county_view_v2.gpkg": {
+      "sha256": "45092780bff21ebc225bf0310b46ad02268657f30e66ef2c4d86a31738dbf98a"
+    },
+    "RELEASE_geopackages/nj_districtr_tract_view_v2.gpkg": {
+      "sha256": "e0d40b9c4770ad46b14134316cc984b6d5dc9c85d5893e2e661a38c4a21916ce"
+    },
+    "RELEASE_geopackages/nm_districtr_county_view_v2.gpkg": {
+      "sha256": "8be32fab9bfdad9a8524dc14fdbee30cc21dca043b206e09b02eadad0133a1b5"
+    },
+    "RELEASE_geopackages/nm_districtr_tract_view_v2.gpkg": {
+      "sha256": "060ae2ed89f2a321dc136b176d7e3b66cbb9af8c38ec0b8c9f2d8542354d7901"
+    },
+    "RELEASE_geopackages/nv_districtr_county_view_v2.gpkg": {
+      "sha256": "d560c7d9a316c659285ccaf902d216ebea4328ed5df339adc503dcc651f90f32"
+    },
+    "RELEASE_geopackages/nv_districtr_tract_view_v2.gpkg": {
+      "sha256": "8af0af82846c89d692bac521e3a7ebbdcf4852d16c165a63890d69c9ea8e8d20"
+    },
+    "RELEASE_geopackages/ny_districtr_county_view_v2.gpkg": {
+      "sha256": "ec7610c7d4ae697487a26335b4cbff438eca80fd7e3469409bd657a11ee395ff"
+    },
+    "RELEASE_geopackages/ny_districtr_tract_view_v2.gpkg": {
+      "sha256": "be8e35dca67d8a310d243594e2464359a12b85d9832d9390d08931fd84bd708a"
+    },
+    "RELEASE_geopackages/oh_districtr_county_view_v2.gpkg": {
+      "sha256": "3a3625349b551593a8a6beffd5e6a7b86e8002c1efd5e5d33b7398ab1c3cdfbc"
+    },
+    "RELEASE_geopackages/oh_districtr_tract_view_v2.gpkg": {
+      "sha256": "4081f9be2798356e7407fb03b4061b6ebc09cb734e10c7d8a00df62911af2aaf"
+    },
+    "RELEASE_geopackages/ok_districtr_county_view_v2.gpkg": {
+      "sha256": "89e56c56cf3d8a70d46884bc6988ac0ee7de680e531b9b960147f1158d01717a"
+    },
+    "RELEASE_geopackages/ok_districtr_tract_view_v2.gpkg": {
+      "sha256": "843f1d68996532c6dc9c3b5a1949cad458fc9a984271216ade0128fe66665855"
+    },
+    "RELEASE_geopackages/or_districtr_county_view_v2.gpkg": {
+      "sha256": "b63c300652c1a6de1be2b7627e91f767a8cde0731b4d827775dfa61c0e23d493"
+    },
+    "RELEASE_geopackages/or_districtr_tract_view_v2.gpkg": {
+      "sha256": "9ccccb48447a6a6493ca3288e654b5f5043eff08845d99ab7d6ea766a55cb854"
+    },
+    "RELEASE_geopackages/pa_districtr_county_view_v2.gpkg": {
+      "sha256": "a626fbaed541e359756ecd66b838193bb5f8fe491b0f468985c048a82a0f3c8b"
+    },
+    "RELEASE_geopackages/pa_districtr_tract_view_v2.gpkg": {
+      "sha256": "c310552d8f88cd39ea98377a1804155d6fcad5080a9cdb9b92faee273e8fee85"
+    },
+    "RELEASE_geopackages/ri_districtr_county_view_v2.gpkg": {
+      "sha256": "3ee13d037e019b6e3c572864d141327d4b02caf4f70ab7b3e13c0c2e651ce3fd"
+    },
+    "RELEASE_geopackages/ri_districtr_tract_view_v2.gpkg": {
+      "sha256": "34cd4a46628e1dea4f50e11f0169b2c59d2e66ac747359c4a59d63dd93f1990f"
+    },
+    "RELEASE_geopackages/sc_districtr_county_view_v2.gpkg": {
+      "sha256": "fba066d48c45887f41c4dc7f477a141fd6712b704ba66355594ab32c5c4133be"
+    },
+    "RELEASE_geopackages/sc_districtr_tract_view_v2.gpkg": {
+      "sha256": "6c9a1b7a78dd321ae0d5f9991b68f7235afde7f519ffaa38e15d5aec85f05b59"
+    },
+    "RELEASE_geopackages/sd_districtr_county_view_v2.gpkg": {
+      "sha256": "c63cc4275855aefc994e916656a3215afee364aae8a55582955194b7a6d2b728"
+    },
+    "RELEASE_geopackages/sd_districtr_tract_view_v2.gpkg": {
+      "sha256": "4109e63ea566011466a51fbe5cc94111862cc7013ae4078e5dea514f46cc0d69"
+    },
+    "RELEASE_geopackages/tn_districtr_county_view_v2.gpkg": {
+      "sha256": "403bd40e878660fb551b835c044bf5a66ab2d959cea90c748707a9b7ae4e8d18"
+    },
+    "RELEASE_geopackages/tn_districtr_tract_view_v2.gpkg": {
+      "sha256": "cb68997e7328328114ed79f60dfb4c77d34050f7ada9b4094d48f1ff1c732308"
+    },
+    "RELEASE_geopackages/tx_districtr_county_view_v2.gpkg": {
+      "sha256": "4dc070360cd210f2b4aac1c2c8037253e7f7b0072884ebc271f71896a350ca8e"
+    },
+    "RELEASE_geopackages/tx_districtr_tract_view_v2.gpkg": {
+      "sha256": "faf74f605bc13de9e249e37b39525dde4e668f71a814baea48cf3268c1b612fe"
+    },
+    "RELEASE_geopackages/ut_districtr_county_view_v2.gpkg": {
+      "sha256": "82c5e7e252bf0631da2dc92feedcabb5b0357b9994e8f13d9c36ac6ea796e6c1"
+    },
+    "RELEASE_geopackages/ut_districtr_tract_view_v2.gpkg": {
+      "sha256": "48e587caa6bd55bf2f592521744e6bf306a08a2a6c03b7fc84bfaa7acc88806a"
+    },
+    "RELEASE_geopackages/va_districtr_county_view_v2.gpkg": {
+      "sha256": "13f6ea8bc55a1e7edc8b0c90679d2058482761c73e53ec55d9d65d9f91651fcf"
+    },
+    "RELEASE_geopackages/va_districtr_tract_view_v2.gpkg": {
+      "sha256": "a4e42c33d6538a4c917cced8af3f33af1b776933ee1b19d1ee43f3d53e1d70c4"
+    },
+    "RELEASE_geopackages/vt_districtr_county_view_v2.gpkg": {
+      "sha256": "854bf5fd69651d6a4efbd245a4257ebb9177d517ca615695d9afd0043004b7c1"
+    },
+    "RELEASE_geopackages/vt_districtr_tract_view_v2.gpkg": {
+      "sha256": "4edae6e868d2b4602a6efbaf2e7cddf8be84f446c71eae390e27553db0b6542d"
+    },
+    "RELEASE_geopackages/wa_districtr_county_view_v2.gpkg": {
+      "sha256": "d64f353c3707e937342d7418fcebd4b140b25e722b94883097c39a5e44f2eaee"
+    },
+    "RELEASE_geopackages/wa_districtr_tract_view_v2.gpkg": {
+      "sha256": "3efa8ba2894e33bc33299a6aaf26d24f4b6a2f857e09bcecac4840eef76e8318"
+    },
+    "RELEASE_geopackages/wi_districtr_county_view_v2.gpkg": {
+      "sha256": "0edcc8d2e538b57b8f39df6234301cf9d8fe6d6782a818b334c400071f99dbab"
+    },
+    "RELEASE_geopackages/wi_districtr_tract_view_v2.gpkg": {
+      "sha256": "d5efc126558bd9f721617b1d6392b9b4af757c9e9d285b0b93f5c8ae564fe9e2"
+    },
+    "RELEASE_geopackages/wv_districtr_county_view_v2.gpkg": {
+      "sha256": "13c8199a007d7dc5c71d514b860316379b00f0dc7dfc7e567d86fb265792fb8e"
+    },
+    "RELEASE_geopackages/wv_districtr_tract_view_v2.gpkg": {
+      "sha256": "6f6fd2408d9f393a5c0edf2cf3435aed03184f55e304ca0af1f468597cc6a4be"
+    },
+    "RELEASE_geopackages/wy_districtr_county_view_v2.gpkg": {
+      "sha256": "8b5aa7a2f94a151fcb9756c3129763302441c7ee251959990e4f923c650483f2"
+    },
+    "RELEASE_geopackages/wy_districtr_tract_view_v2.gpkg": {
+      "sha256": "5a2fc09e23f61275cdddf4b4863958dfc81b22aeecb3bcc37bcbbb29dbb9862f"
+    },
+    "national/raw/acs5_2015_prior_national_counties.csv": {
+      "sha256": "b0f47bc175ff95950c078eab3aeb4ac4952bd5fde6593698617bef9ca6b4441f"
+    },
+    "national/raw/acs5_2015_prior_tracts_01.csv": {
+      "sha256": "52cb9afde662f93f480fbb6f8663c2e00a8d7bddb312dd828138b380fa961b95"
+    },
+    "national/raw/acs5_2015_prior_tracts_02.csv": {
+      "sha256": "c99c28711b8b91f4dedbc3af0c37ef7b686360c5be8d8510b9121111188bd482"
+    },
+    "national/raw/acs5_2015_prior_tracts_04.csv": {
+      "sha256": "c4b0bb712d8e7d921b5ac04b03918e210d8fb6837dc2992a04631acda10e7bf8"
+    },
+    "national/raw/acs5_2015_prior_tracts_05.csv": {
+      "sha256": "782e7263cdc2bae52c1702ee1a8b47b90d87dadff27f58486ad9fab32ba1d83b"
+    },
+    "national/raw/acs5_2015_prior_tracts_06.csv": {
+      "sha256": "e05b73df7a1bf7628b81ace8cf97d2a9d7963e347ab0daa5c2ae2a15769791c3"
+    },
+    "national/raw/acs5_2015_prior_tracts_08.csv": {
+      "sha256": "79117eacf75fe76c09f95db55db6a73047bc2323214d6641d781d49e5ed98555"
+    },
+    "national/raw/acs5_2015_prior_tracts_09.csv": {
+      "sha256": "35700716077102fe4c654ba7612790fdf8fc67276e2600448c192d79eef25dc4"
+    },
+    "national/raw/acs5_2015_prior_tracts_10.csv": {
+      "sha256": "eccdd76c9efec458498ccefac02d367747a83c5b5517e559e86d37fe0caedad4"
+    },
+    "national/raw/acs5_2015_prior_tracts_11.csv": {
+      "sha256": "9db836be52161ec215bcee233727c4f54308f09acecc1bf7fe4b2df6e8407f8a"
+    },
+    "national/raw/acs5_2015_prior_tracts_12.csv": {
+      "sha256": "20f5d17cbf4b4c110de53fd969c617118067cb4578eaf9dede9581229b2289d1"
+    },
+    "national/raw/acs5_2015_prior_tracts_13.csv": {
+      "sha256": "30f450a54be9aee44d3385a7ff0cfd0f7fa93c39d6d7bc5525a25387670a5084"
+    },
+    "national/raw/acs5_2015_prior_tracts_15.csv": {
+      "sha256": "eb4ec549db49670906c65d05a55e3949b2993a912bb0faed6c1cb882f6334b2a"
+    },
+    "national/raw/acs5_2015_prior_tracts_16.csv": {
+      "sha256": "5770151c098d06732e74d2bdda6aefa103dbf3e6dec4749724f2719fcf2b90af"
+    },
+    "national/raw/acs5_2015_prior_tracts_17.csv": {
+      "sha256": "527900548394325ddb04fc7de8a42a8a8efaac7dddc0873939858640b43f0ef0"
+    },
+    "national/raw/acs5_2015_prior_tracts_18.csv": {
+      "sha256": "4911833f249e95986562a84d60b8ce794decbf0967c16cf996031e1d28e1ed4d"
+    },
+    "national/raw/acs5_2015_prior_tracts_19.csv": {
+      "sha256": "03cbd07f895e998dc3b8126bf7e619968ef0391b886921861b3abd9b1248b21a"
+    },
+    "national/raw/acs5_2015_prior_tracts_20.csv": {
+      "sha256": "80e6cdf187fcf191dc927d79f4db025af5ce526919a0db697add603e2aaec79b"
+    },
+    "national/raw/acs5_2015_prior_tracts_21.csv": {
+      "sha256": "efa4c154a511afd649ba4ab2d164d6569aa8eba18092e70459069f9909791696"
+    },
+    "national/raw/acs5_2015_prior_tracts_22.csv": {
+      "sha256": "6db3a23fe30449f602476e65d1d6b428fa4dabee4202443fdbd1099d9d951c73"
+    },
+    "national/raw/acs5_2015_prior_tracts_23.csv": {
+      "sha256": "5b309fd8d3ed360b275e9fc93f525574900b186907cb19e3db6693d1f7a15e7f"
+    },
+    "national/raw/acs5_2015_prior_tracts_24.csv": {
+      "sha256": "29d5756b18a565525bcc59546ef83c1ac62d813f9249daec6aaa32ceea32c06d"
+    },
+    "national/raw/acs5_2015_prior_tracts_25.csv": {
+      "sha256": "079447a1be6a079088a87265fbdebcc4147838209085552662ee6b2b23caec44"
+    },
+    "national/raw/acs5_2015_prior_tracts_26.csv": {
+      "sha256": "7481fd63bfad8bbd20815f76c2dc4cd9399c4c1b923ba3cdd97baeff56a43cd4"
+    },
+    "national/raw/acs5_2015_prior_tracts_27.csv": {
+      "sha256": "7a609b0d95e17968518dea1de0836d8d9bb96722bf4d654f47ee607c07858729"
+    },
+    "national/raw/acs5_2015_prior_tracts_28.csv": {
+      "sha256": "92104015f7e8ed15396828f376cad071aa18a67c7e1985eb528a61531213fba4"
+    },
+    "national/raw/acs5_2015_prior_tracts_29.csv": {
+      "sha256": "a311b2639e733f065c1ee3026ec3b7c4b241077d556378d669d6117c48c9ff1a"
+    },
+    "national/raw/acs5_2015_prior_tracts_30.csv": {
+      "sha256": "82384069ff64f472280f7c3243b1d5421db3788d0640abffedbcfc865bd2fcff"
+    },
+    "national/raw/acs5_2015_prior_tracts_31.csv": {
+      "sha256": "c044b0c01c5c15d747a4a3b0f1a906c7a421bbf351472243ec4eaa8aad7f665d"
+    },
+    "national/raw/acs5_2015_prior_tracts_32.csv": {
+      "sha256": "7ca681a9605bec93de4446a23ef85fe70d965243b8db723ccbefc2653559774e"
+    },
+    "national/raw/acs5_2015_prior_tracts_33.csv": {
+      "sha256": "ce0d936d35a263aee49386ca66857a95ccba779327e8651e15c6e4e250f027fe"
+    },
+    "national/raw/acs5_2015_prior_tracts_34.csv": {
+      "sha256": "2a8b368b82260b199915e9c8bccbfead4e33364f335f8c349ccc72aa382145bc"
+    },
+    "national/raw/acs5_2015_prior_tracts_35.csv": {
+      "sha256": "6addc5cd45267f41ea3b053314a6439b515e1debf2cf2d570e7eee5697b41767"
+    },
+    "national/raw/acs5_2015_prior_tracts_36.csv": {
+      "sha256": "1caba9250af0c43919bcc4016f6b689c7c800004752ed30ef72051beaf6b3952"
+    },
+    "national/raw/acs5_2015_prior_tracts_37.csv": {
+      "sha256": "c6af696cd84564e7c6f4629b9d6eb2b7a441e8e8cbd460483659aa956d1262fe"
+    },
+    "national/raw/acs5_2015_prior_tracts_38.csv": {
+      "sha256": "9461c54a6f13acaa4d0f7c64f70589eed6f119473f0eee0cd92fe2f8c34dafa3"
+    },
+    "national/raw/acs5_2015_prior_tracts_39.csv": {
+      "sha256": "72f0da18724d664a7da363581c463aa62f74e4c315a6dd090747dbde7bffa8f7"
+    },
+    "national/raw/acs5_2015_prior_tracts_40.csv": {
+      "sha256": "08a80761b7c4b5ecf977dbfd22d3b4eec2a7e09941871107bc0cda3731284b36"
+    },
+    "national/raw/acs5_2015_prior_tracts_41.csv": {
+      "sha256": "a34c41f7ff15d52a97e95e5604baf51945c350c62f78a84b80e0330d7ce1fc70"
+    },
+    "national/raw/acs5_2015_prior_tracts_42.csv": {
+      "sha256": "f4f7e1a6ab7b350169696bc1b60867af92b6cb08d65fe53f9c769df8c3ef378d"
+    },
+    "national/raw/acs5_2015_prior_tracts_44.csv": {
+      "sha256": "59397a25aa0b431a1e9883f56aa8ad6c4c63ccc4da4ffa1d9e516b4fa2841e53"
+    },
+    "national/raw/acs5_2015_prior_tracts_45.csv": {
+      "sha256": "eea893972f8d7dffc4ca9909f0e2926a67f3ba8d394db6f9f859df4946e796de"
+    },
+    "national/raw/acs5_2015_prior_tracts_46.csv": {
+      "sha256": "dce4ef64356f58f37edf88e763a26a4398c9b0281e977f4a5b6cb6667ff56602"
+    },
+    "national/raw/acs5_2015_prior_tracts_47.csv": {
+      "sha256": "4aa38c9a304052e7dc48b87fe8950c7c3c85d27640c36c965dfd00c873fd8dbc"
+    },
+    "national/raw/acs5_2015_prior_tracts_48.csv": {
+      "sha256": "f41b4851c0f6a64fda1ec00324d269d809789ae2968ae5d03e2aa43f8c1d8da6"
+    },
+    "national/raw/acs5_2015_prior_tracts_49.csv": {
+      "sha256": "24d98a5f8c9339dd52bc36c7814d3b26208d7368130621152c13259e1f2866b3"
+    },
+    "national/raw/acs5_2015_prior_tracts_50.csv": {
+      "sha256": "98a4f64cc6d6516d94306e2fbafb1b919d9e5e2d3624fecee3c8ce94cd0d08ae"
+    },
+    "national/raw/acs5_2015_prior_tracts_51.csv": {
+      "sha256": "5b7bef4a1fc2ea284363eff55fc15d5220195d9921dbb710ccb7d1c5ac213e2e"
+    },
+    "national/raw/acs5_2015_prior_tracts_53.csv": {
+      "sha256": "d058f36c18ff55c46926a2216e681d2e81208049735baa2c347fffdc64fe8cb6"
+    },
+    "national/raw/acs5_2015_prior_tracts_54.csv": {
+      "sha256": "c4c465968234934aad42d078348c7d0eef641916c172c8971032c466802fcc4e"
+    },
+    "national/raw/acs5_2015_prior_tracts_55.csv": {
+      "sha256": "12ed175ef11634792d86e0164e29f011a8a437e7c1003932770ec365fe80d990"
+    },
+    "national/raw/acs5_2015_prior_tracts_56.csv": {
+      "sha256": "70f51c04dbd58e275185f75c6c8fbc1151fc478036845e74ba02e683a951a1c7"
+    },
+    "national/raw/acs5_2015_prior_tracts_72.csv": {
+      "sha256": "59327350a20120f922746592c89a9d98303d2943c3d7ba891c16d0bb611478d1"
+    },
+    "national/raw/acs5_2020_national_counties.csv": {
+      "sha256": "139ee1d1b3b14b0d08a4d67ccfa2b869e0f5d1cdb80fa9ea221998d1563b248d"
+    },
+    "national/raw/acs5_2020_tracts_01.csv": {
+      "sha256": "357955ab21706d5e54a4be62758f460b5b6d42f39ba4c78b1e39b387537e22d9"
+    },
+    "national/raw/acs5_2020_tracts_02.csv": {
+      "sha256": "81d021739c5068d784fc945a6f4eb2bd1cd97edfe3600c4f71463d92a22aaddd"
+    },
+    "national/raw/acs5_2020_tracts_04.csv": {
+      "sha256": "b0b170bbfa9d4c5dab4dceeaf42932a572e4a34d77b0ac0dbd1a69d78007c3ea"
+    },
+    "national/raw/acs5_2020_tracts_05.csv": {
+      "sha256": "8b6f3d16a064941164baeb138c6f0ffaf6d095ef2571a2b1d7008d7fa4d8dd3a"
+    },
+    "national/raw/acs5_2020_tracts_06.csv": {
+      "sha256": "641329e8303f0c30fd84cd206f8bb2c0b8e149375480520ea7350f358d976fa9"
+    },
+    "national/raw/acs5_2020_tracts_08.csv": {
+      "sha256": "bdb2e6dda26d3ac4f69485a4fb1138d81544fb35e2075dc850c50717833289de"
+    },
+    "national/raw/acs5_2020_tracts_09.csv": {
+      "sha256": "afef97ec7f3714e552b761a9ab54afdf72e3d92cfcfbe5880e86771cf64d29fc"
+    },
+    "national/raw/acs5_2020_tracts_10.csv": {
+      "sha256": "2db1ee4098870c4ac026b5006812dec9ea68216aba2b538de54aa42ffd6fbd93"
+    },
+    "national/raw/acs5_2020_tracts_11.csv": {
+      "sha256": "4cc8067dd1acd2eed68499e13f5d01137098d3428cdfacdada0575ae9b0834ca"
+    },
+    "national/raw/acs5_2020_tracts_12.csv": {
+      "sha256": "07bd59788c1293170bb4c6b446a74d4920b949829462ee64ddc6f2f6926acbd6"
+    },
+    "national/raw/acs5_2020_tracts_13.csv": {
+      "sha256": "f996c7bec7bae0945c7b71a8cf66d71f53373958068681151c6cc6a51d3684ff"
+    },
+    "national/raw/acs5_2020_tracts_15.csv": {
+      "sha256": "38736b3c52bc40876565fb63c7615b92ae5bb3087d39ab2fe0fde9e50001618b"
+    },
+    "national/raw/acs5_2020_tracts_16.csv": {
+      "sha256": "c6ac76d4a9d25b5aa5258c729cdcd14a28f9b2289f2c987d1f5f2d2abb71f79c"
+    },
+    "national/raw/acs5_2020_tracts_17.csv": {
+      "sha256": "fba3c0e029e3de95aed5812b0ddbfb77e8255e9327cecbec9f6cc5c0050616a7"
+    },
+    "national/raw/acs5_2020_tracts_18.csv": {
+      "sha256": "4fb01555feef5ebccfcaa7ed5afd395c419f6f93a601df9ec0c977f4d49bf2aa"
+    },
+    "national/raw/acs5_2020_tracts_19.csv": {
+      "sha256": "454ecf46688e5c44c765547f01a8b319e8831f1fb825ada4a8e25b36dcfa924d"
+    },
+    "national/raw/acs5_2020_tracts_20.csv": {
+      "sha256": "a1172442241c388a6746ed6f9b2c8f32f135cde17311e744ceafa6a377a1b658"
+    },
+    "national/raw/acs5_2020_tracts_21.csv": {
+      "sha256": "9bb9baa7138a257109c2d535ed246f03ebdfe31895c8dc66995bec778f61efca"
+    },
+    "national/raw/acs5_2020_tracts_22.csv": {
+      "sha256": "ba40533c1b3cac55a9570b0ac06b7a234c52b658ac81eb7d9731e8b356f9aa3f"
+    },
+    "national/raw/acs5_2020_tracts_23.csv": {
+      "sha256": "b5189a3e4ae2992e20848b77b08b8b4591fdf40a92a43ee03c8934540df29596"
+    },
+    "national/raw/acs5_2020_tracts_24.csv": {
+      "sha256": "f21c45ed060cde61b36e73586991f464780a2c78beb052ec1011fd2c686a3114"
+    },
+    "national/raw/acs5_2020_tracts_25.csv": {
+      "sha256": "05083df8cb28f976b25353be6044cdb2e1a5c26dc8d227b885c20ab56f7a5c0d"
+    },
+    "national/raw/acs5_2020_tracts_26.csv": {
+      "sha256": "62fb03d2e1818da6fee42d877a06b865bb329c23c101ae9b5b626daefabc785e"
+    },
+    "national/raw/acs5_2020_tracts_27.csv": {
+      "sha256": "198aaf70f9a070210609d59a143cc3a4b63d5ff235a65d1677b915404c80d07a"
+    },
+    "national/raw/acs5_2020_tracts_28.csv": {
+      "sha256": "495c2edae348963e0fa19e03a9e5860e726cdb3c2d796b8436fcd0bd52e9c43b"
+    },
+    "national/raw/acs5_2020_tracts_29.csv": {
+      "sha256": "d6620b60d96b127331c344e0f8c0af49fa17656b99bee387fa21f566bee216ea"
+    },
+    "national/raw/acs5_2020_tracts_30.csv": {
+      "sha256": "bc02dfe1a54f5f67fe8670f0a92e55f7756b18d2032dfdf10df5cdfa17b9f539"
+    },
+    "national/raw/acs5_2020_tracts_31.csv": {
+      "sha256": "af513eddbc94bd10a7ded4b8285cc1995a91bd442afc9ccc72fa2193118ffba5"
+    },
+    "national/raw/acs5_2020_tracts_32.csv": {
+      "sha256": "142a644ac75979e6699167d9ec853caa29ad2aa582a3970c0a6b7bd0862c9acf"
+    },
+    "national/raw/acs5_2020_tracts_33.csv": {
+      "sha256": "a2c5fff04c70a8242126d681e6362f571f8cac6a0f2757b0bf66694173c8d4d7"
+    },
+    "national/raw/acs5_2020_tracts_34.csv": {
+      "sha256": "814104c1661d7c14ce85fc9ddbd7f2ec3e27d601567ce6d2ccb6c1f3890f40cb"
+    },
+    "national/raw/acs5_2020_tracts_35.csv": {
+      "sha256": "6d11b31fe0c593eb09d33225c2d7c1a4cbd918a48be06f1282d3fc919ee14e0f"
+    },
+    "national/raw/acs5_2020_tracts_36.csv": {
+      "sha256": "672621e139eb5933e15690e833cba2a2526ed8857a66529aa73f32e7fe67149d"
+    },
+    "national/raw/acs5_2020_tracts_37.csv": {
+      "sha256": "de1d8c5ad4432f9c20072b0f42cd3c48af42ed538ff3fa1504101623a9627c63"
+    },
+    "national/raw/acs5_2020_tracts_38.csv": {
+      "sha256": "ca838d7b9a25b064da38aca663047b35f21124686527be59865d394f8a38cf4a"
+    },
+    "national/raw/acs5_2020_tracts_39.csv": {
+      "sha256": "6bd75a61224c6bd70c293637a8e2d6c9eb73931ae2cf03c7f6bf3638df73919d"
+    },
+    "national/raw/acs5_2020_tracts_40.csv": {
+      "sha256": "0a9920a951ef9fe0c5788d2c9275a84b6daa66a621aeeb463ae22b466bfa3ef8"
+    },
+    "national/raw/acs5_2020_tracts_41.csv": {
+      "sha256": "6fa9c7f1f810056de67fdb59de03384781a166f6ed88b1bfc11384b63d52063b"
+    },
+    "national/raw/acs5_2020_tracts_42.csv": {
+      "sha256": "3669750027a96ddee7d902439b42628d1cd224b1c71951126afedcd109d8b7cc"
+    },
+    "national/raw/acs5_2020_tracts_44.csv": {
+      "sha256": "39778853cf89b1c728522c61c038ad1709217e1ec392714cf1658bd049236895"
+    },
+    "national/raw/acs5_2020_tracts_45.csv": {
+      "sha256": "55b497c5815f9c19bb7d7e0a75644298d1a74077626bd85c73cbbba187c7d471"
+    },
+    "national/raw/acs5_2020_tracts_46.csv": {
+      "sha256": "ef270b11cd0464eedaf8c391c4495fdc50bb819ef15c800840cb4f6497bf2e73"
+    },
+    "national/raw/acs5_2020_tracts_47.csv": {
+      "sha256": "7b9b2a5005ae91ea9be0e4466906df40d1ca94b3acb0b1de341530be89c6e1ce"
+    },
+    "national/raw/acs5_2020_tracts_48.csv": {
+      "sha256": "431b60a654ef808ba288233518dcb187d69b1aa3e89d7c901ad476bd5569de09"
+    },
+    "national/raw/acs5_2020_tracts_49.csv": {
+      "sha256": "7e8a24c37e433045b519584458ca628ff5ae74aecff943f8e16ec3a172afdb96"
+    },
+    "national/raw/acs5_2020_tracts_50.csv": {
+      "sha256": "30655a2e3b8fcc2f760eb09be2864aab475cb15b41104615f7105810eb29a363"
+    },
+    "national/raw/acs5_2020_tracts_51.csv": {
+      "sha256": "d7c52f88414d062d6fb5695141c6de9e17fb755bc77a4c9e9337daecbb3d40a0"
+    },
+    "national/raw/acs5_2020_tracts_53.csv": {
+      "sha256": "07f3a4d52e1583e8ae469321a4b3b65f094d65d0219dd163bc0fa782a9188cac"
+    },
+    "national/raw/acs5_2020_tracts_54.csv": {
+      "sha256": "492a3e3009ff8b8c9fb09a033f6412c4f04cc7652aff209a0a594dc6b2b55645"
+    },
+    "national/raw/acs5_2020_tracts_55.csv": {
+      "sha256": "59260e31888ebb031e9b4688d767a93f931fee6dc280289b661419ef8f1b495c"
+    },
+    "national/raw/acs5_2020_tracts_56.csv": {
+      "sha256": "80fe9e3684304de71b0a120439d609c8382f90298387485efc241ca9b14035f6"
+    },
+    "national/raw/acs5_2020_tracts_72.csv": {
+      "sha256": "f09489abdd1e91bd256d7bdf1d00ca223bd05cf0b5cbd655524d38129a58b490"
+    },
+    "national/raw/county_geometry_2020.parquet": {
+      "sha256": "118fa126ba547b9f2c311b190d06035db94c7ae6621c8e8b8eac1da0b9fb4d00"
+    },
+    "national/raw/dhc_national_counties.csv": {
+      "sha256": "be29284e446061aaa5cb4e4c3c59b9c16fdf78b201850373e82fc622ae09e3fa"
+    },
+    "national/raw/dhc_tracts_01.csv": {
+      "sha256": "1e4f04fe2f8c002340aaa66091dcbbebd805d34d35c1b27d103e1e16a162b7b3"
+    },
+    "national/raw/dhc_tracts_02.csv": {
+      "sha256": "7eaac7a5bbfe8e90272c3271c9cc91eeda9b22e8a6202c0f7d946208b932dc76"
+    },
+    "national/raw/dhc_tracts_04.csv": {
+      "sha256": "99a6554461af7a8902477b12a1a755d1162cabe135717f3a07cce0d66c8f4597"
+    },
+    "national/raw/dhc_tracts_05.csv": {
+      "sha256": "cc96ffe2bffd4495effa95e35da992c4ee66d1c496e7f3b737d6a310697379a5"
+    },
+    "national/raw/dhc_tracts_06.csv": {
+      "sha256": "857caa477fd91d709a26e893895e184d64088795b999b7f2bc1adfaed6e7709c"
+    },
+    "national/raw/dhc_tracts_08.csv": {
+      "sha256": "7832b59a1bf6c01b635cba4362b99e7101e0de0d734862afe87ddeac84bc19fa"
+    },
+    "national/raw/dhc_tracts_09.csv": {
+      "sha256": "65a4d85ae391e73e09d556f8140eb6215c6995cf354fb54ddf3ce4e940485d97"
+    },
+    "national/raw/dhc_tracts_10.csv": {
+      "sha256": "797a928ec2adb9d99984c5af8a2e2a04df24126a9748d7a5c04e78dc41d1c826"
+    },
+    "national/raw/dhc_tracts_11.csv": {
+      "sha256": "2dfaa954a4ef60adb16839c2e7876de1cead43ea769ab3984289b6a54bfb1c4e"
+    },
+    "national/raw/dhc_tracts_12.csv": {
+      "sha256": "8729ed9b3b4c7113d7d42148058f9c4bb7e7a59a79e70115072e9f1dc9061d8c"
+    },
+    "national/raw/dhc_tracts_13.csv": {
+      "sha256": "5c1df178cfa72c7fed285d0e4409b6930fdc4e031f39570f065333df8bd69682"
+    },
+    "national/raw/dhc_tracts_15.csv": {
+      "sha256": "5625ca5b12884a4632e24bb402cec57c49c8cfd6b538e5c4056843a1d5957455"
+    },
+    "national/raw/dhc_tracts_16.csv": {
+      "sha256": "c3e32690a802c9287f73642685d028890d6d1019add5829837e3d7b47c148132"
+    },
+    "national/raw/dhc_tracts_17.csv": {
+      "sha256": "c0761fa71dbe3c9221b47945f5e69c33e15a6dc447035e74f5d12ecdd2086f58"
+    },
+    "national/raw/dhc_tracts_18.csv": {
+      "sha256": "d7a6a9cc222482f302aab147d2d27e29f80c8edf4c25256ab786e03d2a8f20c0"
+    },
+    "national/raw/dhc_tracts_19.csv": {
+      "sha256": "5ab46d6dff3395e1232c7e412decaa589391cad90b6e05cf05dae276907fe40d"
+    },
+    "national/raw/dhc_tracts_20.csv": {
+      "sha256": "9567d0e0f137f60b9e72495229e0379459a5cb17cae321018d473ffb97a5d817"
+    },
+    "national/raw/dhc_tracts_21.csv": {
+      "sha256": "dd6f872cad1f62f73138f820c447f181c4ddb002e231a46906e0832675c3dabc"
+    },
+    "national/raw/dhc_tracts_22.csv": {
+      "sha256": "b0050034de21ed57a518193e84c884b3db6f8de70ec15d1bc5e38d3978ce8c7f"
+    },
+    "national/raw/dhc_tracts_23.csv": {
+      "sha256": "2141f38093b5809daf418fe5d1f260d9f920bc56d729e5763d78936f63d5ee91"
+    },
+    "national/raw/dhc_tracts_24.csv": {
+      "sha256": "13abd4dc3b9806748b192d48f70183ae43d3782d5fc2457a41ec0f842a7f6014"
+    },
+    "national/raw/dhc_tracts_25.csv": {
+      "sha256": "e20e38f065dfb7a2c1a6a9d3ccc50bd722af795a357b65f8816cb57d3badd9cc"
+    },
+    "national/raw/dhc_tracts_26.csv": {
+      "sha256": "485028a09c62c46e7fbbcbe3b1bf239470f3be6f5ad3b223ce958801667fb0a5"
+    },
+    "national/raw/dhc_tracts_27.csv": {
+      "sha256": "530a9a1c4ff71f152e885b18a10ad55712ef2e7610fd029c5107e77ee21a8483"
+    },
+    "national/raw/dhc_tracts_28.csv": {
+      "sha256": "1a2520ab99ab5b10d0bad2cc7145e96bdd731e8d0f0661654757124cb0e6d490"
+    },
+    "national/raw/dhc_tracts_29.csv": {
+      "sha256": "2de98d287803ddcc8becece5e2ee6f77e5e08a7158fd1918214162bc73a30021"
+    },
+    "national/raw/dhc_tracts_30.csv": {
+      "sha256": "c437e010c1d35b46b989c9e53bc20effef397a18b6377d1154f8187480742ad8"
+    },
+    "national/raw/dhc_tracts_31.csv": {
+      "sha256": "d82d80719f6786bb0f88102dcc51a52d5b45f1bf9039efe3b8f4266ca2160a5c"
+    },
+    "national/raw/dhc_tracts_32.csv": {
+      "sha256": "c02f780a0f80b4a0fdb5bedd1b1227472ec37d61e8fada398605cc8a94a98d11"
+    },
+    "national/raw/dhc_tracts_33.csv": {
+      "sha256": "d8068c1cbfe8857db38bd04770d20e5ff5b10b27f89476b06162f864adcd9261"
+    },
+    "national/raw/dhc_tracts_34.csv": {
+      "sha256": "25f95e1abc89602efd1ab6b97e5cdc53e6f36224ba495afd0d9ca2dd9ae2830f"
+    },
+    "national/raw/dhc_tracts_35.csv": {
+      "sha256": "f0caf7a640f019101f970017341b59b10691d15f8019e19a3b1dee83958f4e7e"
+    },
+    "national/raw/dhc_tracts_36.csv": {
+      "sha256": "73081989d78e3133f68f2db5f7ac131579be0a06a033bdea3c2387863545870f"
+    },
+    "national/raw/dhc_tracts_37.csv": {
+      "sha256": "ac75b5a8e0da6be0ed369d590572ceeac9b1c7f4609e7f94c77320155e852099"
+    },
+    "national/raw/dhc_tracts_38.csv": {
+      "sha256": "ae0fb227ec1478ee376b96823d69629766cb768fa78426397f5dcbd255e89ad5"
+    },
+    "national/raw/dhc_tracts_39.csv": {
+      "sha256": "91bcae9f861647c67d5561264a517d5c2780bcdc17834b310f77db3407efe02f"
+    },
+    "national/raw/dhc_tracts_40.csv": {
+      "sha256": "b1976724688a3c7c1a7d2a5c073356d0668632351ea5722fd2adb3b6ca0a3884"
+    },
+    "national/raw/dhc_tracts_41.csv": {
+      "sha256": "0b51a821ae0389d4be518e7f1ae462513e2c9549ffa3280707d0bdab50097160"
+    },
+    "national/raw/dhc_tracts_42.csv": {
+      "sha256": "75f850f31558acfbfc3450812f9365c560db901428444a0c8a51204a6004c6e3"
+    },
+    "national/raw/dhc_tracts_44.csv": {
+      "sha256": "5993b1a27ea61779a024d345fd57b7eb7287d763a1e7b565a3f5909427c52982"
+    },
+    "national/raw/dhc_tracts_45.csv": {
+      "sha256": "d3bc9388b6c12d1dff209eaf93eb82ac989c115758fe3ccd9ed46026315327c0"
+    },
+    "national/raw/dhc_tracts_46.csv": {
+      "sha256": "6ef48f2a7235df4910e97c14603b1d64289ba5eefa9619c4770854902e7623a0"
+    },
+    "national/raw/dhc_tracts_47.csv": {
+      "sha256": "d447bfad2ecfce384c8a951d5ba173d419999fa9ea1eabe66f7f95d3a9996830"
+    },
+    "national/raw/dhc_tracts_48.csv": {
+      "sha256": "2d855c1310ae0945561ee7ed75d62b6586d74c238d4d7bfb976693eef110fb84"
+    },
+    "national/raw/dhc_tracts_49.csv": {
+      "sha256": "315849f1104ea5d014c17e8df7014d1c53b8b820b85ab8c13734b50a79b49147"
+    },
+    "national/raw/dhc_tracts_50.csv": {
+      "sha256": "aaa4492a079f2bc303639c2702d7068b10c16982aab15ac35e75a5e6d57c60d5"
+    },
+    "national/raw/dhc_tracts_51.csv": {
+      "sha256": "577f1b2717b40c584357802232a48603e9c09cd295595dc85b501ae2ebd21d89"
+    },
+    "national/raw/dhc_tracts_53.csv": {
+      "sha256": "448b5370d135332def2a3e807880f819805d9c3966a98a4bf633e541dcc2d163"
+    },
+    "national/raw/dhc_tracts_54.csv": {
+      "sha256": "54ef440857028647282a273e634fd31c9b3e56a01ed3dd3cc4688c8021c4a725"
+    },
+    "national/raw/dhc_tracts_55.csv": {
+      "sha256": "66619db353b753a91ebac2894884a83eacdf6a911d7dea6b7757ee858e31ce9e"
+    },
+    "national/raw/dhc_tracts_56.csv": {
+      "sha256": "5057ad485a53b58b2116aef595a1179198b7a10d195bd301cd4408bf84f188d0"
+    },
+    "national/raw/dhc_tracts_72.csv": {
+      "sha256": "19254a29bf0b39cb81d1f01b7d0c68c0ffda1bc6d7203c93dcd848274d7aa976"
+    },
+    "national/raw/pl_2020_hispanic_national_counties.csv": {
+      "sha256": "bd4eab2464dc1cb5de80d8b8ed657048c3c9fd493a693b69889eb1d855a8eca2"
+    },
+    "national/raw/pl_2020_hispanic_tracts_01.csv": {
+      "sha256": "49d69de165fded50b62521dddded17f4ec979cef2aa9ca0b2c58b6166fc9515d"
+    },
+    "national/raw/pl_2020_hispanic_tracts_02.csv": {
+      "sha256": "b0cdd94b74c481b2597dbce921d2da3778419d014894fa73804f9eea825f34b7"
+    },
+    "national/raw/pl_2020_hispanic_tracts_04.csv": {
+      "sha256": "316e28c80e115287c6ea34a82701bf89e16d11355d6d6551b5add8dd580fa65f"
+    },
+    "national/raw/pl_2020_hispanic_tracts_05.csv": {
+      "sha256": "5a9aa162fe013a2d8041506fd352b5f083e943ff6ca5ee7aa736742c54fed2b5"
+    },
+    "national/raw/pl_2020_hispanic_tracts_06.csv": {
+      "sha256": "eca27b2e366f67b2a2f3d6022c98e0aba2c503619a840cfa6e0bb5274b573d2e"
+    },
+    "national/raw/pl_2020_hispanic_tracts_08.csv": {
+      "sha256": "91301018fdd25adfe4574566221aac39e364e1745c6242aa42cad3350d109a04"
+    },
+    "national/raw/pl_2020_hispanic_tracts_09.csv": {
+      "sha256": "31ae32753baf4320e4429606a6f9b616fa276dff92d6fc18360388d8345bd505"
+    },
+    "national/raw/pl_2020_hispanic_tracts_10.csv": {
+      "sha256": "fed008aebc757a5cd4304fa5bb3fc6591c4ccc358754c2d29a178e4017385acd"
+    },
+    "national/raw/pl_2020_hispanic_tracts_11.csv": {
+      "sha256": "757b785f06eef56871eae1b3e8f084107cb98b948ce6a2c15107f9198b6a42fa"
+    },
+    "national/raw/pl_2020_hispanic_tracts_12.csv": {
+      "sha256": "ce869ff043bb9d2b146d8fdc58c47215b784fb897df61d006a2757c8ad4410ad"
+    },
+    "national/raw/pl_2020_hispanic_tracts_13.csv": {
+      "sha256": "e0b0fc120b8a625cc134fbcd0573abe48defdd13a37758766a5f6dd754962cdd"
+    },
+    "national/raw/pl_2020_hispanic_tracts_15.csv": {
+      "sha256": "3ece264274c3e412a7bd2c07a813f1acef9cbd8468a56118aedd7d4c0db375f5"
+    },
+    "national/raw/pl_2020_hispanic_tracts_16.csv": {
+      "sha256": "80421113b414cd033a001a9abf98a6ea22f90b9f5ff891685fe8890ac5652bec"
+    },
+    "national/raw/pl_2020_hispanic_tracts_17.csv": {
+      "sha256": "d24a3724f9ead42317a0b307b928bd992a14981d112e01b90bbda3742f9159dd"
+    },
+    "national/raw/pl_2020_hispanic_tracts_18.csv": {
+      "sha256": "899545b01c486517fc2747c9a805a3e3b0bb1c7b847d40599fea9c3dcc7ff590"
+    },
+    "national/raw/pl_2020_hispanic_tracts_19.csv": {
+      "sha256": "2b69a559c751b8aa52453f69286218c020cfa8545679a8e8c537f549de72d458"
+    },
+    "national/raw/pl_2020_hispanic_tracts_20.csv": {
+      "sha256": "da83ddc00bfe354cf87a65697c3e87ccf38f4591823eb0184b6fa90da9822de6"
+    },
+    "national/raw/pl_2020_hispanic_tracts_21.csv": {
+      "sha256": "1bb6a072cefcca5f63de083d5f82e50844dc573f6689b31bb864b84984b61a69"
+    },
+    "national/raw/pl_2020_hispanic_tracts_22.csv": {
+      "sha256": "bfe77ffc5da0e2dd40137d86dd52f391161cf54f20c67830a5acd98bd0916b00"
+    },
+    "national/raw/pl_2020_hispanic_tracts_23.csv": {
+      "sha256": "c261bf721f0cb707af145d5403e86f68ef425cd8b51bae8178f3d0e59029dec2"
+    },
+    "national/raw/pl_2020_hispanic_tracts_24.csv": {
+      "sha256": "478b6039f96353067733973b2f4809beb9379b1bd30ccf49d72dbc3b4a83c513"
+    },
+    "national/raw/pl_2020_hispanic_tracts_25.csv": {
+      "sha256": "987abbc255fa0c6f6cbb8c4a9df29bb5385e4639a24e77b3235b054f20d5d858"
+    },
+    "national/raw/pl_2020_hispanic_tracts_26.csv": {
+      "sha256": "6bfddc373fe0d45b3277118c32c8180cb2e982ab36714559309f3993ce398bdf"
+    },
+    "national/raw/pl_2020_hispanic_tracts_27.csv": {
+      "sha256": "745eb100956dc5849bb95f5c2d9b045ca1f4a46a606e912540cf2672083c55df"
+    },
+    "national/raw/pl_2020_hispanic_tracts_28.csv": {
+      "sha256": "962624a5b8ace36c0b59c1d775ecfad27e86e94201fe55473ae08d07c39b9dc7"
+    },
+    "national/raw/pl_2020_hispanic_tracts_29.csv": {
+      "sha256": "649c312212519ea4d4773f087ea401fd5b41f6a379444ed0a64c90786dbb2d62"
+    },
+    "national/raw/pl_2020_hispanic_tracts_30.csv": {
+      "sha256": "932bb47ab3bbec494141a1b662cf1e8376760c08b4207ddac5da14b3bdfcb531"
+    },
+    "national/raw/pl_2020_hispanic_tracts_31.csv": {
+      "sha256": "1e0e1dde66e513ce5928ddc98a710b3ba2e6bc1234672f9c11628a141cd9c85f"
+    },
+    "national/raw/pl_2020_hispanic_tracts_32.csv": {
+      "sha256": "52a1c100ce636242afa8818ed421f75548a5e300d9b6fb1e072af68e990f9ccc"
+    },
+    "national/raw/pl_2020_hispanic_tracts_33.csv": {
+      "sha256": "a7717a68f6ef356a68e191a074842078ec7c666a97b8cea6eaa3b3c5ccf31fb0"
+    },
+    "national/raw/pl_2020_hispanic_tracts_34.csv": {
+      "sha256": "38ce3600e93e696f69df9386302ac7af3ac0469492f259e07362aa647aaf0a5b"
+    },
+    "national/raw/pl_2020_hispanic_tracts_35.csv": {
+      "sha256": "13ab049aadabb8b10ec485399e1cd8eef7b94bd659d98fced23e8a4f6b5ebe61"
+    },
+    "national/raw/pl_2020_hispanic_tracts_36.csv": {
+      "sha256": "241716c4b66cdb7e756a1f1052570fbbecf6edb72bd067eb9f017f9591884bbe"
+    },
+    "national/raw/pl_2020_hispanic_tracts_37.csv": {
+      "sha256": "a72639f92642adf8bd6b6852de4438d806dfc61cb9a0771c44a6bbab22e2c581"
+    },
+    "national/raw/pl_2020_hispanic_tracts_38.csv": {
+      "sha256": "047a247d3dd068106bd8b0945a9371a2806afa3ebc893b670d66b7a5188609a7"
+    },
+    "national/raw/pl_2020_hispanic_tracts_39.csv": {
+      "sha256": "1f2e136fb0c0bcbfbe614a7bf24605391c15580c6ece9c74e860df5ccfacdb29"
+    },
+    "national/raw/pl_2020_hispanic_tracts_40.csv": {
+      "sha256": "62decd097c45c6ab7645f976c6456a4bc1af6a57bf7c6ecfdd271bebd8821792"
+    },
+    "national/raw/pl_2020_hispanic_tracts_41.csv": {
+      "sha256": "c478e08338d013f423490b51d020b9883479c55cd712f06791ab8e67208ad19d"
+    },
+    "national/raw/pl_2020_hispanic_tracts_42.csv": {
+      "sha256": "5812802011c44d29ee4f4f67a3e06ca99f07012a262f886667cd40e55a99b4a5"
+    },
+    "national/raw/pl_2020_hispanic_tracts_44.csv": {
+      "sha256": "8eb7b00fcaf457d1b162c15db02016d71f0359f05b525be2a4fd7ae8f025da16"
+    },
+    "national/raw/pl_2020_hispanic_tracts_45.csv": {
+      "sha256": "c6da2df43ce912a977fa4d2d9e0e762be9b55213ff11b1f6c08947a8f253ab32"
+    },
+    "national/raw/pl_2020_hispanic_tracts_46.csv": {
+      "sha256": "f3d38e1ad8250f547ab6c961c0d96e23a19e467f3d616a513e90e12efd4267c2"
+    },
+    "national/raw/pl_2020_hispanic_tracts_47.csv": {
+      "sha256": "e556ac7f26949123ea68b39b7dcec833321e770c46a7fee33c63930330d88627"
+    },
+    "national/raw/pl_2020_hispanic_tracts_48.csv": {
+      "sha256": "9378dbcfde0d004e846bf8579f055184362a09e7d8b7907c15df7fe483dea710"
+    },
+    "national/raw/pl_2020_hispanic_tracts_49.csv": {
+      "sha256": "6899c4ce7d43a3a882a22d6d953f27fcbc45b91588437f188cf61da88dc1a93b"
+    },
+    "national/raw/pl_2020_hispanic_tracts_50.csv": {
+      "sha256": "f1ba972cd5828987b82d4446d9b9fafa8f3dd1da6129974fd802ec81e7548279"
+    },
+    "national/raw/pl_2020_hispanic_tracts_51.csv": {
+      "sha256": "35e8dd216e7049a0be4f4c86bdbd803a48145c6597824ee847a9e6bdc2e7a948"
+    },
+    "national/raw/pl_2020_hispanic_tracts_53.csv": {
+      "sha256": "2924ce67b94371fceb9217d712cb56923681a29f90cc65c5e507efb058d7cbce"
+    },
+    "national/raw/pl_2020_hispanic_tracts_54.csv": {
+      "sha256": "6f467cacc8926efed14eb4a372d2dfd667b04b9b38a01ec0a22bbe2ca66b4a31"
+    },
+    "national/raw/pl_2020_hispanic_tracts_55.csv": {
+      "sha256": "6db1f71d0db1217817c11010badb8f037d24569a8edd8f7503772ae2e492c95f"
+    },
+    "national/raw/pl_2020_hispanic_tracts_56.csv": {
+      "sha256": "03da9f4451476236346be792d78f7e8bcc69342c020d43dc6744f31fd4305539"
+    },
+    "national/raw/pl_2020_hispanic_tracts_72.csv": {
+      "sha256": "42ce2ae8ef976283a0224a7af8d2157e87a164f702e412c24e90ce727070e1e5"
+    },
+    "national/raw/pl_2020_total_national_counties.csv": {
+      "sha256": "072c9c8be50d552f3992c259384f0169ff6120577e7f43c4b19022abfbd4abd4"
+    },
+    "national/raw/pl_2020_total_tracts_01.csv": {
+      "sha256": "ccc60958c15b7dc6176d72464972c8f2494673cf73f61bfd07aec172c14e72a4"
+    },
+    "national/raw/pl_2020_total_tracts_02.csv": {
+      "sha256": "8b4118919b3911a6523e10df4b97145c19f4a355e82951445a5cbc148159f944"
+    },
+    "national/raw/pl_2020_total_tracts_04.csv": {
+      "sha256": "0f636881d678526ee228a7761e0ec1b85a89ae8c99fe2ae94c89b69da8e11d57"
+    },
+    "national/raw/pl_2020_total_tracts_05.csv": {
+      "sha256": "df83fdc01210ec7319634e48c9977f2e196e05c2a1c24e2bc1eeb00b9d449824"
+    },
+    "national/raw/pl_2020_total_tracts_06.csv": {
+      "sha256": "75402d23bf1298bb056d40ee140423f9da65078065a5d89654398805b982d562"
+    },
+    "national/raw/pl_2020_total_tracts_08.csv": {
+      "sha256": "c368bfd634f6309bf399d58c179e64d9538464d82bed04187eab40634305e213"
+    },
+    "national/raw/pl_2020_total_tracts_09.csv": {
+      "sha256": "e54b772ab6685b8053160f49c8b93b41a3ee93e999b54001d72c0efbcaa24ede"
+    },
+    "national/raw/pl_2020_total_tracts_10.csv": {
+      "sha256": "5833144a96d148cb4cb96c174a5b6cbfc9a1a151577031ac47fed9ae402bddcf"
+    },
+    "national/raw/pl_2020_total_tracts_11.csv": {
+      "sha256": "275314f867761211b50073e812b68e760fc939a40e5c0e100ddaa78f9eab2a67"
+    },
+    "national/raw/pl_2020_total_tracts_12.csv": {
+      "sha256": "3aa21565e1e113d0a9966a8a436414194ffba82fcf92d2651935cf2601727ae9"
+    },
+    "national/raw/pl_2020_total_tracts_13.csv": {
+      "sha256": "36f857242628de5d3ac699ee1430f824cf0a6f87d12fc62c1138f0a7e7504c95"
+    },
+    "national/raw/pl_2020_total_tracts_15.csv": {
+      "sha256": "5f5aaac11afde65e9b7d518e82d13e39497fd73b2eb2d7ea02cee9f97d7a39b2"
+    },
+    "national/raw/pl_2020_total_tracts_16.csv": {
+      "sha256": "6b38c2fa3ad1d45db52529ed827e4673bf1ecf80d7ea67e0a8d94a0b73ce99d2"
+    },
+    "national/raw/pl_2020_total_tracts_17.csv": {
+      "sha256": "9401cfc98330581cbfcfaffa9055d2752381f596dc940c3505f6efd5b4931d28"
+    },
+    "national/raw/pl_2020_total_tracts_18.csv": {
+      "sha256": "747aa1d6ffcf88812b6984f134570291fa9aed1d907d0eea995d8d1926c9bac3"
+    },
+    "national/raw/pl_2020_total_tracts_19.csv": {
+      "sha256": "14884e44195a1c7ff5b93193fa07a0846a45eb9bbb1f808d9af5e93b077da5c8"
+    },
+    "national/raw/pl_2020_total_tracts_20.csv": {
+      "sha256": "f1e6f38643b6591937b0333bff7a12020147d1e4c02488cf94aaaabe08e3c8d8"
+    },
+    "national/raw/pl_2020_total_tracts_21.csv": {
+      "sha256": "367fbf98cd875f9f181e9867f8e474c2a558f1d2e266e69c7b95e376a00aa382"
+    },
+    "national/raw/pl_2020_total_tracts_22.csv": {
+      "sha256": "8629b4eaf00b9fda26c7a1aaec0cc0f3d146a71ffd2f3e9e06df7f4578cf2afd"
+    },
+    "national/raw/pl_2020_total_tracts_23.csv": {
+      "sha256": "a71d9ef623aa007fe0fdb06ad23a2eef784313ab3289e460ea7c978030433663"
+    },
+    "national/raw/pl_2020_total_tracts_24.csv": {
+      "sha256": "db56eff76ba464e0aaaaef1fef32861c538787a639f9269840aa2f2102cba30d"
+    },
+    "national/raw/pl_2020_total_tracts_25.csv": {
+      "sha256": "ddeee33a4b6024639c71efda50b1032f55671792ce6a3a7e5b77e1af2ba7ee02"
+    },
+    "national/raw/pl_2020_total_tracts_26.csv": {
+      "sha256": "a0692050bc20c9c443859b8b99d3df06990c5249cd0e82ba20ad5c5c55dde58c"
+    },
+    "national/raw/pl_2020_total_tracts_27.csv": {
+      "sha256": "0ae6f96718cebf8d53567bbd9b7277565b6b0b9a516472a06378d440ec8252fb"
+    },
+    "national/raw/pl_2020_total_tracts_28.csv": {
+      "sha256": "bee7d98bcd23ce8124e357a01b30a4972e88f3a707cc7142d4dab775370bf43c"
+    },
+    "national/raw/pl_2020_total_tracts_29.csv": {
+      "sha256": "3d746c13be2ae571ffa94317187312edaf6911d05109e7571071dc5d9b7ac029"
+    },
+    "national/raw/pl_2020_total_tracts_30.csv": {
+      "sha256": "1750a4ce1320e164e617b757c809c84c57ab1cab915254d0dc42f66511db338e"
+    },
+    "national/raw/pl_2020_total_tracts_31.csv": {
+      "sha256": "43e980e3ff7e949a382dcd095cc2987c7f74d2858fd78deecd7e4fdf96233b21"
+    },
+    "national/raw/pl_2020_total_tracts_32.csv": {
+      "sha256": "0ed817e56676894c0f251230f597422c99d2a548dd0911b0990a1b8eade05d71"
+    },
+    "national/raw/pl_2020_total_tracts_33.csv": {
+      "sha256": "e15a62519c74f379b67eab090737846a6767fbbc5081c3ed8faf6d8845a1a536"
+    },
+    "national/raw/pl_2020_total_tracts_34.csv": {
+      "sha256": "6f616f0417a50972c87d80bf928e0c5f38791caaacddf4c920ec7b10ac2ec889"
+    },
+    "national/raw/pl_2020_total_tracts_35.csv": {
+      "sha256": "5ff02cd3a6f81cf2754d9f19ab1fafb75f7b2075021ea5c1fbe7c5176c669152"
+    },
+    "national/raw/pl_2020_total_tracts_36.csv": {
+      "sha256": "0b6e5ee18952d87c78397dcca6b7353163d1cc9e4653cc59ae59a63190ed8395"
+    },
+    "national/raw/pl_2020_total_tracts_37.csv": {
+      "sha256": "d2a9dce85f33bc515f63ee0b48a2b7929fc2df44b30157177cd58694ba7d75f1"
+    },
+    "national/raw/pl_2020_total_tracts_38.csv": {
+      "sha256": "aa7468d75edcc1c7ff434eb722c297f7b0994a88bea3fcbde72b9168eb9578eb"
+    },
+    "national/raw/pl_2020_total_tracts_39.csv": {
+      "sha256": "e646171d38035e2c6116bb9234fe32622ebef6f761cdbe5dd08d4eb4edf8535d"
+    },
+    "national/raw/pl_2020_total_tracts_40.csv": {
+      "sha256": "ffadd1012998e2c24e2988ca384a947996d22bcdbc437c1ef94254b5303fcb8f"
+    },
+    "national/raw/pl_2020_total_tracts_41.csv": {
+      "sha256": "3697098abc6013d1d465ad42cca5c9e786706cfc29a524fe4da6aba7e5d0c98e"
+    },
+    "national/raw/pl_2020_total_tracts_42.csv": {
+      "sha256": "fe0897e777713b9086af0e7c6245771b5a6d5ce55a74d0c28a363effb84bb8f8"
+    },
+    "national/raw/pl_2020_total_tracts_44.csv": {
+      "sha256": "070fca080ae86b0195bea0c19c29c5927249c59c60d23fdb72236fb675ac6128"
+    },
+    "national/raw/pl_2020_total_tracts_45.csv": {
+      "sha256": "f4ea48b74ef5ff0847d0498dd60a0a2219a2461ca280244e6005f1778b03be6c"
+    },
+    "national/raw/pl_2020_total_tracts_46.csv": {
+      "sha256": "47b65ec74179310989522e0a85b647c366ec479d62b772d34bab284c13eceeb2"
+    },
+    "national/raw/pl_2020_total_tracts_47.csv": {
+      "sha256": "bf7cc22c67029669485c8f7ddc6c0644262d735e4630142fe26fb7ea1d125294"
+    },
+    "national/raw/pl_2020_total_tracts_48.csv": {
+      "sha256": "1563bfbfb98fb68217bb90a276d3c0a0fe9581e30d5287f4ad88e1034fe003e6"
+    },
+    "national/raw/pl_2020_total_tracts_49.csv": {
+      "sha256": "a8abfb409790d1fa9b1e2aadcc85cd236db291275143f7e9df41915738f48800"
+    },
+    "national/raw/pl_2020_total_tracts_50.csv": {
+      "sha256": "332c5ae2fdc4edcf7cf2b986a6a733ec05574afbb7d10a8a0c57ecac454df333"
+    },
+    "national/raw/pl_2020_total_tracts_51.csv": {
+      "sha256": "1f2d2d51ffce718d56ba3ba3a980067f6431d2e6283facdb66162f41fd54d03f"
+    },
+    "national/raw/pl_2020_total_tracts_53.csv": {
+      "sha256": "8147939851f2cbaed3ce0e812685a92c55001ae88a5c1eddc0636e2f1ec5e123"
+    },
+    "national/raw/pl_2020_total_tracts_54.csv": {
+      "sha256": "d295b0643b764964fc50586348846083975829faba9f17a29069aaec1fd90643"
+    },
+    "national/raw/pl_2020_total_tracts_55.csv": {
+      "sha256": "fc75c416525d9a644247b91b7e2d833e069e597f986614e0148fe3b4ec251609"
+    },
+    "national/raw/pl_2020_total_tracts_56.csv": {
+      "sha256": "9c5250b5d17ba06216460f9c39182a227f6558771cc05984cd59b8d24449d33f"
+    },
+    "national/raw/pl_2020_total_tracts_72.csv": {
+      "sha256": "ed2ee6216cf89134d0630e3b42490aed5143782ca66d48923e2349fe0e86f682"
+    },
+    "national/raw/tract_geometry_2020_01.parquet": {
+      "sha256": "69fe37110e54bb13026595acc6dede978fe9b66784a295a5074e9d5fa45fea14"
+    },
+    "national/raw/tract_geometry_2020_02.parquet": {
+      "sha256": "2b74c3cfefaaf692bab69b18afac8f2987695e8d98caaf7c5bc41718a79b4137"
+    },
+    "national/raw/tract_geometry_2020_04.parquet": {
+      "sha256": "f379d9b2ddfae9a815baf2b7a09cfe343e517bbf2927a2922843b0fe6f62ec42"
+    },
+    "national/raw/tract_geometry_2020_05.parquet": {
+      "sha256": "1c224e0f13d8bd9cec86a6217c874d9cd4e9d0af9457cfe1dd62b08ce8ceedb1"
+    },
+    "national/raw/tract_geometry_2020_06.parquet": {
+      "sha256": "2234c5ca7957d13afe45836775de848d2cd16a0ed24ff25633fa9ab4db8613dc"
+    },
+    "national/raw/tract_geometry_2020_08.parquet": {
+      "sha256": "49d7a6075b9bfdda3544cefa0a95bbc97a21765c6f6b3906617df13e0fddd72e"
+    },
+    "national/raw/tract_geometry_2020_09.parquet": {
+      "sha256": "8d478c86bd2f22da5bd8234f393e925a46941a9575f40f497bc4dd0b0d4916f3"
+    },
+    "national/raw/tract_geometry_2020_10.parquet": {
+      "sha256": "267f26cb5ba0e580297ef055448bef36452b229a6d508fd045e7f891882ba78f"
+    },
+    "national/raw/tract_geometry_2020_11.parquet": {
+      "sha256": "74729390ef7fecacc0cc7a392b864af8c39b7006af425f06b7ea99043e269a8d"
+    },
+    "national/raw/tract_geometry_2020_12.parquet": {
+      "sha256": "173bb6b3df4892b2f1306e2d1c800f706649e1f5369dada8f44dad647707ab4d"
+    },
+    "national/raw/tract_geometry_2020_13.parquet": {
+      "sha256": "c2ddf5f9f8df3945730e1935739eb3f6fdd32140672d838c811b4e0a7878c7b1"
+    },
+    "national/raw/tract_geometry_2020_15.parquet": {
+      "sha256": "c1693e1fd76f50b03a9f7081d172ceee00a87639fe35570a9febd78fd72829fd"
+    },
+    "national/raw/tract_geometry_2020_16.parquet": {
+      "sha256": "3983aadc35954ca105ae316ebcd527568b0ecf3fa1d9d22f16010e19d02d008a"
+    },
+    "national/raw/tract_geometry_2020_17.parquet": {
+      "sha256": "d4f19e5f84fc544800bac25675f00cf7887e48d8bb2a95cacf3821cff51c78c4"
+    },
+    "national/raw/tract_geometry_2020_18.parquet": {
+      "sha256": "ff2c6a36e007f0c2243b8b6326e9abc641e17a1d511e709c9a78ce54921cc64a"
+    },
+    "national/raw/tract_geometry_2020_19.parquet": {
+      "sha256": "531dcd10a1f9dbf2045f009571b8c28dfc7202b58bba999016686bb6f4865b6d"
+    },
+    "national/raw/tract_geometry_2020_20.parquet": {
+      "sha256": "105aefcf632d84ab11e4bc000426327faf38a41db07ea06b7bf85b96a0cc2133"
+    },
+    "national/raw/tract_geometry_2020_21.parquet": {
+      "sha256": "235bf6d6a9dd3a905720b91755801ebcf498032afae60d01c523352d346872a3"
+    },
+    "national/raw/tract_geometry_2020_22.parquet": {
+      "sha256": "119e077f7f4e72c0db767b2fbec9adcfedbcfccbbbaf3db6de7ea792823b55da"
+    },
+    "national/raw/tract_geometry_2020_23.parquet": {
+      "sha256": "b42ebff0017f07926600e438ff18688580b1c7bf2941cb48ceead40227fee6f7"
+    },
+    "national/raw/tract_geometry_2020_24.parquet": {
+      "sha256": "598ec019f9d594b48451fba834fa946c7d0de836b58a60ee9b7ac79f09c88728"
+    },
+    "national/raw/tract_geometry_2020_25.parquet": {
+      "sha256": "0d6eb7c8de708e976f820502a5726fd8d74e1e0cf3e44ac3f9cf0cd96143204b"
+    },
+    "national/raw/tract_geometry_2020_26.parquet": {
+      "sha256": "dc6bcf7b66139bd533558bd8518ce6a8c6ac1af8aa0c6602b596fa71ce46e30e"
+    },
+    "national/raw/tract_geometry_2020_27.parquet": {
+      "sha256": "bca0d091b687c8edf30b0de37eb6e4eef9b42f407b73529c2992381c5144e738"
+    },
+    "national/raw/tract_geometry_2020_28.parquet": {
+      "sha256": "fd8642aae7eb84ecc123929b1637c69bc98c602ecd4e2a0ed3091a0d04f1ac1a"
+    },
+    "national/raw/tract_geometry_2020_29.parquet": {
+      "sha256": "d2a42d7d47b46104b9b46b13969b76c31e23fe2eea05b0a26d5393f02888b223"
+    },
+    "national/raw/tract_geometry_2020_30.parquet": {
+      "sha256": "d932fef3a07d6978a20a170f31539752c04ba29c5f095219f5c98a7154ffea6d"
+    },
+    "national/raw/tract_geometry_2020_31.parquet": {
+      "sha256": "f2b8e78b121e5b0ea5275f0d64ad93ae50815bab4c3a6b9e5c3a4b5ca0302fa3"
+    },
+    "national/raw/tract_geometry_2020_32.parquet": {
+      "sha256": "8979ee8f5e75206202e7df13e16fe456de23aea655d76792f37d3842373e2e68"
+    },
+    "national/raw/tract_geometry_2020_33.parquet": {
+      "sha256": "68bd7cfd3e3139859ca98a026f39334dc321934f7151c1a2c393e2c5d0b1450f"
+    },
+    "national/raw/tract_geometry_2020_34.parquet": {
+      "sha256": "ed6ea811c744e19385b73fbbbef148fb17ecc0fb66e870760292af12e0aa47ec"
+    },
+    "national/raw/tract_geometry_2020_35.parquet": {
+      "sha256": "a101e5047261f31bf81c0328978b6f5a0e6a155ad593ed678f90d57a23e8a13e"
+    },
+    "national/raw/tract_geometry_2020_36.parquet": {
+      "sha256": "c6626e620d220474c063318f9803724a74e8a8a583cdc4d4cadb61f9e04a1dd3"
+    },
+    "national/raw/tract_geometry_2020_37.parquet": {
+      "sha256": "372bc6cfe1cdf176419c7cdd6ffcc1af2a45b5049482d4857a6ecf23d19cfd60"
+    },
+    "national/raw/tract_geometry_2020_38.parquet": {
+      "sha256": "83437677fcf9ac737bb1d88318062618649034fe09954b51d32fd9103a2956d3"
+    },
+    "national/raw/tract_geometry_2020_39.parquet": {
+      "sha256": "879eeb8fc8d151814bf9d0298a6e7824bdadc15dff48ef016af59a38c56411b3"
+    },
+    "national/raw/tract_geometry_2020_40.parquet": {
+      "sha256": "8d9e0381c32a87fb64a8c2e037287292a8938ba60ccbb33135b6fc86c847b3c8"
+    },
+    "national/raw/tract_geometry_2020_41.parquet": {
+      "sha256": "eb91333c147424ff404889d72e7ff671cc97add117e84fa1a33429595bdbebfa"
+    },
+    "national/raw/tract_geometry_2020_42.parquet": {
+      "sha256": "58a72c548d02712199241dad2b5f0fab41cc5a6f5045720e0e6ea71b14d7179a"
+    },
+    "national/raw/tract_geometry_2020_44.parquet": {
+      "sha256": "b1909cc71a205404e42662fe17f86419ec4d6d2ef8bbbeae72dc2394b7cb5c9d"
+    },
+    "national/raw/tract_geometry_2020_45.parquet": {
+      "sha256": "39c71657dcf46a4ce6abf697fb4db0bdc95f5e6e69059c51a1cdbab85ec0c731"
+    },
+    "national/raw/tract_geometry_2020_46.parquet": {
+      "sha256": "3abf2def3a5c62185815e7898d888e2138c95888d8b8bc6e42be566077f05d3b"
+    },
+    "national/raw/tract_geometry_2020_47.parquet": {
+      "sha256": "d66670cc078ea84473a6219ee0c3bb142b7ca470dc727f9cea211de84e0fd0b8"
+    },
+    "national/raw/tract_geometry_2020_48.parquet": {
+      "sha256": "ff37dfcca00b27b630cc866640948168a106a71b9e11e62fbceafd3b250c5764"
+    },
+    "national/raw/tract_geometry_2020_49.parquet": {
+      "sha256": "42187d81448d3605f279042ef5939c693fce1eed1039556043616971699d52c2"
+    },
+    "national/raw/tract_geometry_2020_50.parquet": {
+      "sha256": "498d4376e0cd7d2b01217edc43a8f5060a1d61541f123bc5e5302f4ee0ab1cc6"
+    },
+    "national/raw/tract_geometry_2020_51.parquet": {
+      "sha256": "993d53ef7b10d0c3142604f5966ec363cf7a1b60bb4b36399d04925f701616ff"
+    },
+    "national/raw/tract_geometry_2020_53.parquet": {
+      "sha256": "cee086dd870972bde58d5d58fcdb07f47931f090129b04c4d8134c3068bfadc5"
+    },
+    "national/raw/tract_geometry_2020_54.parquet": {
+      "sha256": "487c9ee65876e4867902e44b7fff73cfeaa7b3e79498e372d05ae8451e6f0918"
+    },
+    "national/raw/tract_geometry_2020_55.parquet": {
+      "sha256": "4ede28c3e9f866c50a9b62424fc2a4694ea954c86072a820ea3a56222bca23b5"
+    },
+    "national/raw/tract_geometry_2020_56.parquet": {
+      "sha256": "894aa5db08cf16e0331095a4b3c91d463263401d9c15c449d96304a06a13f983"
+    },
+    "national/raw/tract_geometry_2020_72.parquet": {
+      "sha256": "8736b3c375bd5d3dc7028fa1229265a4ed501534e3e7f6039bf34a2282674c7f"
     }
   },
-  "written": "2026-10-20T13:50:37-04:00"
+  "written": "2026-10-29T12:47:59-04:00"
 }

@@ -42,7 +42,7 @@ from pathlib import Path
 import pandas as pd
 from sklearn.metrics import r2_score
 
-from build_dataset.feature_manifest import SlugGroupName, group_features
+from build_dataset.model_groups import ModelGroupName, group_features
 from regression.reconstruct.figures import plot_curve, plot_solo_versus_added
 from regression.shared.cross_val import DEFAULT_FOLDS, out_of_fold_predictions
 from regression.shared.prepare_df import describe_sample, prepare_df_for_regression
@@ -62,7 +62,7 @@ def reconstruction_curve(
     folds: int = DEFAULT_FOLDS,
     top_percent: float | None = None,
     bottom_percent: float | None = None,
-    exclude_groups: list[SlugGroupName] | None = None,
+    exclude_groups: list[ModelGroupName] | None = None,
 ) -> tuple[pd.DataFrame, dict]:
     """Rebuild `feature` from the other features, with 1..all contributors.
 
@@ -78,7 +78,7 @@ def reconstruction_curve(
         Cross-validation folds.
     top_percent, bottom_percent : float or None
         Restrict to one Hispanic-population stratum.
-    exclude_groups : list of SlugGroupName or None
+    exclude_groups : list of ModelGroupName or None
         Drop these groups first, to match the matrix a model run used.
 
     Returns
@@ -196,7 +196,7 @@ def run_reconstruction(
     folds: int = DEFAULT_FOLDS,
     top_percent: float | None = None,
     bottom_percent: float | None = None,
-    exclude_groups: list[SlugGroupName] | None = None,
+    exclude_groups: list[ModelGroupName] | None = None,
 ) -> Path:
     """Run the test, print the curve and verdict, write the CSV and figure."""
     curve, summary = reconstruction_curve(

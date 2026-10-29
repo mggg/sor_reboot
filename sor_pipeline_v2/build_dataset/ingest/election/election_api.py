@@ -1,18 +1,37 @@
-"""APIs for loading the election source file (a local CSV, nothing fetched).
+"""County and tract presidential returns, read from the lab's GerryDB release.
 
-County only. MEDSL publishes counties and stops, because precincts do
-not nest in tracts and so no canvass is reported by tract. The tract
-build gets its returns elsewhere -- from the lab's GerryDB release, read
-by `tract_election_api` -- and the two paths share no code and no source
-file, which is what makes MEDSL an independent check on it
-(`data_audit.scripts.reconcile_tract_election`).
+Nothing here is computed. The release publishes a figure per county and
+per tract for 2016 and 2020, and this module reads those numbers, renames
+them to the pipeline's vote columns and stops. Earlier versions of the
+tract path downloaded VEST precincts and TIGER blocks and allocated votes
+across them with maup; all of that is gone, because the allocation has
+already been done upstream and done once for everybody.
+
+The numbers come from Dave's Redistricting block data (as the release's
+own `gerrydb_view_meta` layer records: "obtained from Dave's data in
+January of 2025", https://github.com/dra2020/block_data), carried onto
+geographies forked from `census.2020/<state>/county` and
+`census.2020/<state>/tract`. So a GEOID here is an official 2020 census
+GEOID, and it joins the PL spine directly.
+
+Coverage is the 50 states. The release ships no county or tract view for
+DC or Puerto Rico, so neither gets vote columns at either level -- PR
+casts no presidential ballots and never had any, and DC's units come out
+NaN alongside PR's.
+
+Both levels come from the same block data, so a state's tracts sum
+exactly to its counties.
+
+Run: `python -m build_dataset.ingest.election.election_api --states 44 [--level county]`
 """
 
 from __future__ import annotations
 
-import hashlib
+import argparse
 from pathlib import Path
+from typing import Literal, get_args
 
+import geopandas as gpd
 import pandas as pd
 
 from build_dataset.ingest.election.election_feats import (
@@ -21,193 +40,217 @@ from build_dataset.ingest.election.election_feats import (
     REP_VOTES,
     REP_VOTES_2016,
 )
-from utils.config import RAW_NATIONAL_DIR
+from utils.config import GERRYDB_RELEASE_DIR, STATE_FIPS_TO_USPS
 
-# MIT Election Data + Science Lab county presidential returns, downloaded
-# from Harvard Dataverse (doi:10.7910/DVN/VOQCHQ) -- an independent
-# compilation of official state canvasses. The download is guestbook-gated
-# (MEDSL tracks usage), so it cannot be fetched unattended; instead the
-# local copy is verified against the checksum Dataverse publishes in its
-# open metadata API (api/datasets/:persistentId), pinned here.
-MEDSL_COUNTY_RAW_CSV = "countypres_2000-2024.csv"
-# The byte checksum of the original CSV, from the metadata API -- what the
-# load-time gate verifies. (The dataset PAGE shows tabular files under
-# their UNF -- "UNF:6:VKZJHPbIwGBnmWCslEFbtw==" -- Dataverse's semantic
-# fingerprint of the normalized data. It cannot be recomputed from the
-# raw CSV without replicating Dataverse's ingest, so it is recorded here
-# as provenance, not enforced.)
-MEDSL_COUNTY_RAW_MD5 = "bd6661282936006b4ef4f5ee71418f3e"
+# The release levels this module reads; each names the view file and
+# fixes the GEOID width (state + county, plus tract).
+GerryDBLevel = Literal["county", "tract"]
 
-# (year, MEDSL party) -> the pipeline's column name. This dict is also the
-# extraction's scope: the loader keeps exactly these years and parties.
-MEDSL_COLUMN_NAMES: dict[tuple[int, str], str] = {
-    (2020, "DEMOCRAT"): DEM_VOTES,
-    (2020, "REPUBLICAN"): REP_VOTES,
-    (2016, "DEMOCRAT"): DEM_VOTES_2016,
-    (2016, "REPUBLICAN"): REP_VOTES_2016,
+GERRYDB_VIEW_TEMPLATE = "{usps}_districtr_{level}_view_v2.gpkg"
+
+# GerryDB carries the GEOID in a column called `path` -- the identifier
+# the geography was forked under, not a filesystem path.
+GERRYDB_GEOID_FIELD = "path"
+
+# Release column -> the pipeline's column.
+GERRYDB_PRESIDENTIAL_COLUMNS: dict[str, str] = {
+    "pres_16_dem": DEM_VOTES_2016,
+    "pres_16_rep": REP_VOTES_2016,
+    "pres_20_dem": DEM_VOTES,
+    "pres_20_rep": REP_VOTES,
 }
 
-# Kansas City reports separately from its counties; census geography (and
-# therefore this pipeline's spine) folds it into Jackson County, MO.
-KANSAS_CITY_PSEUDO_FIPS = "2938000"
-JACKSON_COUNTY_MO_GEOID = "29095"
-
-# Bedford City, VA merged into Bedford County in 2013, but MEDSL carries a
-# vestigial 2016 row for it with zero votes. It is not on the 2020 census
-# spine; dropped so the loader emits only real 2020-vintage counties.
-BEDFORD_CITY_VA_DEFUNCT = "51515"
+GEOID_DIGITS: dict[GerryDBLevel, int] = {"county": 5, "tract": 11}
 
 
-def _check_medsl_county_raw_md5(medsl_path: Path) -> None:
-    """Check that the local MEDSL county returns CSV matches the published MD5 checksum.
+def _view_path(state_fips: str, level: GerryDBLevel) -> Path:
+    """The release file for one state at one level, checked to exist.
 
     Parameters
     ----------
-    medsl_path : Path
-        Location of the downloaded MEDSL CSV.
+    state_fips : str
+        Two-digit state FIPS code.
+    level : GerryDBLevel
+        "county" or "tract".
+
+    Returns
+    -------
+    Path
+        The state's view geopackage at that level.
+
+    Raises
+    ------
+    KeyError
+        If `state_fips` is not a state FIPS code.
+    FileNotFoundError
+        If the release has no view at that level for that state. DC and
+        Puerto Rico are the two that legitimately do not; `main_build`
+        lists them in ELECTION_MISSING_STATES and never asks.
+    """
+    usps = STATE_FIPS_TO_USPS[state_fips]
+    path = GERRYDB_RELEASE_DIR / GERRYDB_VIEW_TEMPLATE.format(
+        usps=usps.lower(), level=level
+    )
+    if not path.exists():
+        raise FileNotFoundError(
+            f"no {level} view for state {state_fips} ({usps}) at {path}. The "
+            "release ships one per state for the 50 states; DC and Puerto "
+            "Rico have none."
+        )
+    return path
+
+
+def load_election(state_fips: str, level: GerryDBLevel) -> pd.DataFrame:
+    """One state's presidential votes per unit, as the release publishes them.
+
+    Parameters
+    ----------
+    state_fips : str
+        Two-digit state FIPS code.
+    level : GerryDBLevel
+        "county" or "tract".
+
+    Returns
+    -------
+    pandas.DataFrame
+        One row per unit in the state: GEOID (five digits for a county,
+        eleven for a tract) plus the four vote columns named by
+        GERRYDB_PRESIDENTIAL_COLUMNS.
+
+    Raises
+    ------
+    FileNotFoundError
+        Propagated from `_view_path`.
+    KeyError
+        If the file lacks a column this reads -- a release whose schema
+        has moved, which should fail here rather than silently produce a
+        frame with votes missing.
+    ValueError
+        If `level` is not a GerryDBLevel, or the GEOIDs are not distinct
+        codes of that level's width for this state.
+    """
+    # Annotations are not enforced at runtime, and an unknown level would
+    # otherwise surface as a misleading missing-file error.
+    if level not in get_args(GerryDBLevel):
+        raise ValueError(f"unknown level {level!r}; known: {get_args(GerryDBLevel)}")
+    path = _view_path(state_fips, level)
+    requested = [GERRYDB_GEOID_FIELD, *GERRYDB_PRESIDENTIAL_COLUMNS]
+    # ignore_geometry: only the attribute table is wanted, and the
+    # geometry is both the bulk of the file and already supplied by
+    # geometry_api from TIGER.
+    frame = gpd.read_file(
+        path, layer=path.stem, columns=requested, ignore_geometry=True
+    )
+
+    absent = [column for column in requested if column not in frame.columns]
+    if absent:
+        raise KeyError(
+            f"{path.name} has no column(s) {absent}; it carries "
+            f"{sorted(frame.columns)}."
+        )
+
+    table = frame[requested].rename(
+        columns={GERRYDB_GEOID_FIELD: "GEOID", **GERRYDB_PRESIDENTIAL_COLUMNS}
+    )
+    table["GEOID"] = table["GEOID"].astype(str)
+    _check_geoids(table["GEOID"], state_fips, level, path.name)
+    return table.sort_values("GEOID").reset_index(drop=True)
+
+
+def _check_geoids(
+    geoids: pd.Series, state_fips: str, level: GerryDBLevel, label: str
+) -> None:
+    """Fail if the GEOIDs cannot join the PL spine.
+
+    Three ways they could not: the wrong width (a block or block-group
+    view read by mistake), a repeat (which would multiply a unit's votes
+    on the merge), or another state's codes (a template or USPS mismatch
+    pointing at the wrong file).
+
+    Parameters
+    ----------
+    geoids : pandas.Series
+        The GEOID column, as text.
+    state_fips : str
+        The state the file was asked for.
+    level : GerryDBLevel
+        The level the file was asked for; fixes the expected width.
+    label : str
+        Filename, for the message.
 
     Raises
     ------
     ValueError
-        If the file's MD5 differs from the checksum Dataverse publishes --
-        the file was modified or is a different dataset version.
-    FileNotFoundError
-        If the file is absent from the raw data directory.
+        If any of the three checks fails.
     """
-    file_md5 = hashlib.md5(medsl_path.read_bytes()).hexdigest()
-    if file_md5 != MEDSL_COUNTY_RAW_MD5:
+    expected = GEOID_DIGITS[level]
+    widths = sorted(set(geoids.str.len()))
+    if widths != [expected]:
         raise ValueError(
-            f"{medsl_path.name}: md5 {file_md5} does not match the published "
-            f"Dataverse checksum {MEDSL_COUNTY_RAW_MD5} -- the file was "
-            "modified or is a different version; re-download from "
-            "doi:10.7910/DVN/VOQCHQ."
+            f"{label}: GEOID widths {widths}, expected "
+            f"[{expected}] -- this is not a {level} view."
+        )
+    repeated = geoids[geoids.duplicated()]
+    if not repeated.empty:
+        raise ValueError(
+            f"{label}: {len(repeated)} repeated GEOID(s), e.g. "
+            f"{repeated.iloc[0]}; votes would be double counted on the merge."
+        )
+    foreign = geoids[~geoids.str.startswith(state_fips)]
+    if not foreign.empty:
+        raise ValueError(
+            f"{label}: {len(foreign)} GEOID(s) outside state {state_fips}, "
+            f"e.g. {foreign.iloc[0]}."
         )
 
 
-def _repair_and_drop_non_county_rows(election_df: pd.DataFrame) -> pd.DataFrame:
-    """Repair known anomalies and drop non-county rows from the election DataFrame.
+def load_election_for_states(
+    state_fips: list[str], level: GerryDBLevel
+) -> pd.DataFrame:
+    """Stack `load_election` over several states.
+
+    No caching: the whole 50-state read is well under a second, so a
+    cached copy would only be a way for the build to go stale.
 
     Parameters
     ----------
-    election_df : pandas.DataFrame
-        Filtered MEDSL rows with a string `county_fips` column.
+    state_fips : list of str
+        Two-digit state FIPS codes.
+    level : GerryDBLevel
+        "county" or "tract".
 
     Returns
     -------
     pandas.DataFrame
-        The same rows with a five-digit `GEOID` column added; FIPS-less
-        reporting units, Alaska, and the defunct Bedford City, VA dropped;
-        and Kansas City's pseudo-FIPS folded into Jackson County, MO.
+        One row per unit across the requested states, sorted by GEOID.
     """
-    election_df = election_df.dropna(subset=["county_fips"])
-    election_df["GEOID"] = election_df["county_fips"].str.zfill(5)
-    election_df.loc[election_df["GEOID"] == KANSAS_CITY_PSEUDO_FIPS, "GEOID"] = (
-        JACKSON_COUNTY_MO_GEOID
+    per_state = [load_election(fips, level) for fips in state_fips]
+    return pd.concat(per_state, ignore_index=True).sort_values("GEOID")
+
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="python -m build_dataset.ingest.election.election_api",
+        description="Read presidential returns from the GerryDB release.",
     )
-    election_df = election_df[election_df["state_po"] != "AK"]
-    election_df = election_df[election_df["GEOID"] != BEDFORD_CITY_VA_DEFUNCT]
-    return election_df
-
-
-def _calculate_vote_totals(election_df: pd.DataFrame) -> pd.DataFrame:
-    """One vote count per (county, year, party), respecting TOTAL rows.
-
-    States report one of two ways: a single TOTAL row per county-party, or
-    the same votes split across mode rows (early / absentee / election
-    day) -- and a county-party can have both. Where a TOTAL row exists it
-    already contains the split rows, so summing everything would
-    double-count; TOTAL wins, and only groups without one sum their modes.
-
-    Parameters
-    ----------
-    election_df : pandas.DataFrame
-        Cleaned MEDSL rows (one per county-year-party-mode) with GEOID,
-        year, party, mode, and candidatevotes columns.
-
-    Returns
-    -------
-    pandas.DataFrame
-        One row per GEOID with the four vote columns named by
-        MEDSL_COLUMN_NAMES, in its declaration order.
-
-    Raises
-    ------
-    KeyError
-        If a (year, party) pair from MEDSL_COLUMN_NAMES is absent from the
-        data -- the pair is named in the error.
-    """
-    group_keys = ["GEOID", "year", "party"]
-    is_total_row = election_df["mode"] == "TOTAL"
-    group_has_total = is_total_row.groupby(
-        [election_df[key] for key in group_keys]
-    ).transform("any")
-    counted_rows = election_df[is_total_row | ~group_has_total]
-
-    votes_by_year_party = (
-        counted_rows.groupby(group_keys)["candidatevotes"]
-        .sum()
-        .unstack(["year", "party"])
+    parser.add_argument(
+        "--states",
+        nargs="+",
+        required=True,
+        metavar="FIPS",
+        help="two-digit state FIPS codes",
     )
-    # Flatten the (year, party) column MultiIndex to the pipeline names by
-    # selecting through the scope dict -- which also asserts all four
-    # columns arrived (a missing year/party raises KeyError by name) and
-    # fixes the output column order to the dict's declaration order.
-    county_votes = pd.DataFrame(
-        {
-            column_name: votes_by_year_party[year_party]
-            for year_party, column_name in MEDSL_COLUMN_NAMES.items()
-        }
+    parser.add_argument(
+        "--level",
+        choices=list(get_args(GerryDBLevel)),
+        default="tract",
     )
-    return county_votes.reset_index()
-
-
-def load_county_election() -> pd.DataFrame:
-    """MEDSL county returns -> one row per GEOID, four vote columns.
-
-    Extracts the two-party presidential vote for 2020 and 2016. The
-    handling below was verified against the file for both years:
-
-    - Rows with no FIPS are non-county reporting units (statewide
-      write-ins, overseas/UOCAVA ballots, RI's federal precinct); dropped.
-    - Kansas City's separate return (pseudo-FIPS 2938000, present in both
-      years) is folded into Jackson County.
-    - Where a county-party has a TOTAL row it is authoritative and the
-      mode-split rows would double-count, so TOTAL wins; otherwise modes
-      are summed. (2016 is all-TOTAL; 2020 mixes both styles.)
-    - Alaska is excluded: MEDSL reports its election districts, which do
-      not map to the census boroughs on the spine. AK boroughs therefore
-      get NaN votes after the merge, like Puerto Rico.
-
-    Returns
-    -------
-    pandas.DataFrame
-        One row per county: GEOID plus Democratic and Republican
-        presidential votes for 2020 and 2016 (floats).
-
-    Raises
-    ------
-    ValueError
-        If the source CSV fails its published-checksum verification.
-    FileNotFoundError
-        If the source CSV is absent from the raw data directory.
-    KeyError
-        If a required (year, party) combination is missing from the file.
-    """
-    medsl_path = RAW_NATIONAL_DIR / MEDSL_COUNTY_RAW_CSV
-
-    _check_medsl_county_raw_md5(medsl_path)
-
-    medsl_pres_data = pd.read_csv(medsl_path, dtype={"county_fips": "string"})
-    election_df = medsl_pres_data[
-        medsl_pres_data["year"].isin({year for year, _ in MEDSL_COLUMN_NAMES})
-        & (medsl_pres_data["office"] == "US PRESIDENT")
-        & medsl_pres_data["party"].isin({party for _, party in MEDSL_COLUMN_NAMES})
-    ].copy()
-
-    election_df = _repair_and_drop_non_county_rows(election_df)
-
-    return _calculate_vote_totals(election_df)
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    print(load_county_election().head())
+    args = _parse_args()
+    table = load_election_for_states(args.states, args.level)
+    print(f"\n{len(table):,} {args.level} rows")
+    print(table.head().to_string(index=False))
+    print(table[list(GERRYDB_PRESIDENTIAL_COLUMNS.values())].sum().to_string())

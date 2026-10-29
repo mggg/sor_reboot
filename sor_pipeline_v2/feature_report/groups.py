@@ -1,22 +1,15 @@
-"""What a report group names: the model's groups, plus population views.
+"""Which columns a feature report can describe, named by group.
 
-The regression partitions the PREDICTORS into thematic groups, and that
-partition is the manifest's job. It says nothing about the other half of
-the processed schema -- the decennial counts, the race-choice shares, the
-classification columns -- because no model fits on them. They are still
-the columns the project is actually about, so the report needs names for
-them too.
+A report describes predictors one model group at a time -- the groups the
+regression is built from, in `model_groups` -- and each group brings its
+context variables with it (citizenship brings VOTINGAGEPOP). The one other
+name a report accepts is "targets": the four shares the regression
+predicts, so their distributions can be read next to the predictors'.
 
-These are reporting views, not model structure, which is why they live
-here and not in the manifest. Each is derived from a manifest constant
-rather than listed by hand, so a column added to the schema cannot go
-missing from the report. `check_coverage` is what enforces that.
-
-The manifest's own TARGETS constant lumps three families together; they
-are split apart here because they answer different questions. A share OF
-THE HISPANIC POPULATION is the modelled outcome. The matching share OF
-THE TOTAL POPULATION is a different quantity that moves with how
-Hispanic a place is, not with how its Hispanic residents answered.
+Nothing else in processed.parquet is reported. The PL counts, the shares
+of the total population and the dominant-choice classification feed no
+model, and their distributions mostly restate how large or how Hispanic a
+place is.
 """
 
 from __future__ import annotations
@@ -24,59 +17,20 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Literal, cast
 
-from build_dataset.feature_manifest import (
-    HISPANIC_RACE_COUNT_COLUMNS,
-    IDENTIFIERS,
+from build_dataset.model_groups import (
     MODEL_GROUPS,
-    PL_COUNT_COLUMNS,
-    TARGETS,
-    SlugGroupName,
-    all_model_features,
+    ModelGroupName,
+    context_columns,
     group_features,
-    processed_columns,
 )
+from regression.shared.run_config import REGRESSION_TARGETS
 
-# The groups this package adds on top of the model's own. A Literal
-# rather than bare str so a typo is a type error, not a runtime one, and
-# so the dict below cannot gain a key nobody can name.
-PopulationGroupName = Literal[
-    "counts",
-    "share_of_hisp",
-    "share_of_pop",
-    "dominant_choice",
-    "context",
-]
-# What `--groups` accepts: a model group or a population group.
-ReportGroupName = SlugGroupName | PopulationGroupName
-
-OF_HISP_SUFFIX = "_Pct_of_Hisp_Pop"
-OF_TOTAL_SUFFIX = "_Pct_of_Total_Pop"
-
-# The context column the ACS declares with role="context": a denominator
-# the clean stage uses, carried into the schema for audit.
-CONTEXT_COLUMNS: tuple[str, ...] = ("VOTINGAGEPOP",)
-
-POPULATION_GROUPS: dict[PopulationGroupName, tuple[str, ...]] = {
-    # Head counts straight from the decennial file, Hispanic-by-race
-    # included. TOTALPOP and HISPANIC live here.
-    "counts": tuple(PL_COUNT_COLUMNS) + tuple(HISPANIC_RACE_COUNT_COLUMNS),
-    # The modelled outcomes: of the Hispanic residents here, what share
-    # chose this race?
-    "share_of_hisp": tuple(t for t in TARGETS if t.endswith(OF_HISP_SUFFIX)),
-    # The same numerators over the WHOLE population. Not outcomes: these
-    # rise and fall with Hispanic share of the place.
-    "share_of_pop": tuple(t for t in TARGETS if t.endswith(OF_TOTAL_SUFFIX)),
-    # Which race choice is the largest, as a label and as indicators.
-    "dominant_choice": tuple(
-        t for t in TARGETS if not t.endswith((OF_HISP_SUFFIX, OF_TOTAL_SUFFIX))
-    ),
-    "context": CONTEXT_COLUMNS,
-}
+ReportGroupName = ModelGroupName | Literal["targets"]
 
 
 def known_groups() -> list[str]:
     """Every group name the report accepts, model groups first."""
-    return [*MODEL_GROUPS, *POPULATION_GROUPS]
+    return [*MODEL_GROUPS, "targets"]
 
 
 def validated_group_names(names: Sequence[str]) -> list[ReportGroupName]:
@@ -89,7 +43,7 @@ def validated_group_names(names: Sequence[str]) -> list[ReportGroupName]:
     Parameters
     ----------
     names : sequence of str
-        Group names as supplied, model or population.
+        Group names as supplied: model groups, or "targets".
 
     Returns
     -------
@@ -108,8 +62,8 @@ def validated_group_names(names: Sequence[str]) -> list[ReportGroupName]:
     return [cast(ReportGroupName, name) for name in names]
 
 
-def model_slugs(names: Sequence[ReportGroupName]) -> list[SlugGroupName]:
-    """Just the model-group slugs from a mixed request, narrowed.
+def model_group_names(names: Sequence[ReportGroupName]) -> list[ModelGroupName]:
+    """Just the model groups from a request, without "targets".
 
     Parameters
     ----------
@@ -118,11 +72,10 @@ def model_slugs(names: Sequence[ReportGroupName]) -> list[SlugGroupName]:
 
     Returns
     -------
-    list of SlugGroupName
-        The members that are model groups. The cast narrows the union to
-        its model half, which the filter has just established.
+    list of ModelGroupName
+        The members that are model groups.
     """
-    return [cast(SlugGroupName, name) for name in names if name in MODEL_GROUPS]
+    return [name for name in names if name != "targets"]
 
 
 def resolve_columns(
@@ -133,55 +86,29 @@ def resolve_columns(
     Parameters
     ----------
     names : sequence of ReportGroupName
-        Group names, model or population, already validated by
-        `validated_group_names`.
+        Group names, already validated by `validated_group_names`.
     exclude_variables : sequence of str
-        Predictors this level does not have; population groups are
-        unaffected, being counts and derived shares every level has.
+        Predictors this level does not have; the targets are unaffected,
+        since every level has them.
 
     Returns
     -------
     list of str
-        Column names.
+        Column names: a model group's predictors then its context
+        variables, or the four targets.
     """
     ordered: list[str] = []
     for name in names:
-        # The casts split the union by hand: `in MODEL_GROUPS` is a plain
-        # membership test, which narrows nothing for the type checker,
-        # and a model group's columns depend on the level's exclusions
-        # while a population group's are a fixed tuple.
-        if name in MODEL_GROUPS:
-            columns: Sequence[str] = group_features(
-                [cast(SlugGroupName, name)], exclude_variables
-            )
+        if name == "targets":
+            columns = list(REGRESSION_TARGETS)
         else:
-            columns = POPULATION_GROUPS[cast(PopulationGroupName, name)]
+            columns = [
+                *group_features([name], exclude_variables),
+                *(
+                    column
+                    for column in context_columns([name])
+                    if column not in exclude_variables
+                ),
+            ]
         ordered.extend(column for column in columns if column not in ordered)
     return ordered
-
-
-def check_coverage(exclude_variables: Sequence[str] = ()) -> list[str]:
-    """Processed columns no report group names -- empty when all are covered.
-
-    The report is only trustworthy as an inventory if every column in the
-    schema is reachable through some group. A column added to the
-    manifest without a home here shows up in this list.
-
-    Parameters
-    ----------
-    exclude_variables : sequence of str
-        Predictors this level does not have.
-
-    Returns
-    -------
-    list of str
-        The orphans, in schema order.
-    """
-    reachable = set(all_model_features(exclude_variables))
-    for columns in POPULATION_GROUPS.values():
-        reachable.update(columns)
-    return [
-        column
-        for column in processed_columns(exclude_variables=exclude_variables)
-        if column not in reachable and column not in IDENTIFIERS
-    ]

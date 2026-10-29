@@ -16,13 +16,6 @@ REFERENCE_TABLES_DIR = AUDIT_DATA_DIR / "reference_tables"
 COMPARISON_FINDINGS_CSV = AUDIT_DATA_DIR / "comparison_findings.csv"
 ELECTION_FINDINGS_CSV = AUDIT_DATA_DIR / "election_findings.csv"
 GEOMETRY_FINDINGS_CSV = AUDIT_DATA_DIR / "geometry_findings.csv"
-MEDSL_FINDINGS_CSV = AUDIT_DATA_DIR / "medsl_findings.csv"
-
-# MIT Election Data + Science Lab county presidential returns 2000-2024,
-# downloaded by hand from Harvard Dataverse (doi:10.7910/DVN/VOQCHQ) on
-# 2026-09-29. Independent of DRA2020: compiled directly from official
-# state canvasses.
-MEDSL_CSV = AUDIT_DATA_DIR / "countypres_2000-2024.csv"
 
 # The Census Gazetteer counties file: the published reference for land
 # area and internal-point coordinates, independent of the TIGER/Line

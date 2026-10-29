@@ -22,9 +22,7 @@ from utils import config
 from utils.config import STATE_FIPS_TO_USPS
 
 
-def load_unit_names(
-    level: config.GeographicBuildLevel, geoids: pd.Series
-) -> pd.Series:
+def load_unit_names(level: config.GeographicBuildLevel, geoids: pd.Series) -> pd.Series:
     """GEOID -> display name, for the units `geoids` actually contains.
 
     Tract geometry is published one state at a time, so the states are

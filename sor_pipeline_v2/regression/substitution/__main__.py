@@ -29,7 +29,7 @@ import shap
 from sklearn.metrics import r2_score
 from sklearn.model_selection import KFold
 
-from build_dataset.feature_manifest import SlugGroupName, group_features
+from build_dataset.model_groups import ModelGroupName, group_features
 from regression.shared.cross_val import DEFAULT_FOLDS, out_of_fold_predictions
 from regression.shared.fit import fit_weighted, make_regressor
 from regression.shared.prepare_df import describe_sample, prepare_df_for_regression
@@ -198,7 +198,7 @@ def substitution_test(
     folds: int = DEFAULT_FOLDS,
     top_percent: float | None = None,
     bottom_percent: float | None = None,
-    exclude_groups: list[SlugGroupName] | None = None,
+    exclude_groups: list[ModelGroupName] | None = None,
 ) -> tuple[pd.DataFrame, dict]:
     """Remove one feature, refit, and report what replaced it and what it cost.
 
@@ -307,7 +307,7 @@ def run_substitution(
     folds: int = DEFAULT_FOLDS,
     top_percent: float | None = None,
     bottom_percent: float | None = None,
-    exclude_groups: list[SlugGroupName] | None = None,
+    exclude_groups: list[ModelGroupName] | None = None,
     counties: tuple[str, ...] = (),
 ) -> Path:
     """Run the test, print the verdict, write the table and any waterfalls."""

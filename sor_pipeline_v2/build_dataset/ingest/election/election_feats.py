@@ -1,7 +1,7 @@
 """What the election source declares: the political-preference features.
 
-The election source is a local CSV loaded whole (no variable-code fetch list
-to derive). TURNOUT's denominator is the ACS citizenship feature
+The election source is the lab's GerryDB release, read whole at either
+level (no variable-code fetch list to derive). TURNOUT's denominator is the ACS citizenship feature
 VOTINGAGEPOP, so it can only be computed after the ACS join.
 """
 
@@ -15,9 +15,9 @@ from build_dataset.ingest.declarations.feature_utils import (
     SumFeature,
 )
 
-# The standardized 2020 presidential vote columns. The raw CSVs spell them
-# differently per level; election_api renames to these on load, and every
-# computation reads them through these constants.
+# The standardized 2020 presidential vote columns. The release spells them
+# pres_20_dem / pres_20_rep; election_api renames to these on load,
+# and every computation reads them through these constants.
 DEM_VOTES = "E_20_PRES_DEM"
 REP_VOTES = "E_20_PRES_REP"
 
